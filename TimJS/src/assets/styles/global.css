@@ -1,0 +1,27 @@
+* {
+    font-family: Roboto, Inter, sans-serif;
+    line-height: 1.6vw;
+    color:"#272B30";
+    line-height: 100%;
+    letter-spacing: 0.0em;
+    text-align: center;
+}
+
+body {
+    background-color: aliceblue;
+}
+
+h1 {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+h2 {
+    font-size: 16px;
+    font-weight: 400;
+}
+
+.slidebar-icon {
+    font-size: 1.25vw;
+    margin:"0 5%"
+}
