@@ -36,7 +36,7 @@ const Sidebar = () => {
     return (
       <Flex className="sidebar" direction="column" >
         
-        <VStack alignItems='flex-start' padding="4%" height={'100vh'}>
+        <VStack alignItems='flex-start' padding="4%" height={'100vh'} gap={'20px'}>
 
           // logo
           <Box margin={"35px"}>

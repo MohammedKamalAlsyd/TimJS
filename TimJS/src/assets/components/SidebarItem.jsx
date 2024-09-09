@@ -6,7 +6,7 @@ import '../styles/Sidebar.css';
 function SidebarItem({ icon, title, active }) {
   return (
     <Link width={'100%'} as={RouterLink} to={`/${title.toLowerCase().replace(/\s/g, '-')}`} _hover={{textDecoration:'none'}}>
-        <Box height={'60px'} display={'flex'} alignItems={'center'}>
+        <Box height={'35px'} display={'flex'} alignItems={'center'}>
             <Flex flexDir="row" gap="15px" >
                 <Icon marginLeft={"40px"}
                     as={icon}
