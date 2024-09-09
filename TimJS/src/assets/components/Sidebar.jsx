@@ -34,9 +34,9 @@ const Sidebar = () => {
       }
 
     return (
-      <Flex className="sidebar" direction="column" height="100%">
-
-        <VStack alignItems='flex-start' padding="4%">
+      <Flex className="sidebar" direction="column" >
+        
+        <VStack alignItems='flex-start' padding="4%" height={'100vh'}>
 
           // logo
           <Box margin={"35px"}>
@@ -80,8 +80,8 @@ const Sidebar = () => {
           />
 
 
-          <Spacer />
-         
+          
+          <Spacer/>
 
           <SidebarItem
             icon={IoSettingsSharp}

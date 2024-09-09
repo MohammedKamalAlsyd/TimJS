@@ -8,16 +8,14 @@ import './assets/styles/global.css'
 
 function App() {
   return (
-    <>
-      <Router>
-        <ChakraProvider theme={customTheme}>
-          <HStack>
-            <Sidebar/>
-            <Routes />
-          </HStack>
-        </ChakraProvider>
-      </Router>
-    </>
+      <ChakraProvider theme={customTheme}>
+        <Router>
+            <HStack>
+              <Sidebar/>
+              <Routes />
+            </HStack>
+        </Router>
+      </ChakraProvider>
   )
 }
 

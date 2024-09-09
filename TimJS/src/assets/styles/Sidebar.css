@@ -1,7 +1,10 @@
 .sidebar {
   margin: 0.05%;
-  position: sticky;
-  width: 20%;
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  width: 15%;
+
 }
 
 
