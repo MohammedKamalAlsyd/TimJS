@@ -6,7 +6,7 @@ import EmptyPage from './assets/pages/empty';
 
 const routes = [
     {
-        path: 'main-dashboard',
+        path: 'dashboard',
         element: <EmptyPage/>,
     },
 ];

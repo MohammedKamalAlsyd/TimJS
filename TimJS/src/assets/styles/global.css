@@ -23,6 +23,11 @@ h2 {
     font-weight: 400;
 }
 
+h3 {
+    font-size: 10.5px;
+    font-weight: 400;
+}
+
 .slidebar-icon {
     font-size: 1.25vw;
     margin:"0 5%"
