@@ -7,7 +7,6 @@ import { FaAngleDown } from "react-icons/fa";
 const Header = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null); // Ref for dropdown
-  const iconRef = useRef(null); // Ref for FaAngleDown
 
   // Custom select dropdown states
   const [selectedOption, setSelectedOption] = useState('daily');
@@ -33,9 +32,7 @@ const Header = () => {
   const handleClickOutside = (event) => {
     if (
       dropdownRef.current &&
-      !dropdownRef.current.contains(event.target) &&
-      iconRef.current &&
-      !iconRef.current.contains(event.target)
+      !dropdownRef.current.contains(event.target)
     ) {
       setShowDropdown(false);
       setShowOptions(false);
@@ -75,7 +72,6 @@ const Header = () => {
         <CgProfile fontSize={'25px'} />
         <h2>Welcome, Olivia Carter</h2>
         <FaAngleDown
-          ref={iconRef}
           className={`dropdown-icon ${showDropdown ? 'dropdown-icon-active' : ''}`} // Rotate icon when active
           fontSize={'30px'}
           onClick={toggleDropdown}

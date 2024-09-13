@@ -51,7 +51,7 @@ const Sidebar = () => {
 
           <SidebarItem
             icon={RiDashboardFill}
-            title="DashBoard"
+            title="Dashboard"
             active={activeItem === '/dashboard'}
           />
 

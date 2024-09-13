@@ -2,12 +2,13 @@
 import React from 'react';
 import {Route, Routes} from 'react-router-dom';
 import EmptyPage from './assets/pages/empty';
+import Dashboard from './assets/pages/HomePage';
 
 
 const routes = [
     {
         path: 'dashboard',
-        element: <EmptyPage/>,
+        element: <Dashboard/>,
     },
 ];
 
