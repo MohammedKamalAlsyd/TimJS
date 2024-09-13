@@ -1,0 +1,13 @@
+.sidebar {
+  margin: 0.05%;
+  position: relative;
+  top: 0px;
+  bottom: 0px;
+  width: 17.5%;
+}
+
+
+.logo-pic {
+  width: 40px;
+  height: 40px;
+}
