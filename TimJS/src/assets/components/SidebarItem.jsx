@@ -6,14 +6,14 @@ import '../styles/Sidebar.css';
 function SidebarItem({ icon, title, active }) {
   return (
     <Link width={'100%'} as={RouterLink} to={`/${title.toLowerCase().replace(/\s/g, '-')}`} _hover={{textDecoration:'none'}}>
-        <Box height={'35px'} display={'flex'} alignItems={'center'}>
-            <Flex flexDir="row" gap="15px" >
+        <Box height={'40px'} display={'flex'} >
+            <Flex flexDir="row" gap="15px" alignItems={'center'}>
                 <Icon marginLeft={"40px"}
                     as={icon}
                     className='slidebar-icon'
                     fontSize={'20px'}
                 />
-                <h2 height={'20px'} style={{fontWeight:active ? '500' : 'inherit'}}>
+                <h2 height={'auto'} style={{fontWeight:active ? '600' : 'inherit'}}>
                     {title}
                 </h2>
             </Flex>

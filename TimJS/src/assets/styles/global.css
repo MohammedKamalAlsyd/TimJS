@@ -14,12 +14,12 @@ html, body, #app, #app > div {
   }
 
 h1 {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 700;
 }
 
 h2 {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 400;
 }
 
