@@ -10,38 +10,83 @@
     background-color: #f8f9fa;
   }
   
-/* Comparison Type Section */
-.comparison-type {
-  display: flex;
-  align-items: center;
-  border-radius: 12px;
-}
-
-.comparison-type label {
-  font-size: 16px;
-  font-weight: 500;
-  color: #000000;
-  margin-right: 10px;
-}
-
-.comparison-type select {
-  padding: 8px 12px;
-  font-size: 14px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  background-color: white;
-  color: #000000;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.comparison-type select:hover {
-  border-color: #000000;
-}
-
-.comparison-type select:focus {
-  outline: none;
-  border-color: #000000;
-}
+  .comparison-type {
+    display: flex;
+    align-items: center;
+    border-radius: 12px;
+  }
+  
+  .comparison-type label {
+    font-size: 16px;
+    font-weight: 500;
+    color: #000000;
+    margin-right: 10px;
+  }
+  
+  .custom-select {
+    position: relative;
+    padding: 8px 12px;
+    font-size: 14px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background-color: white;
+    color: #000000;
+    cursor: pointer;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .custom-select:hover {
+    border-color: #000000;
+  }
+  
+  .selected-option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .options-container {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 10;
+  }
+  
+  /* Show the options when the select is clicked */
+  .show-options {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  
+  .option {
+    padding: 10px;
+    font-size: 14px;
+    color: #000000;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .option:hover {
+    background-color: #f1f3f5;
+  }
+  
+  /* Custom arrow down icon in the select box */
+  .selected-option::after {
+    content: '▼';
+    font-size: 12px;
+    margin-left: 8px;
+    color: #000000;
+  }
   
   /* User Section Styles */
   .user-section {

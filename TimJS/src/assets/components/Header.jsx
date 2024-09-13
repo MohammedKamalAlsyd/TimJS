@@ -15,6 +15,17 @@ const Header = () => {
     setShowDropdown((prev) => !prev);
   };
 
+   // Custom select dropdown states
+   const [selectedOption, setSelectedOption] = useState('daily');
+   const [showOptions, setShowOptions] = useState(false);
+
+
+   const comparisonOptions = [
+    { value: 'daily', label: 'Daily' },
+    { value: 'weekly', label: 'Weekly' },
+    { value: 'monthly', label: 'Monthly' },
+  ];
+
   // Close dropdown if clicking outside
   const handleClickOutside = (event) => {
     if (
@@ -25,6 +36,12 @@ const Header = () => {
     ) {
       setShowDropdown(false);
     }
+  };
+
+
+  const handleOptionClick = (value) => {
+    setSelectedOption(value);
+    setShowOptions(false);
   };
 
   useEffect(() => {
