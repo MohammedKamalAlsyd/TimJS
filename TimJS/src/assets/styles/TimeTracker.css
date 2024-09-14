@@ -1,0 +1,25 @@
+.dashboard-container{
+    position: relative;
+    display: grid;
+    grid-template-columns: 65% 35%;
+    grid-template-rows: 34vh 6vh 6vh 34vh;
+    grid-gap: 15px;
+    width: 100%;
+    height: 100%;
+    padding: 10px 0px 0px 0px;
+}
+
+.current_dashboard {
+    grid-area: 1 / 1 / 3 / 2;
+    background-color: rgb(238, 18, 18);
+}
+
+.previous_dashboard {
+    grid-area: 3 / 1 / -1 / 2;
+    background-color: rgb(54, 44, 44);
+}
+
+.usage_summary {
+    grid-area: 1 / 2 / 4 / -1;
+    background-color: rgb(30, 65, 219);
+}
