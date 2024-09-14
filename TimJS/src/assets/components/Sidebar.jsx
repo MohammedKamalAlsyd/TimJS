@@ -42,7 +42,7 @@ const Sidebar = () => {
           <Box margin={"35px"}>
             <HStack justify="flex-end" align="center" gap='1.35vw'>
               <GoClockFill className="logo-pic"/>
-              <h1>
+              <h1 style={{fontWeight:'700'}}>
                   TimJS
               </h1>
             </HStack>
