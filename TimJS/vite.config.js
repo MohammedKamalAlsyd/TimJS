@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import jsconfigPaths from "vite-jsconfig-paths";
 import { crx } from "@crxjs/vite-plugin";
-import manifestJson from "./public/manifest.json";
+import manifestJson from "./manifest.json";
 
 const manifest = manifestJson;
 

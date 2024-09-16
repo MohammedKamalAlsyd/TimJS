@@ -1,0 +1,42 @@
+{
+  "manifest_version": 3,
+  "name": "TimJS",
+  "version": "1.0.0",
+  "description": "TrackJS is an AI-powered browser tool that helps you understand and improve your online behavior.",
+  "icons": {
+    "16": "src/icons/clock.png",
+    "48": "src/icons/clock.png",
+    "128": "src/icons/clock.png"
+  },
+  "permissions": [
+    "scripting",
+    "activeTab",
+    "tabs",
+    "storage",
+    "declarativeContent" 
+  ],
+  "action": {
+    "default_popup": "index.html"
+  },
+  "background": {
+    "service_worker": "src/background/MainScrapper.js",
+    "type": "module"
+  } ,
+"content_scripts": [
+    {
+      "matches": [
+        "https://www.facebook.com/*"
+      ],
+      "js": ["src/content/FacebookScrapper.js"],
+      "run_at": "document_end"
+    },
+    {
+      "matches": [
+        "https://www.youtube.com/*"
+      ],
+      "js": ["src/content/YoutubeScrapper.js"],
+      "run_at": "document_end"
+    }
+  ]
+
+}
