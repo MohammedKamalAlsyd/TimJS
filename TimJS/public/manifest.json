@@ -4,9 +4,9 @@
   "version": "1.0.0",
   "description": "TrackJS is an AI-powered browser tool that helps you understand and improve your online behavior.",
   "icons": {
-    "16": "/icons/clock.png",
-    "48": "/icons/clock.png",
-    "128": "/icons/clock.png"
+    "16": "icons/clock.png",
+    "48": "icons/clock.png",
+    "128": "icons/clock.png"
   },
   "permissions": [
     "scripting",
