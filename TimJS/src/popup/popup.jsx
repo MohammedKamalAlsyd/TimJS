@@ -4,7 +4,7 @@ import { Button, Spacer } from '@chakra-ui/react';
 const PopupApp = () => {
   const openDashboardOnPopup = () => {
     const popupUrl = chrome.runtime.getURL('popup.html');
-    const dashboardUrl = `${popupUrl.replace('popup.html', '')}dashboard`;
+    const dashboardUrl = `${popupUrl.replace('popup.html', '')}src/homepage/homepage.html`;
 
     chrome.tabs.create({ url: dashboardUrl });
   };
