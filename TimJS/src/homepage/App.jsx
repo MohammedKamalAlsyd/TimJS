@@ -11,13 +11,13 @@ function App() {
   return (
       <ChakraProvider theme={customTheme}>
         <Router>
-            <HStack justifyContent={'start'} height={'100%'}>
-              <Sidebar/>
-              <VStack height={'full'} width={'full'} padding={'35px 35px 35px 35px'} margin={'0px 35px'}>
-                <Header/>
-                <Routes />
-              </VStack>
-            </HStack>
+          <HStack justifyContent={'start'} height={'100%'}>
+            <Sidebar/>
+            <VStack height={'full'} width={'full'} padding={'35px 35px 35px 35px'} margin={'0px 35px'}>
+              <Header/>
+              <Routes />
+            </VStack>
+          </HStack>
         </Router>
       </ChakraProvider>
   )
