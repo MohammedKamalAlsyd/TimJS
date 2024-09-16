@@ -1,8 +1,8 @@
 // routes.js
 import React from 'react';
 import {Route, Routes} from 'react-router-dom';
-import EmptyPage from './assets/pages/empty';
-import Dashboard from './assets/pages/TimeTracker';
+import EmptyPage from '../assets/pages/empty';
+import Dashboard from '../assets/pages/TimeTracker';
 
 
 const routes = [
