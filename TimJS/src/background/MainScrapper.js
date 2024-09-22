@@ -1,74 +1,112 @@
+// Initialize website usage data
 let websiteData = {};
-let lastUrl = '';
-let startTime = 0;
+let activeTab = null;
+let sessionStart = null;
+let prevWebsite = null;
 
-const saveData = () => {
-  chrome.storage.local.set({ websiteData }, () => {
-    console.log("Data saved:", websiteData);
-  });
-};
-
-const loadData = () => {
-  chrome.storage.local.get('websiteData', (result) => {
-    websiteData = result.websiteData || {}; // Initialize if data doesn't exist
-    console.log("Data loaded:", websiteData);
-  });
-};
-
-// Utility function to check if the URL is valid (not an internal Chrome or extension page)
-const isValidUrl = (url) => {
-  return url && !url.startsWith('chrome://') && !url.startsWith('chrome-extension://') && url !== 'about:blank';
-};
-
-// Function to track the active tab
-const trackActiveTab = (tab) => {
-  const currentUrl = new URL(tab.url).hostname;
-
-  if (!isValidUrl(tab.url)) return;  // Ignore invalid URLs
-
-  if (currentUrl !== lastUrl) {
-    if (lastUrl && websiteData[lastUrl]) {
-      // Update the time spent on the last URL
-      const duration = Math.round((Date.now() - startTime) / 60000); // in minutes
-      websiteData[lastUrl].time += duration;
+// Restore previously saved data on extension startup
+chrome.storage.local.get("websiteData", (data) => {
+    if (data.websiteData) {
+        websiteData = data.websiteData;
     }
-
-    if (!websiteData[currentUrl]) {
-      websiteData[currentUrl] = {
-        open_freq: 1,
-        time: 0,
-        icon: tab.favIconUrl || 'default-icon.png'
-      };
-    } else {
-      websiteData[currentUrl].open_freq++;
-    }
-
-    lastUrl = currentUrl;
-    startTime = Date.now();
-  }
-};
-
-// Load data on extension startup
-loadData();
-
-// Track tab activation (when switching between tabs)
-chrome.tabs.onActivated.addListener(activeInfo => {
-  chrome.tabs.get(activeInfo.tabId, (tab) => {
-    if (tab && tab.url) {
-      trackActiveTab(tab);
-    }
-  });
 });
 
-// Track tab updates (when a tab changes its URL, like navigating to a new page)
+// Listen to tab updates (like switching or loading a new website)
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status === 'complete' && tab.url) {
-    trackActiveTab(tab);
-  }
+    if (changeInfo.status === "complete") {
+        trackWebsiteUsage(tab);
+    }
 });
 
-// Save data every 10 minutes
-setInterval(saveData, 10 * 60 * 1000);
+// Listen to tab switching
+chrome.tabs.onActivated.addListener((activeInfo) => {
+    chrome.tabs.get(activeInfo.tabId, (tab) => {
+        trackWebsiteUsage(tab);
+    });
+});
 
-// Save data when the extension is unloaded
-chrome.runtime.onSuspend.addListener(saveData);
+// Handle browser close event
+chrome.runtime.onSuspend.addListener(() => {
+    saveData();
+});
+
+// Function to track website usage
+function trackWebsiteUsage(tab) {
+    const currentURL = new URL(tab.url);
+    const domain = currentURL.hostname;
+
+    if (!sessionStart) sessionStart = new Date();
+
+    // If user switches from a previous website, calculate the time spent
+    if (activeTab && activeTab.url !== tab.url) {
+        const sessionEnd = new Date();
+        const timeSpent = Math.floor((sessionEnd - sessionStart) / 1000 / 60); // time in minutes
+        saveWebsiteTime(activeTab.url, timeSpent);
+    }
+
+    // Update session start time for the new tab
+    sessionStart = new Date();
+    activeTab = tab;
+
+    // Get website icon URL
+    const websiteIcon = tab.favIconUrl || ''; // Use favicon if available, else empty string
+    const siteMetadata = {
+        'open_freq': 1,
+        'time': 0,
+        'icon': websiteIcon, // Store only the icon URL
+        'next_site': {}
+    };
+
+    if (!websiteData[domain]) {
+        websiteData[domain] = siteMetadata;
+    } else {
+        websiteData[domain]['open_freq'] += 1;
+    }
+
+    // Track the next website user moves to (if any)
+    if (prevWebsite && prevWebsite !== domain) {
+        if (websiteData[prevWebsite]['next_site'][domain]) {
+            websiteData[prevWebsite]['next_site'][domain] += 1;
+        } else {
+            websiteData[prevWebsite]['next_site'][domain] = 1;
+        }
+    }
+
+    prevWebsite = domain;
+
+    // Save data after every site update
+    saveData();
+}
+
+// Save the time spent on a website
+function saveWebsiteTime(url, timeSpent) {
+    const domain = new URL(url).hostname;
+
+    if (websiteData[domain]) {
+        websiteData[domain]['time'] += timeSpent;
+    } else {
+        // Handle edge cases (this shouldn't happen with correct initialization)
+        websiteData[domain] = {
+            'open_freq': 1,
+            'time': timeSpent,
+            'icon': '', // Leave the icon URL empty if unavailable
+            'next_site': {}
+        };
+    }
+}
+
+// Save the collected data locally
+function saveData() {
+    chrome.storage.local.set({ 'websiteData': websiteData }, () => {
+        console.log('Website Data Saved:', websiteData); // Log the data being saved
+    });
+}
+
+// When browser reopens, load the last saved data
+chrome.runtime.onStartup.addListener(() => {
+    chrome.storage.local.get('websiteData', (data) => {
+        if (data.websiteData) {
+            websiteData = data.websiteData;
+        }
+    });
+});
