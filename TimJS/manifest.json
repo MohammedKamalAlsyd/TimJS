@@ -16,27 +16,17 @@
     "declarativeContent" 
   ],
   "action": {
-    "default_popup": "./src/popup/popup.html"
+    "default_popup": "src/popup/popup.html"
   },
   "background": {
     "service_worker": "src/background/MainScrapper.js",
     "type": "module"
-  } ,
-"content_scripts": [
+  },
+  "content_scripts": [
     {
-      "matches": [
-        "https://www.facebook.com/*"
-      ],
-      "js": ["src/content/FacebookScrapper.js"],
-      "run_at": "document_end"
-    },
-    {
-      "matches": [
-        "https://www.youtube.com/*"
-      ],
-      "js": ["src/content/YoutubeScrapper.js"],
-      "run_at": "document_end"
+      "matches": ["*://www.youtube.com/*"],
+      "js": ["src/content/YoutubeScrapper.js"]
     }
-  ]
-
+  ] 
+  
 }
