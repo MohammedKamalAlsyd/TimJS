@@ -4,22 +4,25 @@ let activeTab = null;
 let sessionStart = null;
 let prevWebsite = null;
 
-// Helper function to get today's date as a string (e.g., "2024-09-22")
+// Helper function to get today's date as a string (e.g., "2024-09-24")
 function getCurrentDate() {
     const today = new Date();
-    return today.toISOString().split('T')[0]; // Format: "YYYY-MM-DD"
+    const localDate = new Date(today.getTime() - (today.getTimezoneOffset() * 60000)); // Adjust for local time zone
+    return localDate.toISOString().split('T')[0]; // Format: "YYYY-MM-DD"
 }
 
 // Restore previously saved data on extension startup
 chrome.storage.local.get("websiteData", (data) => {
     if (data.websiteData) {
         websiteData = data.websiteData;
+        console.log('Restored website data:', websiteData); // Debugging log
     }
 });
 
 // Listen to tab updates (like switching or loading a new website)
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (changeInfo.status === "complete") {
+        console.log('Tab updated:', tab.url); // Debugging log
         trackWebsiteUsage(tab);
     }
 });
@@ -27,6 +30,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 // Listen to tab switching
 chrome.tabs.onActivated.addListener((activeInfo) => {
     chrome.tabs.get(activeInfo.tabId, (tab) => {
+        console.log('Tab switched:', tab.url); // Debugging log
         trackWebsiteUsage(tab);
     });
 });
@@ -38,22 +42,28 @@ chrome.runtime.onSuspend.addListener(() => {
 
 // Function to track website usage
 function trackWebsiteUsage(tab) {
+    if (!tab || !tab.url) return;
+
     const currentURL = new URL(tab.url);
     const domain = currentURL.hostname;
     const todayDate = getCurrentDate();
 
-    // Exclude chrome-extension:// URLs
-    if (tab.url.startsWith("chrome-extension://") || tab.url.startsWith("chrome://extensions/")) {
+    // Debugging log to ensure today's date is being tracked
+    console.log('Tracking usage for date:', todayDate);
+
+    // Exclude chrome-extension:// and chrome:// URLs
+    if (tab.url.startsWith("chrome-extension://") || tab.url.startsWith("chrome://")) {
         console.log("Ignoring internal Chrome extension URL:", tab.url);
         return;
     }
 
+    // If this is the first tab, start the session
     if (!sessionStart) sessionStart = new Date();
 
     // If user switches from a previous website, calculate the time spent
     if (activeTab && activeTab.url !== tab.url) {
         const sessionEnd = new Date();
-        const timeSpent = Math.floor((sessionEnd - sessionStart) / 1000 / 60); // time in minutes
+        const timeSpent = Math.max((sessionEnd - sessionStart) / 1000 / 60, 0.5); // time in minutes, minimum 0.5 minutes
         saveWebsiteTime(activeTab.url, timeSpent);
     }
 
@@ -64,10 +74,13 @@ function trackWebsiteUsage(tab) {
     // Initialize data for today if it doesn't exist
     if (!websiteData[todayDate]) {
         websiteData[todayDate] = {};
+        console.log(`Initialized data for ${todayDate}`); // Debugging log
     }
 
     // Get website icon URL
-    const websiteIcon = tab.favIconUrl || ''; // Use favicon if available, else empty string
+    const websiteIcon = tab.favIconUrl ? tab.favIconUrl : ''; // Use favicon if available
+
+    // Metadata for the website
     const siteMetadata = {
         'open_freq': 1,
         'time': 0,
@@ -78,6 +91,7 @@ function trackWebsiteUsage(tab) {
     // Initialize data for this domain if not present for today
     if (!websiteData[todayDate][domain]) {
         websiteData[todayDate][domain] = siteMetadata;
+        console.log(`Initialized data for domain: ${domain}`); // Debugging log
     } else {
         websiteData[todayDate][domain]['open_freq'] += 1;
     }
@@ -112,6 +126,8 @@ function saveWebsiteTime(url, timeSpent) {
     } else {
         websiteData[todayDate][domain]['time'] += timeSpent;
     }
+
+    console.log(`Saved time for domain ${domain}: ${timeSpent} minutes`); // Debugging log
 }
 
 // Save the collected data locally
@@ -126,6 +142,7 @@ chrome.runtime.onStartup.addListener(() => {
     chrome.storage.local.get('websiteData', (data) => {
         if (data.websiteData) {
             websiteData = data.websiteData;
+            console.log('Data loaded on startup:', websiteData); // Debugging log
         }
     });
 });
