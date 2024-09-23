@@ -4,6 +4,12 @@ let activeTab = null;
 let sessionStart = null;
 let prevWebsite = null;
 
+// Helper function to get today's date as a string (e.g., "2024-09-22")
+function getCurrentDate() {
+    const today = new Date();
+    return today.toISOString().split('T')[0]; // Format: "YYYY-MM-DD"
+}
+
 // Restore previously saved data on extension startup
 chrome.storage.local.get("websiteData", (data) => {
     if (data.websiteData) {
@@ -34,6 +40,13 @@ chrome.runtime.onSuspend.addListener(() => {
 function trackWebsiteUsage(tab) {
     const currentURL = new URL(tab.url);
     const domain = currentURL.hostname;
+    const todayDate = getCurrentDate();
+
+    // Exclude chrome-extension:// URLs
+    if (tab.url.startsWith("chrome-extension://") || tab.url.startsWith("chrome://extensions/")) {
+        console.log("Ignoring internal Chrome extension URL:", tab.url);
+        return;
+    }
 
     if (!sessionStart) sessionStart = new Date();
 
@@ -48,6 +61,11 @@ function trackWebsiteUsage(tab) {
     sessionStart = new Date();
     activeTab = tab;
 
+    // Initialize data for today if it doesn't exist
+    if (!websiteData[todayDate]) {
+        websiteData[todayDate] = {};
+    }
+
     // Get website icon URL
     const websiteIcon = tab.favIconUrl || ''; // Use favicon if available, else empty string
     const siteMetadata = {
@@ -57,18 +75,19 @@ function trackWebsiteUsage(tab) {
         'next_site': {}
     };
 
-    if (!websiteData[domain]) {
-        websiteData[domain] = siteMetadata;
+    // Initialize data for this domain if not present for today
+    if (!websiteData[todayDate][domain]) {
+        websiteData[todayDate][domain] = siteMetadata;
     } else {
-        websiteData[domain]['open_freq'] += 1;
+        websiteData[todayDate][domain]['open_freq'] += 1;
     }
 
     // Track the next website user moves to (if any)
     if (prevWebsite && prevWebsite !== domain) {
-        if (websiteData[prevWebsite]['next_site'][domain]) {
-            websiteData[prevWebsite]['next_site'][domain] += 1;
+        if (websiteData[todayDate][prevWebsite]['next_site'][domain]) {
+            websiteData[todayDate][prevWebsite]['next_site'][domain] += 1;
         } else {
-            websiteData[prevWebsite]['next_site'][domain] = 1;
+            websiteData[todayDate][prevWebsite]['next_site'][domain] = 1;
         }
     }
 
@@ -81,17 +100,17 @@ function trackWebsiteUsage(tab) {
 // Save the time spent on a website
 function saveWebsiteTime(url, timeSpent) {
     const domain = new URL(url).hostname;
+    const todayDate = getCurrentDate();
 
-    if (websiteData[domain]) {
-        websiteData[domain]['time'] += timeSpent;
-    } else {
-        // Handle edge cases (this shouldn't happen with correct initialization)
-        websiteData[domain] = {
+    if (!websiteData[todayDate][domain]) {
+        websiteData[todayDate][domain] = {
             'open_freq': 1,
             'time': timeSpent,
             'icon': '', // Leave the icon URL empty if unavailable
             'next_site': {}
         };
+    } else {
+        websiteData[todayDate][domain]['time'] += timeSpent;
     }
 }
 
