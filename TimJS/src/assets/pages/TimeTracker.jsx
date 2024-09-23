@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import '../styles/TimeTracker.css'
-import { Box, HStack, VStack,Text, Spacer } from '@chakra-ui/react';
+import '../styles/TimeTracker.css';
+import { Box, HStack, VStack, Text, Spacer } from '@chakra-ui/react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
-import WebClassification from '../../classification/Web Classification.json';  // Assuming you have this file
+import WebClassification from '../../classification/Web Classification.json'; // Assuming you have this file
 
 const TimeTracker = () => {
   const [chartData, setChartData] = useState([]);
@@ -17,9 +17,9 @@ const TimeTracker = () => {
     'Arts & Entertainment', 
     'Games', 
     'Life Style & Hobbies'
-];
+  ];
 
-const WORKING_CATEGORIES = [
+  const WORKING_CATEGORIES = [
     'Technology',
     'Tools',
     'Business & Consumer Services', 
@@ -29,7 +29,7 @@ const WORKING_CATEGORIES = [
     'Science & Education',
     'News & Sport',
     'Travel' 
-];
+  ];
 
   const processData = (data) => {
     const categoryMap = {};
@@ -39,52 +39,57 @@ const WORKING_CATEGORIES = [
 
     // Process data and categorize websites
     Object.keys(data).forEach((website) => {
-      const timeSpent = data[website].time;
-      const category = WebClassification[website]?.Category || 'Unknown';
-      const icon = data[website].icon; // Assuming this is available
+        const siteInfo = data[website]; // Get the site information
+        const timeSpent = siteInfo.time; // Time spent on the website
+        const category = WebClassification[website]?.Category || 'Unknown';
+        const icon = siteInfo.icon; // Extracting icon directly from siteInfo
 
-      // Aggregate time by category
-      if (categoryMap[category]) {
-        categoryMap[category] += timeSpent;
-      } else {
-        categoryMap[category] = timeSpent;
-      }
+        // Aggregate time by category
+        categoryMap[category] = (categoryMap[category] || 0) + timeSpent;
 
-      // Classify as wasted or working time
-      if (WASTED_CATEGORIES.includes(category)) {
-        totalWastedTime += timeSpent;
-      } else if (WORKING_CATEGORIES.includes(category)) {
-        totalWorkingTime += timeSpent;
-      }
+        // Classify as wasted or working time
+        if (WASTED_CATEGORIES.includes(category)) {
+            totalWastedTime += timeSpent;
+        } else if (WORKING_CATEGORIES.includes(category)) {
+            totalWorkingTime += timeSpent;
+        }
 
-      // Create details for the usage list
-      websiteDetails.push({
-        name: website,
-        time: timeSpent,
-        category,
-        icon,
-      });
+        // Create details for the usage list
+        websiteDetails.push({
+            name: website,
+            time: timeSpent,
+            category,
+            icon,
+        });
     });
 
     // Convert category data for chart
     const formattedChartData = Object.keys(categoryMap).map((category) => ({
-      name: category,
-      hours: (categoryMap[category] / 60).toFixed(2), // Convert minutes to hours
+        name: category,
+        hours: (categoryMap[category] / 60).toFixed(2), // Convert minutes to hours
     }));
 
     setChartData(formattedChartData);
     setWebsiteData(websiteDetails);
     setWastedTime(totalWastedTime);
     setWorkingTime(totalWorkingTime);
-  };
+};
 
-  useEffect(() => {
-    // Fetch website data from storage (simulated)
-    chrome.storage.local.get('websiteData', (result) => {
-      const todayData = result.websiteData[getCurrentDate()] || {};
-      processData(todayData);
-    });
-  }, []);
+useEffect(() => {
+  // Fetch website data from storage (simulated)
+  chrome.storage.local.get('websiteData', (result) => {
+      const websiteData = result.websiteData || {};
+      
+      // Get the latest date from the keys
+      const dates = Object.keys(websiteData);
+      const latestDate = dates.length > 0 ? dates.reduce((a, b) => (a > b ? a : b)) : null; // Find the most recent date
+
+      if (latestDate) {
+          const todayData = websiteData[latestDate]; // Access data for the latest date
+          processData(todayData);
+      }
+  });
+}, []);
 
   // Helper function to get the current date in "YYYY-MM-DD" format
   const getCurrentDate = () => {
@@ -176,29 +181,32 @@ const WORKING_CATEGORIES = [
 
       <Box className="previous_dashboard">
         {/* Website Usage List */}
-        <VStack alignItems={'left'} spacing={4} mt={6} overflow={'scroll'}>
-          {filteredWebsites.map((site, index) => (
-            <HStack
-              key={site.name}
-              padding={3}
-              borderBottom={'1px solid #eee'}
-              width="100%"
-              className="usage-list-item"
-            >
-              <img src={site.icon} alt={site.name} style={{ width: 40, height: 40 }} />
-              <VStack alignItems="left" flexGrow={1}>
-                <Text fontSize="md">{site.name}</Text>
-                <Text fontSize="sm" color="gray.500">
-                  Active: {site.time < 1 ? 'Less than 1 minute' : `${Math.floor(site.time / 60)} h ${site.time % 60} m`}
+        <VStack alignItems={'left'} spacing={4} mt={6} overflowY={'scroll'} maxH="400px">
+          {filteredWebsites.length > 0 ? (
+            filteredWebsites.map((site) => (
+              <HStack
+                key={site.name}
+                padding={3}
+                borderBottom={'1px solid #eee'}
+                width="100%"
+                className="usage-list-item"
+              >
+                <img src={site.icon} alt={site.name} style={{ width: 40, height: 40 }} />
+                <VStack alignItems="left" flexGrow={1}>
+                  <Text fontSize="md">{site.name}</Text>
+                  <Text fontSize="sm" color="gray.500">
+                    Active: {formatTime(site.time)}
+                  </Text>
+                </VStack>
+                <Text fontSize="sm" color="gray.400">
+                  {site.time > 0
+                    ? ((site.time / websiteData.reduce((acc, site) => acc + site.time, 0)) * 100).toFixed(1) + '%' : '0%'}
                 </Text>
-              </VStack>
-              <Text fontSize="sm" color="gray.400">
-                {site.time > 0
-                  ? ((site.time / websiteData.reduce((acc, site) => acc + site.time, 0)) * 100).toFixed(1) + '%'
-                  : '0%'}
-              </Text>
-            </HStack>
-          ))}
+              </HStack>
+            ))
+          ) : (
+            <Text>No websites to display.</Text>
+          )}
         </VStack>
       </Box>
 
