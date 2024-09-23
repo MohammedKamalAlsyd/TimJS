@@ -24,12 +24,6 @@
   "background": {
     "service_worker": "src/background/MainScrapper.js",
     "type": "module"
-  },
-  "content_scripts": [
-    {
-      "matches": ["*://www.youtube.com/*"],
-      "js": ["src/content/YoutubeScrapper.js"]
-    }
-  ] 
+  }
   
 }
