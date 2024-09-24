@@ -19,7 +19,8 @@
     grid-area: 3 / 1 / -1 / 2;
     width: 100%;
     height: 100%;
-    padding:'15px';
+    padding:15px;
+    overflow:scroll;
 }
 
 .usage_summary {
@@ -44,4 +45,3 @@
 .number_cell {
     padding: 20px;
 }
-
