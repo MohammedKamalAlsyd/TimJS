@@ -19,7 +19,7 @@ TrackJS is a comprehensive browser-based tool designed to help users understand 
 
 - **Experiment Creation**: Enables users to set up controlled experiments for different time management strategies.
 - **Intervention Tracking**: Monitors user responses to interventions like time limits and notifications.
-- **Effectiveness Analysis**: Evaluates the impact of these strategies on productivity and distraction reduction.
+- **Effectiveness Analysis**: Evaluate the impact of these strategies on productivity and distraction reduction.
 
 ## Additional Features
 
@@ -27,7 +27,6 @@ TrackJS is a comprehensive browser-based tool designed to help users understand 
 
 - **Customizable Limits**: Allows users to set time restrictions for specific websites or categories.
 - **Visual Representations**: Provides clear visualizations of time usage through pie charts and graphs.
-- **Productivity Tips**: Offers helpful advice and strategies for improving time management.
 
 ### Personalization
 
@@ -38,8 +37,3 @@ TrackJS is a comprehensive browser-based tool designed to help users understand 
 
 - **Clear Presentation**: Offers intuitive visualizations of user data.
 - **Progress Tracking**: Helps users monitor progress and identify areas for improvement.
-
-### Integration
-
-- **Compatibility**: Integrates with popular productivity apps like calendars and task managers.
-- **Cross-Platform Support**: Works seamlessly across different browsers and devices.
