@@ -20,6 +20,7 @@
     "build": "extension build"
   },
   "dependencies": {
+    "@chakra-ui/react": "^3.2.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.0.2"
@@ -29,8 +30,8 @@
   },
   "private": true,
   "author": {
-    "name": "Your Name",
-    "email": "your@email.com",
-    "url": "https://yourwebsite.com"
+    "name": "Mohammed Kamal Alsyd",
+    "email": "MohammedKamalAlsyd@gmail.com",
+    "url": "https://www.linkedin.com/in/mohammed-kamal-alsyd/"
   }
 }

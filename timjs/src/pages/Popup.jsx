@@ -3,7 +3,7 @@ import '../styles/App.css';
 
 const Popup = () => {
   const handleButtonClick = () => {
-    chrome.tabs.create({ url: chrome.runtime.getURL('index.html#/home') });
+    chrome.tabs.create({ url: chrome.runtime.getURL('action/default_popup.html#/home') });
   };
 
   return (

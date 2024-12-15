@@ -1,0 +1,52 @@
+* {
+    font-family: Roboto, Inter, sans-serif;
+    line-height: 1.6vw;
+    color:"#272B30";
+    line-height: 100%;
+    letter-spacing: 0.0em;
+    text-align: left;
+}
+
+
+html, body, #app, #app > div {
+    height: 100vh;
+    background-color: aliceblue;
+  }
+
+h1 {
+    font-size: 22px;
+    font-weight: 600;
+}
+
+h2 {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+h3 {
+    font-size: 12.5px;
+    font-weight: 500;
+}
+
+.label {
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.red-text {
+    font-size: 22px;
+    font-weight: 600;
+    color: #8B4A4A;
+}
+
+.green-text {
+    font-size: 22px;
+    font-weight: 600;
+    color: #4B6A44;
+}
+
+
+.slidebar-icon {
+    font-size: 1.25vw;
+    margin:"0 5%"
+}
