@@ -1,2 +1,1 @@
-1-Try to Remove webextension-polyfill and test functionalities
-2-add Selenium script to test the extension
+1-add Selenium script to test the extension

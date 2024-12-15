@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import '../styles/App.css';
-import DataProcessor from '../../utils/DataProcessor';
+import DataProcessor from '../utils/DataProcessor';
 
 const Home = () => {
   const [message, setMessage] = useState('');
