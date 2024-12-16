@@ -1,7 +1,7 @@
-TrackJS
+TimJS
 =======
 
-TrackJS is a comprehensive browser-based tool designed to help users understand and improve their online behavior. By tracking time spent on different websites, analyzing social media interactions, and providing A/B testing capabilities, TrackJS offers valuable insights for productivity and time management.
+TimJS is a comprehensive browser-based tool designed to help users understand and improve their online behavior. By tracking time spent on different websites, analyzing social media interactions, and providing A/B testing capabilities, TrackJS offers valuable insights for productivity and time management.
 
 Core Functionality
 ------------------
@@ -80,4 +80,4 @@ This project is built using [Extension.js](https://github.com/extension-js/exten
 Summary
 -------
 
-TrackJS combines advanced analytics, personalized insights, and intuitive tools to help users optimize their online behavior. Whether you’re looking to improve productivity, better manage your time, or gain a deeper understanding of your online habits, TrackJS is here to help.
+TimJS combines advanced analytics, personalized insights, and intuitive tools to help users optimize their online behavior. Whether you’re looking to improve productivity, better manage your time, or gain a deeper understanding of your online habits, TimJS is here to help.

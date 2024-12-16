@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import '../styles/Header.css'; // Import the separate CSS file
 import { HStack } from '@chakra-ui/react';
-import { CgProfile } from "react-icons/cg";
 import { FaAngleDown } from "react-icons/fa";
 
 const Header = () => {
@@ -46,6 +45,7 @@ const Header = () => {
     };
   }, []);
 
+
   return (
     <div className="header">
       <div className="comparison-type">
@@ -69,8 +69,6 @@ const Header = () => {
       </div>
 
       <HStack className="user-section" spacing='1vw'>
-        <CgProfile fontSize={'25px'} />
-        <h2>Welcome, Olivia Carter</h2>
         <FaAngleDown
           className={`dropdown-icon ${showDropdown ? 'dropdown-icon-active' : ''}`} // Rotate icon when active
           fontSize={'30px'}

@@ -1,42 +1,96 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+* {
+  font-family: 'Roboto', sans-serif;
+  line-height: 1.4; /* Adjusted for smaller font */
+  letter-spacing: 0.01em;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  transition: all 0.2s ease-in-out;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+html, body, #app, #app > div {
+  height: 100%;
+  background-color: #F9F9F9; /* Light gray */
+  color: #333333; /* Dark gray */
+  font-size: 14px; /* Smaller font for body */
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+h2 {
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+h3 {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+button {
+  background-color: #F1F1F1;
+  color: #000000;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+}
+
+button:hover {
+  background-color: #E2E2E2;
+  transform: scale(1.03);
+}
+
+button:focus {
+  outline: 2px solid #000000;
+}
+
+.active-button {
+  background-color: #000000;
+  color: #FFFFFF;
+  border: 1px solid #000000;
+}
+
+a {
+  color: #000000;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease-in-out;
+}
+
+.sidebar-icon {
+  font-size: 1rem;
+  color: #333333;
+  margin: 0 0.5rem;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #000000;
+  margin-bottom: 0.5rem;
 }
 
 .card {
-  padding: 2em;
+  background-color: #FFFFFF;
+  border: 1px solid #EAEAEA;
+  border-radius: 8px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  transition: transform 0.2s ease-in-out;
 }
 
-.read-the-docs {
-  color: #888;
+.card:hover {
+  transform: translateY(-3px);
+}
+
+.section-divider {
+  border-top: 1px solid #E2E2E2;
+  margin: 1rem 0;
 }

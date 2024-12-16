@@ -1,5 +1,5 @@
 import React from 'react';
-import { Icon, Box, Flex, Link, textDecoration } from '@chakra-ui/react';
+import { Icon, Box, Flex, Link} from '@chakra-ui/react';
 import { Link as RouterLink } from 'react-router-dom';
 import '../styles/Sidebar.css';
 
@@ -13,9 +13,9 @@ function SidebarItem({ icon, title, active }) {
                     className='slidebar-icon'
                     fontSize={'20px'}
                 />
-                <h2 height={'auto'} style={{fontWeight:active ? '600' : 'inherit'}}>
+                <h3 height={'auto'} style={{fontWeight:active ? '600' : 'inherit'}}>
                     {title}
-                </h2>
+                </h3>
             </Flex>
         </Box>
     </Link>

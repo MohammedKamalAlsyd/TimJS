@@ -2,8 +2,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom'; // Import Routes and Route
 import { ChakraProvider, HStack, VStack } from '@chakra-ui/react';
 import Popup from './pages/Popup';
-import Home from './pages/Home';
-import './styles/global.css';
+import Dashboard from './pages/Dashboard';
 import './styles/App.css';
 import customTheme from './styles/chakra-theme';
 import Sidebar from './components/Sidebar';
@@ -11,7 +10,7 @@ import Header from './components/Header';
 
 const Layout = ({ children, showSidebar = true, showHeader = true }) => {
   return (
-    <HStack justifyContent={'start'} height={'100%'}>
+    <HStack justifyContent={'start'} height={'100%'} width={'100%'}>
       {showSidebar && <Sidebar />}
       <VStack
         height={'full'}
@@ -41,10 +40,10 @@ const App = () => {
         />
         {/* Home: Include Sidebar and Header */}
         <Route
-          path="/home"
+          path="/dashboard"
           element={
             <Layout showSidebar={true} showHeader={true}>
-              <Home />
+              <Dashboard />
             </Layout>
           }
         />

@@ -1,26 +1,68 @@
-import { extendTheme } from '@chakra-ui/react';
+import { extendTheme } from "@chakra-ui/react";
 
 const customTheme = extendTheme({
   styles: {
     global: (props) => ({
       html: {
-        height: '100%',  // Ensure html takes full height
+        height: "100%",
       },
       body: {
-        height: '100%',  // Ensure body takes full height
-        backgroundColor: props.colorMode === 'dark' ? '#000000' : '#FFFFFF',
-        color: props.colorMode === 'dark' ? '#FFFFFF' : '#000000',
+        height: "100%",
+        backgroundColor: "#F9F9F9", // Light gray background
+        color: "#333333", // Dark gray text color
         margin: 0,
         padding: 0,
+        transition: "all 0.3s ease",
+        fontSize: "14px", // Smaller base font size
       },
-      '#root': {
-        height: '100%',  // If using React, ensure the root div takes full height
+      "#root": {
+        height: "100%",
+        outerWidth: "100%"
+      },
+      a: {
+        color: "#000000",
+        textDecoration: "none",
+        _hover: {
+          textDecoration: "underline",
+          color: "#555555",
+        },
       },
     }),
   },
   fonts: {
-    heading: "'Roboto', Inter, sans-serif",
-    body: "'Roboto', Inter, sans-serif",
+    heading: "'Roboto', sans-serif",
+    body: "'Roboto', sans-serif",
+  },
+  components: {
+    Button: {
+      baseStyle: {
+        borderRadius: "md",
+        fontWeight: "500",
+        fontSize: "13px", // Smaller font for buttons
+        color: "#000000",
+        backgroundColor: "#F1F1F1",
+        _hover: {
+          backgroundColor: "#E2E2E2",
+          transform: "scale(1.03)",
+          transition: "all 0.2s ease-in-out",
+        },
+      },
+      variants: {
+        solid: {
+          bg: "#000000",
+          color: "#FFFFFF",
+          _hover: {
+            bg: "#333333",
+          },
+        },
+        ghost: {
+          color: "#333333",
+          _hover: {
+            bg: "#EAEAEA",
+          },
+        },
+      },
+    },
   },
 });
 

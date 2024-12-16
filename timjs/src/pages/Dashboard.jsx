@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import '../styles/TimeTracker.css';
+import '../styles/Dashboard.css';
 import { Box, HStack, VStack, Text, Spacer } from '@chakra-ui/react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
-import WebClassification from '../../../TimJS-Scrapper-Integration/TimJS/src/classification/Web Classification.json'; // Assuming you have this file
+import WebClassification from '../utils/Web Classification.json';
 
 
 const TimeTracker = () => {
