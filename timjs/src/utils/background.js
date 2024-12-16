@@ -1,3 +1,8 @@
+import { globalComparisonType } from '../components/Header'; // Adjust path as needed
+
+console.log("Global Comparison Type:", globalComparisonType);
+
+
 chrome.runtime.onInstalled.addListener(() => {
     console.log('Extension Installed!');
   });
@@ -7,3 +12,5 @@ chrome.runtime.onInstalled.addListener(() => {
       console.log('Background Script:', message.data);
     }
   });
+
+  

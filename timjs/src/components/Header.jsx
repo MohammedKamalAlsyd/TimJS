@@ -4,7 +4,7 @@ import { FaAngleDown } from "react-icons/fa";
 import "../styles/Header.css";
 
 // Shared global state for comparison type
-let globalComparisonType = "daily";
+export let globalComparisonType = "daily";
 export const getComparisonType = () => globalComparisonType;
 
 const Header = ({ onComparisonChange }) => {
