@@ -113,6 +113,7 @@
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
   width: 180px;
   opacity: 0;
   visibility: hidden;
@@ -138,6 +139,89 @@
 }
 
 .dropdown-menu a:hover {
-  background-color: #f1f3f5;
   color: #111111;
 }
+
+
+/* Submenu for Support Project */
+.submenu {
+  position: relative;
+}
+
+.submenu > span {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #333333;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.submenu-arrow {
+  font-size: 12px;
+  margin-right: 4px; /* Reduced space between the arrow and text */
+  color: #444444;
+  transition: transform 0.3s ease;
+}
+
+.submenu:hover .submenu-options {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+}
+
+.submenu-options {
+  position: absolute;
+  top: 0;
+  right: calc(100% + 8px); /* Added space between original menu and submenu */
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 180px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(10px); /* Animate appearing from the right */
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.submenu-options a {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: #333333;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.submenu-options a:hover {
+  color: #111111;
+}
+
+/* Updated Dropdown Menu */
+.dropdown-menu {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 200px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.show-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
