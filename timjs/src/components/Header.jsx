@@ -1,15 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
-import '../styles/Header.css'; // Import the separate CSS file
 import { HStack } from '@chakra-ui/react';
 import { FaAngleDown } from "react-icons/fa";
+import '../styles/Header.css';
 
-const Header = () => {
+// Shared global state for comparison type
+let globalComparisonType = 'daily';
+export const getComparisonType = () => globalComparisonType;
+
+const Header = ({ onComparisonChange }) => {
   const [showDropdown, setShowDropdown] = useState(false);
-  const dropdownRef = useRef(null); // Ref for dropdown
-
-  // Custom select dropdown states
-  const [selectedOption, setSelectedOption] = useState('daily');
   const [showOptions, setShowOptions] = useState(false);
+  const [selectedOption, setSelectedOption] = useState(globalComparisonType);
+
+  const dropdownRef = useRef(null);
+  const comparisonRef = useRef(null);
 
   const comparisonOptions = [
     { value: 'daily', label: 'Daily' },
@@ -17,21 +21,23 @@ const Header = () => {
     { value: 'monthly', label: 'Monthly' },
   ];
 
+  // Handle comparison option selection
   const handleOptionClick = (value) => {
     setSelectedOption(value);
+    globalComparisonType = value;
     setShowOptions(false);
+    if (onComparisonChange) onComparisonChange(value);
   };
 
-  const toggleDropdown = (e) => {
-    e.stopPropagation(); // Prevent closing immediately when clicking the icon
+  // Handle toggling user dropdown
+  const toggleDropdown = () => {
     setShowDropdown((prev) => !prev);
   };
 
-  // Close dropdown if clicking outside
-  const handleClickOutside = (event) => {
+  const handleOutsideClick = (event) => {
     if (
-      dropdownRef.current &&
-      !dropdownRef.current.contains(event.target)
+      dropdownRef.current && !dropdownRef.current.contains(event.target) &&
+      comparisonRef.current && !comparisonRef.current.contains(event.target)
     ) {
       setShowDropdown(false);
       setShowOptions(false);
@@ -39,23 +45,24 @@ const Header = () => {
   };
 
   useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, []);
-
 
   return (
     <div className="header">
-      <div className="comparison-type">
-        <label htmlFor="comparison">Comparison Type:</label>
-        <div className="custom-select" onClick={() => setShowOptions(!showOptions)}>
+      {/* Comparison Type Dropdown */}
+      <div className="comparison-type" ref={comparisonRef}>
+        <label>Comparison Type:</label>
+        <div
+          className="custom-select"
+          onClick={() => setShowOptions((prev) => !prev)}
+        >
           <div className="selected-option">
-            {comparisonOptions.find(option => option.value === selectedOption).label}
+            {comparisonOptions.find((opt) => opt.value === selectedOption)?.label}
           </div>
           <div className={`options-container ${showOptions ? 'show-options' : ''}`}>
-            {comparisonOptions.map(option => (
+            {comparisonOptions.map((option) => (
               <div
                 key={option.value}
                 className="option"
@@ -68,18 +75,15 @@ const Header = () => {
         </div>
       </div>
 
-      <HStack className="user-section" spacing='1vw'>
+      {/* User Dropdown Menu */}
+      <HStack className="user-section" spacing="1vw">
         <FaAngleDown
-          className={`dropdown-icon ${showDropdown ? 'dropdown-icon-active' : ''}`} // Rotate icon when active
-          fontSize={'30px'}
+          className={`dropdown-icon ${showDropdown ? 'dropdown-icon-active' : ''}`}
           onClick={toggleDropdown}
         />
-
-        {/* Dropdown Menu */}
         <div
           className={`dropdown-menu ${showDropdown ? 'show-dropdown' : ''}`}
           ref={dropdownRef}
-          onClick={(e) => e.stopPropagation()}
         >
           <a href="#">Support Project</a>
           <a href="#">Logout</a>
