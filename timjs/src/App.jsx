@@ -1,38 +1,54 @@
-import {React,useState} from 'react';
-import { HashRouter as Router, Route, Routes,useLocation } from 'react-router-dom';
+import React from 'react';
+import { Routes, Route } from 'react-router-dom'; // Import Routes and Route
 import { ChakraProvider, HStack, VStack } from '@chakra-ui/react';
 import Popup from './pages/Popup';
 import Home from './pages/Home';
+import './styles/global.css';
 import './styles/App.css';
 import customTheme from './styles/chakra-theme';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
-import './styles/Global.css'
+
+const Layout = ({ children, showSidebar = true, showHeader = true }) => {
+  return (
+    <HStack justifyContent={'start'} height={'100%'}>
+      {showSidebar && <Sidebar />}
+      <VStack
+        height={'full'}
+        width={'full'}
+        padding={'35px'}
+        margin={showSidebar ? '0px 35px' : '0px'}
+      >
+        {showHeader && <Header />}
+        {children}
+      </VStack>
+    </HStack>
+  );
+};
 
 const App = () => {
-  const isPopup = useLocation()=== '/';
   return (
     <ChakraProvider theme={customTheme}>
-      <Router>
-        {
-          isPopup?
-          <HStack justifyContent={'start'} height={'100%'}>
-            <Sidebar/>
-            <VStack height={'full'} width={'full'} padding={'35px 35px 35px 35px'} margin={'0px 35px'}>
-              <Header/>
-              <Routes>
-                <Route path="/" element={<Popup />} /> {/*try to use index instead of path=/*/}
-                <Route path="/home" element={<Home />} />
-              </Routes>
-            </VStack>
-          </HStack>:
-          <Routes>
-            <Route path="/" element={<Popup />} />
-            <Route path="/home" element={<Home />} />
-          </Routes>
-        }
-        
-      </Router>
+      <Routes>
+        {/* Popup: No Sidebar, No Header */}
+        <Route
+          path="/"
+          element={
+            <Layout showSidebar={false} showHeader={false}>
+              <Popup />
+            </Layout>
+          }
+        />
+        {/* Home: Include Sidebar and Header */}
+        <Route
+          path="/home"
+          element={
+            <Layout showSidebar={true} showHeader={true}>
+              <Home />
+            </Layout>
+          }
+        />
+      </Routes>
     </ChakraProvider>
   );
 };

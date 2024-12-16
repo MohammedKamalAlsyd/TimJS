@@ -9,9 +9,9 @@ import SidebarItem from './SidebarItem';
 // icons
 import { GoClockFill } from "react-icons/go";
 import { RiDashboardFill } from "react-icons/ri";
-import { LuBarChart3 } from "react-icons/lu";
+import { LuChartBar } from "react-icons/lu";
 import { GiGearStickPattern } from "react-icons/gi";
-import { LuLineChart } from "react-icons/lu";
+import { LuChartLine } from "react-icons/lu";
 import { LuBrainCircuit } from "react-icons/lu";
 import { IoSettingsSharp } from "react-icons/io5";
 
@@ -56,7 +56,7 @@ const Sidebar = () => {
           />
 
           <SidebarItem
-            icon={LuBarChart3}
+            icon={LuChartBar}
             title="Interaction analysis"
             active={activeItem === '/interaction-analysis'}
           />
@@ -68,7 +68,7 @@ const Sidebar = () => {
           />
 
           <SidebarItem
-            icon={LuLineChart}
+            icon={LuChartLine }
             title="Usage Time Forecast"
             active={activeItem === '/usage-time-forecast'}
           />
