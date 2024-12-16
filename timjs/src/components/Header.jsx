@@ -25,14 +25,10 @@ const Header = ({ onComparisonChange }) => {
   const handleOptionClick = (value) => {
     setSelectedOption(value);
     globalComparisonType = value;
-    setShowOptions(false);
+    setShowDropdown(false);
     if (onComparisonChange) onComparisonChange(value);
   };
 
-  // Handle toggling user dropdown
-  const toggleDropdown = () => {
-    setShowDropdown((prev) => !prev);
-  };
 
   const handleOutsideClick = (event) => {
     if (
@@ -76,14 +72,13 @@ const Header = ({ onComparisonChange }) => {
       </div>
 
       {/* User Dropdown Menu */}
-      <HStack className="user-section" spacing="1vw">
+      <HStack className="user-section" spacing="1vw" ref={dropdownRef}>
         <FaAngleDown
           className={`dropdown-icon ${showDropdown ? 'dropdown-icon-active' : ''}`}
-          onClick={toggleDropdown}
+          onClick={() => setShowDropdown((prev) => !prev)}
         />
         <div
           className={`dropdown-menu ${showDropdown ? 'show-dropdown' : ''}`}
-          ref={dropdownRef}
         >
           <a href="#">Support Project</a>
           <a href="#">Logout</a>

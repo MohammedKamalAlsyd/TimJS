@@ -1,1 +1,12 @@
 1-add Selenium script to test the extension
+
+
+
+
+
+
+
+
+import { getComparisonType } from './Header';
+const comparisonType = getComparisonType();
+console.log(comparisonType);
