@@ -5,7 +5,7 @@ let sessionStart = null;
 let prevWebsite = null;
 
 // List of URL prefixes to exclude from tracking
-const excludedUrls = ["chrome:", "file:", "about:", "edge:", "brave:"];
+const excludedUrls = ["chrome:","chrome-extension:", "file:", "about:", "edge:", "brave:"];
 
 // Function to check if a URL is excluded
 function isExcludedUrl(url) {

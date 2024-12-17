@@ -5,8 +5,14 @@
 4-modify the style of recharts
 5-add data processing script
 6-change the license to prevent commerical use (in case we mae premium subscribtion for enhanced ai and sync storage between users)
-
-
+7-update the stlye of dashboard page (change bar colors) and add colors for working and wasted time
+8-update the data processing script
+9-make command to load dummy data for testing purpose where it:
+*should contain more than 1 month data
+*test if the older data than 1 1 month get deleted
+*try aggregating with 30 day interval
+10-add comparison on the barchart to plot the difference in use between the comparison type
+11-add check button in case the user want to compare the previous month/week/day in the barchart
 
 
 
