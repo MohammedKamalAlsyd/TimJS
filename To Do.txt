@@ -13,8 +13,16 @@
 *try aggregating with 30 day interval
 10-add comparison on the barchart to plot the difference in use between the comparison type
 11-add check button in case the user want to compare the previous month/week/day in the barchart
-
-
+12-dashboard page need to hold state or make refresh when user enter the page after while
+13-fix the error :
+*onClick: (data)=>handleBarClick(data.activePayload[0].payload), Uncaught TypeError: Cannot read properties of undefined (reading '0'),action/default_popup.html#/dashboard
+*and two other related to the inner javascript code like socket programming and error throwing
+14-design the popup page
+15-implement the rest of routes
+16-write the unit test
+17-implement the content script for youtube
+18-make forecast using the browser time
+19-add explaination for the wasted time and working time
 
 
 
