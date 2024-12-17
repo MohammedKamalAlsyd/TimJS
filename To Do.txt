@@ -1,4 +1,10 @@
 1-add Selenium script to test the extension
+2-Edits on the background script:
+*it still save extension id as website
+3-add some padding between barchart and the items display
+4-modify the style of recharts
+5-add data processing script
+6-change the license to prevent commerical use (in case we mae premium subscribtion for enhanced ai and sync storage between users)
 
 
 

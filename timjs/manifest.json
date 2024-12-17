@@ -14,9 +14,23 @@
     "48": "src/imgs/icon.png",
     "128": "src/imgs/icon.png"
   },
+  "web_accessible_resources": [
+    {
+      "resources": ["_favicon/*"],
+      "matches": ["<all_urls>"]
+    }
+  ],
   "background": {
     "service_worker": "src/utils/background.js"
   },
-  "permissions": ["tabs","activeTab", "storage"],
+  "commands": {
+    "clear_local_storage": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+L"
+      },
+      "description": "Clear all local storage data (testing only)"
+    }
+  },
+  "permissions": ["tabs", "activeTab", "storage", "favicon"],
   "host_permissions": ["<all_urls>"]
 }
