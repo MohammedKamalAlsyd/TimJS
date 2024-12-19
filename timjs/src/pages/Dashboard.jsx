@@ -12,6 +12,7 @@ import {
   Cell,
 } from "recharts";
 import WebClassification from "../utils/Web Classification.json";
+import InfoTooltip from "../components/InfoTooltip";
 
 const TimeTracker = () => {
   const [chartData, setChartData] = useState([]);
@@ -115,7 +116,6 @@ const TimeTracker = () => {
     : websiteData;
 
   const getBarColor = (category) => {
-    console.log("hj")
     if (category === activeCategory || category === hoveredCategory) {
       return "#555555"; // Active or hovered bar color
     }
@@ -138,15 +138,22 @@ const TimeTracker = () => {
           <Box className="number_cell_grid">
             <Box className="number_cell wasted_time">
               <VStack alignItems="left">
+                <HStack>
                 <Text className="label">Wasted Time</Text>
                 <Spacer />
+                <InfoTooltip message="Wasted Time is the total time spent on websites like social media, shopping, entertainment, games, lifestyle, and travel." />
+                </HStack>
                 <Text className="red-text">{formatTime(wastedTime)}</Text>
               </VStack>
             </Box>
 
             <Box className="number_cell working_time">
               <VStack alignItems="left">
+                <HStack>
                 <Text className="label">Working Time</Text>
+                <Spacer />
+                <InfoTooltip  message={"Working Time is the total time spent on websites related to technology, tools, business, finance, health, careers, education, and news."}/>
+                </HStack>
                 <Spacer />
                 <Text className="green-text">{formatTime(workingTime)}</Text>
               </VStack>
@@ -189,12 +196,12 @@ const TimeTracker = () => {
                     onClick={(data) => handleBarClick(data)}
                     cursor="pointer"
                     style={{ transition: "fill 0.2s ease-in-out" }}
+                    radius={[30, 30, 0, 0]}
                   >
-                    {/* Customize the fill based on data */}
                     {chartData.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
-                        fill={() => getBarColor(entry.name)} // Example condition: random fill color
+                        fill={getBarColor(entry.name)}
                       />
                     ))}
                   </Bar>
@@ -259,6 +266,8 @@ const TimeTracker = () => {
           </VStack>
         </Box>
       </Box>
+      <Box className="usage_summary">3</Box>
+      <Box className="sync_info">4</Box>
     </Box>
   );
 };

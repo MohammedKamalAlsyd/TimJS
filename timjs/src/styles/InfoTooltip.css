@@ -1,0 +1,46 @@
+.info-tooltip-container {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+  }
+  
+  .info-icon {
+    font-size: 1.5rem;
+    color: #1e41db; /* Matches the palette's primary blue color */
+    transition: color 0.3s ease;
+  }
+  
+  .info-icon:hover {
+    color: #3d5afe; /* A slightly lighter blue for hover effect */
+  }
+  
+  .tooltip-message {
+    position: absolute;
+    top: 100%; /* Position below the icon */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #000000; /* Matches the sync_info background color */
+    color: #ffffff;
+    padding: 8px 12px;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    font-size: 0.875rem;
+    width: 200px;
+    text-align: center;
+    white-space: normal;
+    z-index: 1000;
+    opacity: 0.9;
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(10px);
+    }
+    to {
+      opacity: 0.9;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+  
