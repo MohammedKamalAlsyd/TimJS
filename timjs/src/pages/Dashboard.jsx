@@ -10,6 +10,7 @@ import {
   Tooltip,
   CartesianGrid,
   Cell,
+  Global,
 } from "recharts";
 import InfoTooltip from "../components/InfoTooltip";
 import processBarChartData  from "../utils/DataProcessor";
@@ -29,7 +30,8 @@ const TimeTracker = () => {
 
   useEffect(() => {
     chrome.storage.local.get("websiteData", (result) => {
-      const websiteData = result.websiteData || {};
+      const websiteData = result.websiteData["sessions"] || {};
+      console.log(websiteData)
       const { chartData, websiteDetails, wastedTime, workingTime, interval } =
         processBarChartData(websiteData, aggregationType);
       setChartData(chartData);
@@ -70,6 +72,13 @@ const TimeTracker = () => {
     return `${h} h ${m} m`;
   };
 
+  const capitalizeFirstWord = (str) => {
+    if (!str) {
+      return str; // Return empty string for empty input
+    }
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
   return (
     <Box className="dashboard_container">
       <Box className="current_dashboard">
@@ -82,7 +91,7 @@ const TimeTracker = () => {
             <Box className="number_cell wasted_time">
               <VStack alignItems="left">
                 <HStack>
-                  <Text className="label">Wasted Time</Text>
+                  <h2>Wasted Time</h2>
                   <Spacer />
                   <InfoTooltip message="Wasted Time is the total time spent on websites like social media, shopping, entertainment, games, lifestyle, and travel." />
                 </HStack>
@@ -93,7 +102,7 @@ const TimeTracker = () => {
             <Box className="number_cell working_time">
               <VStack alignItems="left">
                 <HStack>
-                  <Text className="label">Working Time</Text>
+                  <h2 className="label">Working Time</h2>
                   <Spacer />
                   <InfoTooltip message="Working Time is the total time spent on websites related to technology, tools, business, finance, health, careers, education, and news." />
                 </HStack>
@@ -208,7 +217,22 @@ const TimeTracker = () => {
           </VStack>
         </Box>
       </Box>
-      <Box className="usage_summary">3</Box>
+      <Box className="browsing_summary">
+        <h2 className="label">Browsing Time</h2>
+        <VStack alignItems="left">
+          <Box className="roundedBoxStyle">
+            <h3>Total Browsing Time:</h3>
+          </Box>
+          <Box className="roundedBoxStyle">
+            <h3>Total Browsing in This {capitalizeFirstWord(aggregationType)}:</h3>
+          </Box>
+        </VStack>
+
+
+
+
+
+      </Box>
       <Box className="sync_info">4</Box>
     </Box>
   );

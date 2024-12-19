@@ -97,9 +97,9 @@
     margin-left: 10px;
   }
   
-  .usage_summary {
+  .browsing_summary {
     grid-area: 1 / 2 / 4 / -1;
-    background-color: rgb(30, 65, 219);
+    padding: 70px 70px;
   }
   
   .sync_info {

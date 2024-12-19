@@ -1,4 +1,4 @@
-import { extendTheme } from "@chakra-ui/react";
+import { color, extendTheme } from "@chakra-ui/react";
 
 const customTheme = extendTheme({
   styles: {
@@ -19,6 +19,21 @@ const customTheme = extendTheme({
         height: "100%",
         outerWidth: "100%"
       },
+      ".red-text":{
+        color:"#C70039",
+        fontWeight: "bold"
+        },
+        ".green-text":{
+          color:"teal",
+          fontWeight: "bold"
+        },
+        ".roundedBoxStyle": {
+          border: "1px solid #E2E8F0", // Light gray border
+          borderRadius: "12px", // Rounded corners
+          padding: "16px", // Inner padding
+          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)", // Subtle shadow for depth
+          backgroundColor: "#FFFFFF", // White background
+        },
       a: {
         color: "#000000",
         textDecoration: "none",

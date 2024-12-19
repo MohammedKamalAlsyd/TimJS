@@ -26,9 +26,15 @@
   "commands": {
     "clear_local_storage": {
       "suggested_key": {
-        "default": "Ctrl+Shift+L"
+        "default": "Ctrl+Shift+1"
       },
       "description": "Clear all local storage data (testing only)"
+    },
+    "load_test_data": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+2"
+      },
+      "description": "Load test data into local storage (testing only)"
     }
   },
   "permissions": ["tabs", "activeTab", "storage", "favicon"],
