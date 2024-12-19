@@ -21,9 +21,8 @@ const WORKING_CATEGORIES = [
 ];
 
 const processBarChartData = (websiteData, aggregationType) => {
-  console.log(aggregationType)
   const categoryMap = {};
-  const websiteDetails = [];
+  const websiteDetailsMap = {}; // Map to store unique websites
   let totalWastedTime = 0;
   let totalWorkingTime = 0;
 
@@ -48,23 +47,35 @@ const processBarChartData = (websiteData, aggregationType) => {
       const timeSpent = siteInfo.time;
       const category = WebClassification[website]?.Category || "Other";
 
+      // Update category map
       categoryMap[category] = (categoryMap[category] || 0) + timeSpent;
 
+      // Update total wasted or working time
       if (WASTED_CATEGORIES.includes(category)) {
         totalWastedTime += timeSpent;
       } else if (WORKING_CATEGORIES.includes(category)) {
         totalWorkingTime += timeSpent;
       }
 
-      websiteDetails.push({
-        name: website,
-        time: timeSpent,
-        category,
-        icon: siteInfo.icon,
-      });
+      // Update website details map to ensure unique websites
+      if (!websiteDetailsMap[website]) {
+        websiteDetailsMap[website] = {
+          name: website,
+          time: timeSpent,
+          category,
+          icon: siteInfo.icon,
+        };
+      } else {
+        // Concatenate the time if the website already exists
+        websiteDetailsMap[website].time += timeSpent;
+      }
     });
   });
 
+  // Convert websiteDetailsMap to an array
+  const websiteDetails = Object.values(websiteDetailsMap);
+
+  // Format chart data
   const formattedChartData = Object.keys(categoryMap).map((category) => ({
     name: category,
     hours: (categoryMap[category] / 60).toFixed(2),
