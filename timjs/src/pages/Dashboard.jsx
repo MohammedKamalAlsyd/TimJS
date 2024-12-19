@@ -11,101 +11,42 @@ import {
   CartesianGrid,
   Cell,
 } from "recharts";
-import WebClassification from "../utils/Web Classification.json";
 import InfoTooltip from "../components/InfoTooltip";
+import processBarChartData  from "../utils/DataProcessor";
+import { useGlobalContext } from "../utils/GlobalContext";
+
 
 const TimeTracker = () => {
+  const { aggregationType } = useGlobalContext(); // Use the aggregation type from the context
   const [chartData, setChartData] = useState([]);
-  const [filteredCategory, setFilteredCategory] = useState(null); // To filter based on chart click
-  const [websiteData, setWebsiteData] = useState([]); // To store the website usage details
-  const [wastedTime, setWastedTime] = useState(0); // Wasted time in minutes
-  const [workingTime, setWorkingTime] = useState(0); // Working time in minutes
-  const [activeCategory, setActiveCategory] = useState(null); // State to track the currently focused category
-  const [hoveredCategory, setHoveredCategory] = useState(null); // Track hovered bar
-
-  const WASTED_CATEGORIES = [
-    "Social Media",
-    "Shopping",
-    "Arts & Entertainment",
-    "Games",
-    "Life Style & Hobbies",
-    "Travel",
-  ];
-
-  const WORKING_CATEGORIES = [
-    "Technology",
-    "Tools",
-    "Business & Consumer Services",
-    "Finance",
-    "Health & Food",
-    "Jobs & Careers",
-    "Science & Education",
-    "News & Sport",
-  ];
-
-  const processData = (data) => {
-    const categoryMap = {};
-    const websiteDetails = [];
-    let totalWastedTime = 0;
-    let totalWorkingTime = 0;
-
-    Object.keys(data).forEach((website) => {
-      const siteInfo = data[website]; // Get the site information
-      const timeSpent = siteInfo.time; // Time spent on the website
-      const category = WebClassification[website]?.Category || "Other";
-      const icon = siteInfo.icon; // Extracting icon directly from siteInfo
-
-      // Aggregate time by category
-      categoryMap[category] = (categoryMap[category] || 0) + timeSpent;
-
-      // Classify as wasted or working time
-      if (WASTED_CATEGORIES.includes(category)) {
-        totalWastedTime += timeSpent;
-      } else if (WORKING_CATEGORIES.includes(category)) {
-        totalWorkingTime += timeSpent;
-      }
-
-      // Create details for the usage list
-      websiteDetails.push({
-        name: website,
-        time: timeSpent,
-        category,
-        icon,
-      });
-    });
-
-    const formattedChartData = Object.keys(categoryMap).map((category) => ({
-      name: category,
-      hours: (categoryMap[category] / 60).toFixed(2), // Convert minutes to hours
-    }));
-
-    setChartData(formattedChartData);
-    setWebsiteData(websiteDetails);
-    setWastedTime(totalWastedTime);
-    setWorkingTime(totalWorkingTime);
-  };
+  const [filteredCategory, setFilteredCategory] = useState(null);
+  const [websiteData, setWebsiteData] = useState([]);
+  const [wastedTime, setWastedTime] = useState(0);
+  const [workingTime, setWorkingTime] = useState(0);
+  const [activeCategory, setActiveCategory] = useState(null);
+  const [hoveredCategory, setHoveredCategory] = useState(null);
+  const [aggregationInterval, setAggregationInterval] = useState(""); // To display interval or day
 
   useEffect(() => {
     chrome.storage.local.get("websiteData", (result) => {
       const websiteData = result.websiteData || {};
-      const dates = Object.keys(websiteData);
-      const latestDate =
-        dates.length > 0 ? dates.reduce((a, b) => (a > b ? a : b)) : null;
-
-      if (latestDate) {
-        const todayData = websiteData[latestDate];
-        processData(todayData);
-      }
+      const { chartData, websiteDetails, wastedTime, workingTime, interval } =
+        processBarChartData(websiteData, aggregationType);
+      setChartData(chartData);
+      setWebsiteData(websiteDetails);
+      setWastedTime(wastedTime);
+      setWorkingTime(workingTime);
+      setAggregationInterval(interval);
     });
-  }, []);
+  }, [aggregationType]);
 
   const handleBarClick = (data) => {
     if (data && data.name) {
       if (activeCategory === data.name) {
-        setActiveCategory(null); // Clear active category
+        setActiveCategory(null);
         setFilteredCategory(null);
       } else {
-        setActiveCategory(data.name); // Set new active category
+        setActiveCategory(data.name);
         setFilteredCategory(data.name);
       }
     }
@@ -117,9 +58,9 @@ const TimeTracker = () => {
 
   const getBarColor = (category) => {
     if (category === activeCategory || category === hoveredCategory) {
-      return "#555555"; // Active or hovered bar color
+      return "#555555";
     }
-    return "#C4C4C4"; // Default bar color
+    return "#C4C4C4";
   };
 
   const formatTime = (minutes) => {
@@ -133,15 +74,17 @@ const TimeTracker = () => {
     <Box className="dashboard_container">
       <Box className="current_dashboard">
         <VStack alignItems="left" className="current_dashboard_content">
-          <h1>Current Dashboard</h1>
+          <h1>
+            Current Dashboard {aggregationInterval && `(${aggregationInterval})`}
+          </h1>
 
           <Box className="number_cell_grid">
             <Box className="number_cell wasted_time">
               <VStack alignItems="left">
                 <HStack>
-                <Text className="label">Wasted Time</Text>
-                <Spacer />
-                <InfoTooltip message="Wasted Time is the total time spent on websites like social media, shopping, entertainment, games, lifestyle, and travel." />
+                  <Text className="label">Wasted Time</Text>
+                  <Spacer />
+                  <InfoTooltip message="Wasted Time is the total time spent on websites like social media, shopping, entertainment, games, lifestyle, and travel." />
                 </HStack>
                 <Text className="red-text">{formatTime(wastedTime)}</Text>
               </VStack>
@@ -150,11 +93,10 @@ const TimeTracker = () => {
             <Box className="number_cell working_time">
               <VStack alignItems="left">
                 <HStack>
-                <Text className="label">Working Time</Text>
-                <Spacer />
-                <InfoTooltip  message={"Working Time is the total time spent on websites related to technology, tools, business, finance, health, careers, education, and news."}/>
+                  <Text className="label">Working Time</Text>
+                  <Spacer />
+                  <InfoTooltip message="Working Time is the total time spent on websites related to technology, tools, business, finance, health, careers, education, and news." />
                 </HStack>
-                <Spacer />
                 <Text className="green-text">{formatTime(workingTime)}</Text>
               </VStack>
             </Box>

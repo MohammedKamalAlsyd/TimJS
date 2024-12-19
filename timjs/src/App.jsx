@@ -7,6 +7,8 @@ import './styles/App.css';
 import customTheme from './styles/chakra-theme';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
+import { GlobalProvider  } from "./utils/GlobalContext"; // Adjust the import path
+
 
 const Layout = ({ children, showSidebar = true, showHeader = true }) => {
   return (
@@ -28,6 +30,7 @@ const Layout = ({ children, showSidebar = true, showHeader = true }) => {
 const App = () => {
   return (
     <ChakraProvider theme={customTheme}>
+      <GlobalProvider >
       <Routes>
         {/* Popup: No Sidebar, No Header */}
         <Route
@@ -48,6 +51,7 @@ const App = () => {
           }
         />
       </Routes>
+      </GlobalProvider >
     </ChakraProvider>
   );
 };

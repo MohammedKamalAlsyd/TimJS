@@ -1,16 +1,15 @@
-import React, { useState, useEffect, useRef } from "react";
+// Header.js
+import React, { useRef, useState, useEffect } from "react";
 import { HStack } from "@chakra-ui/react";
 import { FaAngleDown } from "react-icons/fa";
+import { useGlobalContext } from "../utils/GlobalContext"; // Adjust the import path
 import "../styles/Header.css";
 
-// Shared global state for comparison type
-export let globalAggregationType = "day";
-export const getComparisonType = () => globalAggregationType;
-
-const Header = ({ onComparisonChange }) => {
+const Header = () => {
+  const { aggregationType, changeAggregationType } = useGlobalContext();
   const [showDropdown, setShowDropdown] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
-  const [selectedOption, setSelectedOption] = useState(globalAggregationType);
+  const [selectedOption, setSelectedOption] = useState(aggregationType);
 
   const dropdownRef = useRef(null);
   const comparisonRef = useRef(null);
@@ -21,12 +20,10 @@ const Header = ({ onComparisonChange }) => {
     { value: "month", label: "Month" },
   ];
 
-  // Handle comparison option selection
   const handleOptionClick = (value) => {
     setSelectedOption(value);
-    globalAggregationType = value;
+    changeAggregationType(value);
     setShowDropdown(false);
-    if (onComparisonChange) onComparisonChange(value);
   };
 
   const handleOutsideClick = (event) => {
@@ -56,10 +53,7 @@ const Header = ({ onComparisonChange }) => {
           onClick={() => setShowOptions((prev) => !prev)}
         >
           <div className="selected-option">
-            {
-              comparisonOptions.find((opt) => opt.value === selectedOption)
-                ?.label
-            }
+            {comparisonOptions.find((opt) => opt.value === selectedOption)?.label}
           </div>
           <div
             className={`options-container ${showOptions ? "show-options" : ""}`}
@@ -80,9 +74,7 @@ const Header = ({ onComparisonChange }) => {
       {/* User Dropdown Menu */}
       <HStack className="user-section" spacing="1vw" ref={dropdownRef}>
         <FaAngleDown
-          className={`dropdown-icon ${
-            showDropdown ? "dropdown-icon-active" : ""
-          }`}
+          className={`dropdown-icon ${showDropdown ? "dropdown-icon-active" : ""}`}
           onClick={() => setShowDropdown((prev) => !prev)}
         />
         <div className={`dropdown-menu ${showDropdown ? "show-dropdown" : ""}`}>
@@ -91,27 +83,15 @@ const Header = ({ onComparisonChange }) => {
               <span className="submenu-arrow">◀</span>Support The Project
             </span>
             <div className="submenu-options">
-              <a
-                href="https://github.com"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href="https://github.com" target="_blank" rel="noopener noreferrer">
                 Give Star on GitHub
               </a>
-              <a
-                href="https://donate.example.com"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href="https://donate.example.com" target="_blank" rel="noopener noreferrer">
                 Donate
               </a>
             </div>
           </div>
-          <a
-            href="https://github.com/issues"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a href="https://github.com/issues" target="_blank" rel="noopener noreferrer">
             Report Issue
           </a>
         </div>
