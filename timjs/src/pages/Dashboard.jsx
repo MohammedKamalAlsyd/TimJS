@@ -13,7 +13,7 @@ import {
   Global,
 } from "recharts";
 import InfoTooltip from "../components/InfoTooltip";
-import processBarChartData  from "../utils/DataProcessor";
+import {processBarChartData,  calculateBrowsingTimeByAggregation }  from "../utils/DataProcessor";
 import { useGlobalContext } from "../utils/GlobalContext";
 
 
@@ -22,6 +22,8 @@ const TimeTracker = () => {
   const [chartData, setChartData] = useState([]);
   const [filteredCategory, setFilteredCategory] = useState(null);
   const [websiteData, setWebsiteData] = useState([]);
+  const [totalTime, setTotalTime] = useState(0);
+  const [aggBrowsing, setaggBrowsing] = useState(null);
   const [wastedTime, setWastedTime] = useState(0);
   const [workingTime, setWorkingTime] = useState(0);
   const [activeCategory, setActiveCategory] = useState(null);
@@ -29,11 +31,16 @@ const TimeTracker = () => {
   const [aggregationInterval, setAggregationInterval] = useState(""); // To display interval or day
 
   useEffect(() => {
-    chrome.storage.local.get("websiteData", (result) => {
-      const websiteData = result.websiteData["sessions"] || {};
-      console.log(websiteData)
+    chrome.storage.local.get("trackingData", (result) => {
+      const websiteData = result.trackingData.sessions || {};
       const { chartData, websiteDetails, wastedTime, workingTime, interval } =
         processBarChartData(websiteData, aggregationType);
+      readBrowsingDataFromLocalStorage((browsingData) => {
+        const total = calculateTotalBrowsingTime(browsingData);
+        const browsingtime = calculateBrowsingTimeByAggregation(browsingData, aggregationType);
+        setaggBrowsing(browsingtime);
+        setTotalTime(total);
+      });
       setChartData(chartData);
       setWebsiteData(websiteDetails);
       setWastedTime(wastedTime);
@@ -41,6 +48,37 @@ const TimeTracker = () => {
       setAggregationInterval(interval);
     });
   }, [aggregationType]);
+
+  // Function to read browsing data from local storage
+  const readBrowsingDataFromLocalStorage = (callback) => {
+    chrome.storage.local.get("trackingData", (data) => {
+      if (data.trackingData) {
+        callback(data.trackingData.browsing);
+      } else {
+        callback({});
+      }
+    });
+  };
+
+  // Function to calculate the total browsing time using the "browsing" section directly
+  const calculateTotalBrowsingTime = (browsingData) => {
+    return Object.values(browsingData).reduce((total, time) => total + time, 0);
+  };
+
+  // Function to format time in days, hours, and minutes
+  const formatTime = (totalMinutes) => {
+  const days = Math.floor(totalMinutes / (24 * 60));
+  const hours = Math.floor((totalMinutes % (24 * 60)) / 60);
+  const minutes = Math.round(totalMinutes % 60);
+
+  let formattedTime = "";
+  if (days > 0) formattedTime += `${days} day${days > 1 ? "s" : ""}, `;
+  if (hours > 0) formattedTime += `${hours} hour${hours > 1 ? "s" : ""}, `;
+  formattedTime += `${minutes} minute${minutes > 1 ? "s" : ""}`;
+
+  return formattedTime;
+};
+
 
   const handleBarClick = (data) => {
     if (data && data.name) {
@@ -65,13 +103,6 @@ const TimeTracker = () => {
     return "#C4C4C4";
   };
 
-  const formatTime = (minutes) => {
-    if (minutes < 1) return "Less than 1 minute";
-    const h = Math.floor(minutes / 60);
-    const m = (minutes % 60).toFixed(0);
-    return `${h} h ${m} m`;
-  };
-
   const capitalizeFirstWord = (str) => {
     if (!str) {
       return str; // Return empty string for empty input
@@ -84,7 +115,7 @@ const TimeTracker = () => {
       <Box className="current_dashboard">
         <VStack alignItems="left" className="current_dashboard_content">
           <h1>
-            Current Dashboard {aggregationInterval && `(${aggregationInterval})`}
+            Dashboard {aggregationInterval && `(${aggregationInterval})`}
           </h1>
 
           <Box className="number_cell_grid">
@@ -222,17 +253,15 @@ const TimeTracker = () => {
         <VStack alignItems="left">
           <Box className="roundedBoxStyle">
             <h3>Total Browsing Time:</h3>
+            <h3>{formatTime(totalTime)}</h3>
           </Box>
           <Box className="roundedBoxStyle">
-            <h3>Total Browsing in This {capitalizeFirstWord(aggregationType)}:</h3>
+            {console.log(aggBrowsing)}
+            <h3>Total Browsing in This {capitalizeFirstWord(aggregationType)}: {aggBrowsing}</h3>
           </Box>
         </VStack>
-
-
-
-
-
       </Box>
+
       <Box className="sync_info">4</Box>
     </Box>
   );

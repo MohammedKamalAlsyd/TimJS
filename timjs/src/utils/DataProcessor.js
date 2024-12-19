@@ -20,6 +20,61 @@ const WORKING_CATEGORIES = [
   "News & Sport",
 ];
 
+
+/**
+ * Function to calculate browsing time based on aggregation type (day/week/month).
+ * @param {Object} websiteData - The tracking data containing browsing times.
+ * @param {string} aggregationType - "day", "week", or "month".
+ * @returns {Object} Object containing total browsing time and the interval string.
+ */
+// Function to calculate total browsing time by aggregation type
+const calculateBrowsingTimeByAggregation = (browsingData, aggregationType) => {
+  const dates = Object.keys(browsingData).sort(); // Sort dates for chronological order
+  let relevantDates = [];
+
+  if (aggregationType === "day") {
+    const latestDate = dates.length > 0 ? dates[dates.length - 1] : null;
+    relevantDates = latestDate ? [latestDate] : [];
+  } else if (aggregationType === "week") {
+    relevantDates = dates.slice(-7); // Last 7 days
+  } else if (aggregationType === "month") {
+    relevantDates = dates.slice(-30); // Last 30 days
+  }
+
+  // Calculate total browsing time as an integer
+  const totalBrowsingTime = Math.round(relevantDates.reduce((total, date) => {
+    return total + (browsingData[date] || 0);
+  }, 0));
+
+  return totalBrowsingTime;
+};
+
+
+// Function to get the aggregation interval as a string
+const getAggregationInterval = (dates, aggregationType) => {
+  dates = dates.sort(); // Sort dates in chronological order
+  let interval = "";
+  if (aggregationType === "day") {
+    const latestDate = dates.length > 0 ? dates[dates.length - 1] : "No Data";
+    interval = latestDate;
+  } else if (aggregationType === "week") {
+    interval = dates.length > 0
+      ? `${dates[0]} to ${dates[dates.length - 1]}`
+      : "No Data";
+  } else if (aggregationType === "month") {
+    interval = dates.length > 0
+      ? `${dates[0]} to ${dates[dates.length - 1]}`
+      : "No Data";
+  }
+  return interval;
+};
+
+/**
+ * Main function to process bar chart data for browsing.
+ * @param {Object} websiteData - The tracking data containing website sessions.
+ * @param {string} aggregationType - "day", "week", or "month".
+ * @returns {Object} Processed data for bar chart and details.
+ */
 const processBarChartData = (websiteData, aggregationType) => {
   const categoryMap = {};
   const websiteDetailsMap = {}; // Map to store unique websites
@@ -90,4 +145,7 @@ const processBarChartData = (websiteData, aggregationType) => {
   };
 };
 
-export default processBarChartData;
+export {  
+  calculateBrowsingTimeByAggregation, 
+  processBarChartData 
+};
