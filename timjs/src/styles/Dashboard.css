@@ -105,5 +105,17 @@
   .sync_info {
     grid-area: 4 / 2 / -1 / -1;
     background-color: #000000;
+    padding: 20px;
+    position: relative;
   }
   
+  .sync-button {
+    background-color: #F0F0F0; /* Light gray background */
+    border: 1px solid #D0D0D0; /* Light gray border */
+    padding: 10px 20px; /* Adjust padding for desired size */
+    border-radius: 0px; /* Rounded corners */
+    font-size: 16px; /* Adjust font size as needed */
+    font-weight: bold;
+    color: #333; /* Dark gray text */
+    cursor: pointer; /* Change cursor to pointer on hover */
+  }

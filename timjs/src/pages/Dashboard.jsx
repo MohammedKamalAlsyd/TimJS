@@ -256,13 +256,16 @@ const TimeTracker = () => {
             <h3>{formatTime(totalTime)}</h3>
           </Box>
           <Box className="roundedBoxStyle">
-            {console.log(aggBrowsing)}
-            <h3>Total Browsing in This {capitalizeFirstWord(aggregationType)}: {aggBrowsing}</h3>
+            <h3>Total Browsing in This {capitalizeFirstWord(aggregationType)}:</h3>
+            <h3>{formatTime(totalTime)}</h3>
           </Box>
         </VStack>
       </Box>
-
-      <Box className="sync_info">4</Box>
+      <Box className="sync_info">
+          <h1 style = {{color:"floralwhite" , fontWeight:200}}>Account Sync Information</h1>
+          <h2 style = {{color:"floralwhite" , fontWeight:200, padding:"15px 0px"}}>Feature Not Implemented Yet</h2>
+          <button disabled={true} className="sync-button" style = {{cursor: "not-allowed",position:'absolute',bottom:'30px',right:'25px'}}>Sync</button>
+      </Box>
     </Box>
   );
 };

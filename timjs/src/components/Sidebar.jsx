@@ -73,21 +73,21 @@ const Sidebar = () => {
             active={activeItem === '/usage-time-forecast'}
           />
 
-          <SidebarItem
+          {/* <SidebarItem
             icon={LuBrainCircuit}
             title="AI Time Optimizer"
             active={activeItem === '/ai-time-optimizer'}
-          />
+          /> */}
 
 
           
           <Spacer/>
 
-          <SidebarItem
+          {/* <SidebarItem
             icon={IoSettingsSharp}
             title="Setting"
             active={activeItem === '/setting'}
-          />
+          /> */}
 
         </VStack>
 
