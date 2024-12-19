@@ -4,7 +4,6 @@
 3-add some padding between barchart and the items display
 4-modify the style of recharts
 5-add data processing script
-6-change the license to prevent commerical use (in case we mae premium subscribtion for enhanced ai and sync storage between users)
 7-update the stlye of dashboard page (change bar colors) and add colors for working and wasted time
 8-update the data processing script
 9-make command to load dummy data for testing purpose where it:

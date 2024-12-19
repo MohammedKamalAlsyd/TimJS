@@ -1,4 +1,4 @@
-.dashboard_container{
+.dashboard_container {
     position: relative;
     display: grid;
     grid-template-columns: 65% 35%;
@@ -7,45 +7,103 @@
     width: 100%;
     height: 100%;
     padding: 10px 25px 10px 25px;
-}
-
-.current_dashboard {
+  }
+  
+  .current_dashboard {
     grid-area: 1 / 1 / 3 / 2;
     width: 100%;
     height: 100%;
-}
-
-.usage_list {
-    grid-area: 3 / 1 / -1 / 2;
-    width: 100%;
+  }
+  
+  .current_dashboard_content {
+    padding: 15px;
     height: 100%;
-    padding:15px;
-    box-sizing: border-box;
-}
-
-.usage-list-item {
-    box-sizing: border-box; /* Ensure the padding and border are included in width */
-}
-
-.usage_summary {
-    grid-area: 1 / 2 / 4 / -1;
-    background-color: rgb(30, 65, 219);
-}
-
-.sync_info {
-    grid-area: 4 / 2 / -1 / -1;
-    background-color: #000000;
-}
-
-.number_cell_grid {
+  }
+  
+  .number_cell_grid {
     position: relative;
     display: grid;
     grid-template-columns: 50% 50%;
     grid-template-rows: 30% 70%;
     grid-gap: 15px;
     height: 100%;
-}
-
-.number_cell {
+  }
+  
+  .number_cell {
     padding: 20px;
-}
+  }
+  
+  .wasted_time {
+    grid-area: 1 / 1 / 2 / 2;
+  }
+  
+  .working_time {
+    grid-area: 1 / 2 / 2 / -1;
+  }
+  
+  .bar_chart {
+    grid-area: 2 / 1 / -1 / -1;
+    padding: 15px;
+  }
+  
+  .bar_chart_bar {
+    fill: #C4C4C4;
+    border-radius: 10px 10px 0 0;
+    animation-duration: 300ms;
+  }
+  
+  .usage_list {
+    grid-area: 3 / 1 / -1 / 2;
+    width: 100%;
+    height: 100%;
+    padding: 15px;
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
+  
+  .usage_list_content {
+    overflow-y: scroll;
+    height: 95%;
+  }
+  
+  .usage_list_item {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+  }
+  
+  .site_icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .site_category {
+    font-size: 0.875rem;
+    color: gray;
+  }
+  
+  .site_percentage {
+    font-size: 0.875rem;
+    color: gray;
+  }
+  
+  .site_bar {
+    border-radius: 5px;
+    height: 10px;
+    background-color: teal;
+    margin-left: 10px;
+  }
+  
+  .usage_summary {
+    grid-area: 1 / 2 / 4 / -1;
+    background-color: rgb(30, 65, 219);
+  }
+  
+  .sync_info {
+    grid-area: 4 / 2 / -1 / -1;
+    background-color: #000000;
+  }
+  
