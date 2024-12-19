@@ -4,27 +4,27 @@ import { FaAngleDown } from "react-icons/fa";
 import "../styles/Header.css";
 
 // Shared global state for comparison type
-export let globalComparisonType = "daily";
-export const getComparisonType = () => globalComparisonType;
+export let globalAggregationType = "day";
+export const getComparisonType = () => globalAggregationType;
 
 const Header = ({ onComparisonChange }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
-  const [selectedOption, setSelectedOption] = useState(globalComparisonType);
+  const [selectedOption, setSelectedOption] = useState(globalAggregationType);
 
   const dropdownRef = useRef(null);
   const comparisonRef = useRef(null);
 
   const comparisonOptions = [
-    { value: "daily", label: "Daily" },
-    { value: "weekly", label: "Weekly" },
-    { value: "monthly", label: "Monthly" },
+    { value: "day", label: "Day" },
+    { value: "week", label: "Week" },
+    { value: "month", label: "Month" },
   ];
 
   // Handle comparison option selection
   const handleOptionClick = (value) => {
     setSelectedOption(value);
-    globalComparisonType = value;
+    globalAggregationType = value;
     setShowDropdown(false);
     if (onComparisonChange) onComparisonChange(value);
   };
@@ -50,7 +50,7 @@ const Header = ({ onComparisonChange }) => {
     <div className="header">
       {/* Comparison Type Dropdown */}
       <div className="comparison-type" ref={comparisonRef}>
-        <label>Comparison Type:</label>
+        <label>Aggregation Type:</label>
         <div
           className="custom-select"
           onClick={() => setShowOptions((prev) => !prev)}

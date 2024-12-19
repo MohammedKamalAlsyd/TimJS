@@ -20,7 +20,11 @@
     width: 100%;
     height: 100%;
     padding:15px;
-    overflow:scroll;
+    box-sizing: border-box;
+}
+
+.usage-list-item {
+    box-sizing: border-box; /* Ensure the padding and border are included in width */
 }
 
 .usage_summary {

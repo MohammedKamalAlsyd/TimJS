@@ -23,7 +23,8 @@
 17-implement the content script for youtube
 18-make forecast using the browser time
 19-add explaination for the wasted time and working time
-
+20-dont forget to disable commands in production modes
+21-working time and wasted time not calculated correctly as sum of the browsing not add up to its summation
 
 
 

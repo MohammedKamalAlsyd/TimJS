@@ -20,6 +20,7 @@ const TimeTracker = () => {
     'Arts & Entertainment',
     'Games',
     'Life Style & Hobbies',
+    'Travel',
   ];
 
   const WORKING_CATEGORIES = [
@@ -31,7 +32,6 @@ const TimeTracker = () => {
     'Jobs & Careers',
     'Science & Education',
     'News & Sport',
-    'Travel',
   ];
 
   const processData = (data) => {
@@ -223,10 +223,12 @@ const TimeTracker = () => {
           </Box>
         </VStack>
       </Box>
-
+  
       <Box className="usage_list">
+        <h1>Usage Summary</h1>
         {/* Website Usage List */}
-        <VStack alignItems={'left'} spacing={4} padding={'15px'} overflowY={'scroll'}>
+        <Box overflow={'scroll'} height={'95%'}>
+        <VStack alignItems={'left'} spacing={2} overflow={'scroll'}>
           {filteredWebsites.length > 0 ? (
             filteredWebsites
               .sort((a, b) => b.time - a.time) // Sort by time, largest to smallest
@@ -236,6 +238,7 @@ const TimeTracker = () => {
                   padding={3}
                   borderBottom={'1px solid #eee'}
                   width="100%"
+                  maxWidth="calc(100% - 30px)" /* Adjust based on padding */
                   className="usage-list-item"
                 >
                   <img src={site.icon} alt={site.name} style={{ width: 40, height: 40 }} />
@@ -264,6 +267,7 @@ const TimeTracker = () => {
           )}
 
         </VStack>
+        </Box>
       </Box>
 
       <Box className="usage_summary">3</Box>
