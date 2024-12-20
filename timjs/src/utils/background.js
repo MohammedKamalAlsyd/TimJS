@@ -66,7 +66,6 @@ function saveData() {
   });
 }
 
-
 // Function to track website usage
 function trackWebsiteUsage(tab) {
   if (!tab || !tab.url || isExcludedUrl(tab.url)) return;
@@ -147,12 +146,33 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === "complete") {
     trackWebsiteUsage(tab);
   }
+  if (changeInfo.url && changeInfo.url.startsWith("chrome-extension://")) {
+    const urlParts = changeInfo.url.split("/");
+    const extensionId = urlParts[2]; // Extract the extension ID from the URL
+
+    // Assuming the popup URL pattern is consistent across different extensions
+    if (
+      changeInfo.url.startsWith(
+        `chrome-extension://${extensionId}/action/default_popup.html#/dashboard`
+      )
+    ) {
+      // Reload the popup when the user navigates back to it
+      chrome.tabs.reload(tabId);
+    }
+  }
 });
+
 
 // Event listener: track tab switching
 chrome.tabs.onActivated.addListener((activeInfo) => {
   chrome.tabs.get(activeInfo.tabId, (tab) => {
     trackWebsiteUsage(tab);
+  });
+    chrome.tabs.get(activeInfo.tabId, function(tab) {
+      if (tab.url.startsWith('chrome-extension://edglgopbgfiafofabhhimnjfilkejdml/')) {
+          // Reload the tab if it's the extension page
+          chrome.tabs.reload(tab.id);
+      }
   });
 });
 
@@ -180,108 +200,108 @@ chrome.commands.onCommand.addListener((command) => {
   }
 });
 
-
 // Function to load test data (for testing only)
 function loadTestData() {
-    const testData = {
-      sessions: {
-        "2023-11-18": {
-          "example.com": {
-            icon: "https://example.com/favicon.ico",
-            time: 35,
-            nextWebsites: {
-              "another-example.com": 2,
-              "testsite.com": 1,
-            },
-          },
-          "another-example.com": {
-            icon: "https://another-example.com/favicon.ico",
-            time: 20,
-            nextWebsites: {
-              "example.com": 1,
-            },
+  const testData = {
+    sessions: {
+      "2023-11-18": {
+        "example.com": {
+          icon: "https://example.com/favicon.ico",
+          time: 35,
+          nextWebsites: {
+            "another-example.com": 2,
+            "testsite.com": 1,
           },
         },
-        "2023-11-20": {
-          "testsite.com": {
-            icon: "https://testsite.com/favicon.ico",
-            time: 45,
-            nextWebsites: {
-              "example.com": 3,
-            },
-          },
-        },
-        "2023-11-22": {
-          "sample.com": {
-            icon: "https://sample.com/favicon.ico",
-            time: 25,
-            nextWebsites: {},
-          },
-        },
-        "2023-11-25": {
-          "example.com": {
-            icon: "https://example.com/favicon.ico",
-            time: 60,
-            nextWebsites: {
-              "another-example.com": 4,
-            },
-          },
-          "another-example.com": {
-            icon: "https://another-example.com/favicon.ico",
-            time: 30,
-            nextWebsites: {},
-          },
-        },
-        "2023-12-01": {
-          "testsite.com": {
-            icon: "https://testsite.com/favicon.ico",
-            time: 15,
-            nextWebsites: {
-              "example.com": 1,
-            },
-          },
-        },
-        "2023-12-05": {
-          "example.com": {
-            icon: "https://example.com/favicon.ico",
-            time: 90,
-            nextWebsites: {
-              "sample.com": 2,
-            },
-          },
-          "sample.com": {
-            icon: "https://sample.com/favicon.ico",
-            time: 50,
-            nextWebsites: {},
+        "another-example.com": {
+          icon: "https://another-example.com/favicon.ico",
+          time: 20,
+          nextWebsites: {
+            "example.com": 1,
           },
         },
       },
-      browsing: {
-        "2023-11-18": 55,
-        "2023-11-20": 45,
-        "2023-11-22": 25,
-        "2023-11-25": 90,
-        "2023-12-01": 15,
-        "2023-12-05": 140,
+      "2023-11-20": {
+        "testsite.com": {
+          icon: "https://testsite.com/favicon.ico",
+          time: 45,
+          nextWebsites: {
+            "example.com": 3,
+          },
+        },
       },
-      total_browsing_time: 370,
-    };
-  
-    // First, clear existing data
-    chrome.storage.local.clear(() => {
-      console.log("Previous data cleared from storage.");
-  
-      // Load the test data
-      chrome.storage.local.set({ trackingData: testData }, () => {
-        console.log("Test data successfully loaded into storage:", testData);
-      });
-    });
-  }
+      "2023-11-22": {
+        "sample.com": {
+          icon: "https://sample.com/favicon.ico",
+          time: 25,
+          nextWebsites: {},
+        },
+      },
+      "2023-11-25": {
+        "example.com": {
+          icon: "https://example.com/favicon.ico",
+          time: 60,
+          nextWebsites: {
+            "another-example.com": 4,
+          },
+        },
+        "another-example.com": {
+          icon: "https://another-example.com/favicon.ico",
+          time: 30,
+          nextWebsites: {},
+        },
+      },
+      "2023-12-01": {
+        "testsite.com": {
+          icon: "https://testsite.com/favicon.ico",
+          time: 15,
+          nextWebsites: {
+            "example.com": 1,
+          },
+        },
+      },
+      "2023-12-05": {
+        "example.com": {
+          icon: "https://example.com/favicon.ico",
+          time: 90,
+          nextWebsites: {
+            "sample.com": 2,
+          },
+        },
+        "sample.com": {
+          icon: "https://sample.com/favicon.ico",
+          time: 50,
+          nextWebsites: {},
+        },
+      },
+    },
+    browsing: {
+      "2023-11-18": 55,
+      "2023-11-20": 45,
+      "2023-11-22": 25,
+      "2023-11-25": 90,
+      "2023-12-01": 15,
+      "2023-12-05": 140,
+    },
+    total_browsing_time: 370,
+  };
 
+  // First, clear existing data
+  chrome.storage.local.clear(() => {
+    console.log("Previous data cleared from storage.");
+
+    // Load the test data
+    chrome.storage.local.set({ trackingData: testData }, () => {
+      console.log("Test data successfully loaded into storage:", testData);
+    });
+  });
+}
 
 // Function to delete all local storage (for testing only)
 function deleteLocalStorage() {
-    chrome.storage.local.clear(() => {
-        console.log("Local storage cleared. This section is for testing and should be removed later.");
-    });
+  chrome.storage.local.clear(() => {
+    console.log(
+      "Local storage cleared. This section is for testing and should be removed later."
+    );
+  });
 }
