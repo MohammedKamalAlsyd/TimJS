@@ -20,99 +20,88 @@ const WORKING_CATEGORIES = [
   "News & Sport",
 ];
 
+const fetchFromStorage = async (key) => {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.get(key, (result) => {
+      if (chrome.runtime.lastError) {
+        reject(chrome.runtime.lastError);
+      } else {
+        resolve(result[key]);
+      }
+    });
+  });
+};
 
-/**
- * Function to calculate browsing time based on aggregation type (day/week/month).
- * @param {Object} websiteData - The tracking data containing browsing times.
- * @param {string} aggregationType - "day", "week", or "month".
- * @returns {Object} Object containing total browsing time and the interval string.
- */
-// Function to calculate total browsing time by aggregation type
 const calculateBrowsingTimeByAggregation = (browsingData, aggregationType) => {
-  const dates = Object.keys(browsingData).sort(); // Sort dates for chronological order
+  const dates = Object.keys(browsingData).sort();
   let relevantDates = [];
 
   if (aggregationType === "day") {
     const latestDate = dates.length > 0 ? dates[dates.length - 1] : null;
     relevantDates = latestDate ? [latestDate] : [];
   } else if (aggregationType === "week") {
-    relevantDates = dates.slice(-7); // Last 7 days
+    relevantDates = dates.slice(-7);
   } else if (aggregationType === "month") {
-    relevantDates = dates.slice(-30); // Last 30 days
+    relevantDates = dates.slice(-30);
   }
 
-  // Calculate total browsing time as an integer
-  const totalBrowsingTime = Math.round(relevantDates.reduce((total, date) => {
-    return total + (browsingData[date] || 0);
-  }, 0));
+  const totalBrowsingTime = Math.round(
+    relevantDates.reduce((total, date) => total + (browsingData[date] || 0), 0)
+  );
 
   return totalBrowsingTime;
 };
 
-
-// Function to get the aggregation interval as a string
-const getAggregationInterval = (dates, aggregationType) => {
-  dates = dates.sort(); // Sort dates in chronological order
-  let interval = "";
-  if (aggregationType === "day") {
-    const latestDate = dates.length > 0 ? dates[dates.length - 1] : "No Data";
-    interval = latestDate;
-  } else if (aggregationType === "week") {
-    interval = dates.length > 0
-      ? `${dates[0]} to ${dates[dates.length - 1]}`
-      : "No Data";
-  } else if (aggregationType === "month") {
-    interval = dates.length > 0
-      ? `${dates[0]} to ${dates[dates.length - 1]}`
-      : "No Data";
+const processDashboardData = async (aggregationType) => {
+  const trackingData = await fetchFromStorage("trackingData");
+  if (!trackingData) {
+    return {
+      chartData: [],
+      websiteDetails: [],
+      wastedTime: 0,
+      workingTime: 0,
+      totalTime: 0,
+      aggBrowsing: 0,
+      aggregationInterval: "",
+    };
   }
-  return interval;
-};
 
-/**
- * Main function to process bar chart data for browsing.
- * @param {Object} websiteData - The tracking data containing website sessions.
- * @param {string} aggregationType - "day", "week", or "month".
- * @returns {Object} Processed data for bar chart and details.
- */
-const processBarChartData = (websiteData, aggregationType) => {
   const categoryMap = {};
-  const websiteDetailsMap = {}; // Map to store unique websites
+  const websiteDetailsMap = {};
   let totalWastedTime = 0;
   let totalWorkingTime = 0;
 
-  const dates = Object.keys(websiteData);
+  const dates = Object.keys(trackingData.sessions).sort();
   let interval = "";
   let relevantDates = [];
 
   if (aggregationType === "day") {
-    const latestDate = dates.length > 0 ? dates.reduce((a, b) => (a > b ? a : b)) : null;
+    const latestDate = dates.length > 0 ? dates[dates.length - 1] : null;
     relevantDates = latestDate ? [latestDate] : [];
-    interval = latestDate;
+    interval = latestDate || "No Data";
   } else if (aggregationType === "week" || aggregationType === "month") {
-    const sortedDates = dates.sort();
-    relevantDates = sortedDates.slice(-7); // Last 7 days (week) or similar logic for month
-    interval = `${relevantDates[0]} to ${relevantDates[relevantDates.length - 1]}`;
+    relevantDates = aggregationType === "week" ? dates.slice(-7) : dates.slice(-30);
+    interval =
+      relevantDates.length > 0
+        ? `${relevantDates[0]} to ${relevantDates[relevantDates.length - 1]}`
+        : "No Data";
   }
 
   relevantDates.forEach((date) => {
-    const dailyData = websiteData[date] || {};
+    const dailyData = trackingData.sessions[date] || {};
     Object.keys(dailyData).forEach((website) => {
       const siteInfo = dailyData[website];
       const timeSpent = siteInfo.time;
       const category = WebClassification[website]?.Category || "Other";
 
-      // Update category map
       categoryMap[category] = (categoryMap[category] || 0) + timeSpent;
 
-      // Update total wasted or working time
       if (WASTED_CATEGORIES.includes(category)) {
         totalWastedTime += timeSpent;
       } else if (WORKING_CATEGORIES.includes(category)) {
         totalWorkingTime += timeSpent;
       }
 
-      // Update website details map to ensure unique websites
       if (!websiteDetailsMap[website]) {
         websiteDetailsMap[website] = {
           name: website,
@@ -121,16 +110,14 @@ const processBarChartData = (websiteData, aggregationType) => {
           icon: siteInfo.icon,
         };
       } else {
-        // Concatenate the time if the website already exists
         websiteDetailsMap[website].time += timeSpent;
       }
     });
   });
 
-  // Convert websiteDetailsMap to an array
-  const websiteDetails = Object.values(websiteDetailsMap);
+  const totalBrowsingTime = Object.values(categoryMap).reduce((acc, val) => acc + val, 0);
+  const aggBrowsing = calculateBrowsingTimeByAggregation(trackingData.browsing, aggregationType);
 
-  // Format chart data
   const formattedChartData = Object.keys(categoryMap).map((category) => ({
     name: category,
     hours: (categoryMap[category] / 60).toFixed(2),
@@ -138,14 +125,13 @@ const processBarChartData = (websiteData, aggregationType) => {
 
   return {
     chartData: formattedChartData,
-    websiteDetails,
+    websiteDetails: Object.values(websiteDetailsMap),
     wastedTime: totalWastedTime,
     workingTime: totalWorkingTime,
-    interval,
+    totalTime: totalBrowsingTime,
+    aggBrowsing,
+    aggregationInterval: interval,
   };
 };
 
-export {  
-  calculateBrowsingTimeByAggregation, 
-  processBarChartData 
-};
+export { processDashboardData };
