@@ -1,10 +1,7 @@
 1-add Selenium script to test the extension
-2-Edits on the background script:
-*it still save extension id as website
-3-add some padding between barchart and the items display
+2-Update the script to delete old data (more than 30 days old)
 4-modify the style of recharts
-5-add data processing script
-7-update the stlye of dashboard page (change bar colors) and add colors for working and wasted time
+5-add kast updated in header and remove auto-reload in the dashboard page
 8-update the data processing script
 9-make command to load dummy data for testing purpose where it:
 *should contain more than 1 month data

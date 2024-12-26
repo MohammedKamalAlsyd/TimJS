@@ -66,6 +66,26 @@ function saveData() {
   });
 }
 
+
+// Function to check if a URL is a YouTube page
+function isYouTubePage(url) {
+  return url && url.includes("https://www.youtube.com/");
+}
+
+
+// Function to handle YouTube tab
+function handleYouTubeTab(tabId) {
+  chrome.storage.sync.get("YoutubeContentScrapping", (data) => {
+    if (data.allow) {
+      chrome.scripting.executeScript({
+        target: { tabId: tabId },
+        files: ["youtubeScript.js"],
+      });
+    }
+  });
+}
+
+
 // Function to track website usage
 function trackWebsiteUsage(tab) {
   if (!tab || !tab.url || isExcludedUrl(tab.url)) return;
@@ -144,6 +164,9 @@ function saveWebsiteTime(url, timeSpent) {
 // Event listener: track tab updates (like switching or loading a new website)
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === "complete") {
+    if (isYouTubePage(tab.url)) {
+      handleYouTubeTab(tabId);
+    }
     trackWebsiteUsage(tab);
   }
   if (changeInfo.url && changeInfo.url.startsWith("chrome-extension://")) {
@@ -166,13 +189,10 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 // Event listener: track tab switching
 chrome.tabs.onActivated.addListener((activeInfo) => {
   chrome.tabs.get(activeInfo.tabId, (tab) => {
+    if (isYouTubePage(tab.url)) {
+      handleYouTubeTab(activeInfo.tabId);
+    }
     trackWebsiteUsage(tab);
-  });
-    chrome.tabs.get(activeInfo.tabId, function(tab) {
-      if (tab.url.startsWith('chrome-extension://edglgopbgfiafofabhhimnjfilkejdml/')) {
-          // Reload the tab if it's the extension page
-          chrome.tabs.reload(tab.id);
-      }
   });
 });
 

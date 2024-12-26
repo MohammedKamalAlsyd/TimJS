@@ -18,6 +18,10 @@
     {
       "resources": ["_favicon/*"],
       "matches": ["<all_urls>"]
+    },
+    {
+      "resources": ["youtubeScript.js"],
+      "matches": ["https://www.youtube.com/*"]
     }
   ],
   "background": {
@@ -37,6 +41,6 @@
       "description": "Load test data into local storage (testing only)"
     }
   },
-  "permissions": ["tabs", "activeTab", "storage", "favicon","management"],
+  "permissions": ["tabs", "activeTab", "storage", "favicon","scripting"],
   "host_permissions": ["<all_urls>"]
 }
