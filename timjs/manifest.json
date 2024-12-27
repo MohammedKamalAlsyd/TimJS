@@ -41,6 +41,6 @@
       "description": "Load test data into local storage (testing only)"
     }
   },
-  "permissions": ["tabs", "activeTab", "storage", "favicon","scripting"],
+  "permissions": ["tabs", "activeTab", "storage", "favicon","scripting","webNavigation"],
   "host_permissions": ["<all_urls>"]
 }

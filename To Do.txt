@@ -3,6 +3,7 @@
 4-modify the style of recharts
 5-add kast updated in header and remove auto-reload in the dashboard page
 8-update the data processing script
+6-update .browsing_summary padding size to make it more dynamic
 9-make command to load dummy data for testing purpose where it:
 *should contain more than 1 month data
 *test if the older data than 1 1 month get deleted

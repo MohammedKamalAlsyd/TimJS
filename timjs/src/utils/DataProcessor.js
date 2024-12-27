@@ -134,4 +134,39 @@ const processDashboardData = async (aggregationType) => {
   };
 };
 
-export { processDashboardData };
+const retrieveYouTubeScrappingData = async (aggregationType, callback) => {
+  chrome.storage.local.get(["youtube_scrapping"], (result) => {
+    const scrappingData = result.youtube_scrapping || {};
+    const processedData = processDountData(scrappingData, aggregationType);
+    callback(processedData);
+  });
+};
+
+const processDountData = (scrappingData, aggregationType) => {
+  const dates = Object.keys(scrappingData).sort();
+  const relevantDates = filterDatesByAggregation(dates, aggregationType);
+  const aggregatedData = { video: 0, shorts: 0 };
+
+  relevantDates.forEach((date) => {
+    const dailyData = scrappingData[date];
+    aggregatedData.video += dailyData.total_time.video;
+    aggregatedData.shorts += dailyData.total_time.shorts;
+  });
+
+  return [
+    { type: "Video", time: aggregatedData.video },
+    { type: "Shorts", time: aggregatedData.shorts },
+  ];
+};
+
+const filterDatesByAggregation = (dates, aggregationType) => {
+  if (aggregationType === "day") return dates.slice(-1);
+  if (aggregationType === "week") return dates.slice(-7);
+  if (aggregationType === "month") return dates.slice(-30);
+  return dates;
+};
+
+
+
+
+export { processDashboardData, retrieveYouTubeScrappingData };

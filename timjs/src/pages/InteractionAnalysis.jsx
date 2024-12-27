@@ -1,73 +1,73 @@
 import React, { useState, useEffect } from "react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+} from "recharts";
+import { retrieveYouTubeScrappingData } from "../utils/DataProcessor";
+import { useGlobalContext } from "../utils/GlobalContext";
 
 const InteractionAnalysis = () => {
+  const { aggregationType } = useGlobalContext(); // Read aggregation type from global context
   const [data, setData] = useState([]);
-  const [allow, setAllow] = useState(false);
+  const [scrapingAllowed, setScrapingAllowed] = useState(false);
 
+  // Load YoutubeContentScrapping from storage on mount
   useEffect(() => {
-    chrome.runtime.onMessage.addListener((message) => {
-      if (message.action === "updateData") {
-        setData((prev) => [...prev, message.details]);
-      }
+    chrome.storage.sync.get("YoutubeContentScrapping", (result) => {
+      setScrapingAllowed(result.YoutubeContentScrapping || false);
     });
   }, []);
-  const handleScrape = () => {
-    if (allow) {
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        if (tabs[0] && tabs[0].url.includes("youtube.com")) {
-          chrome.scripting.executeScript({
-            target: { tabId: tabs[0].id },
-            func: () => {
-              // The code to execute on the page
-              const genreMeta = document.querySelector('meta[itemprop="genre"]');
-              const isShorts = window.location.pathname.startsWith('/shorts');
-              
-              const result = {
-                genre: genreMeta ? genreMeta.getAttribute('content') : 'Unknown',
-                type: isShorts ? 'Shorts' : 'Video',
-              };
-              
-              console.log('Scraped Data:', result);
-              return result; // This will be returned to the callback
-            },
-          }, (results) => {
-            if (results && results.length > 0) {
-              const scrapedData = results[0].result;
-              console.log('Genre:', scrapedData.genre);
-              console.log('Type:', scrapedData.type);
-            } else {
-              console.error('No results returned from script execution.');
-            }
-          });
-        } else {
-          alert("This script only works on YouTube!");
-        }
+
+  // Fetch chart data when aggregationType or scrapingAllowed changes
+  useEffect(() => {
+    if (scrapingAllowed) {
+      retrieveYouTubeScrappingData(aggregationType, (processedData) => {
+        setData(processedData);
       });
     } else {
-      alert("Enable scraping by toggling the 'Allow' option!");
+      setData([]); // Clear data if scraping is disabled
     }
+  }, [aggregationType, scrapingAllowed]);
+
+  // Toggle YoutubeContentScrapping value in storage
+  const toggleScrapingAllowed = () => {
+    const newValue = !scrapingAllowed;
+    chrome.storage.sync.set({ YoutubeContentScrapping: newValue }, () => {
+      setScrapingAllowed(newValue);
+      if (!newValue) {
+        chrome.storage.local.set({ youtube_scrapping: {} }); // Clear data if disabled
+      }
+    });
   };
 
   return (
     <div style={{ padding: "10px" }}>
-      <h1>YouTube Video Scraper</h1>
-      <button onClick={() => setAllow((prev) => !prev)}>
-        {allow ? "Disable" : "Enable"} Scraping
-      </button>
-      <button onClick={handleScrape} disabled={!allow}>
-        Scrape Current Page
-      </button>
-      {data.length > 0 && (
+      <h1>YouTube Interaction Analysis</h1>
+      <label>
+        <input
+          type="checkbox"
+          checked={scrapingAllowed}
+          onChange={toggleScrapingAllowed}
+        />
+        Enable YouTube Scraper
+      </label>
+      {data.length > 0 ? (
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={data}>
             <XAxis dataKey="type" />
             <YAxis />
             <Tooltip />
             <Legend />
-            <Bar dataKey="genre" fill="#82ca9d" />
+            <Bar dataKey="time" fill="#82ca9d" />
           </BarChart>
         </ResponsiveContainer>
+      ) : (
+        <p>No Enough Data</p>
       )}
     </div>
   );

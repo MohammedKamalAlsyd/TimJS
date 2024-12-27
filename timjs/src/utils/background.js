@@ -66,25 +66,75 @@ function saveData() {
   });
 }
 
-
 // Function to check if a URL is a YouTube page
 function isYouTubePage(url) {
   return url && url.includes("https://www.youtube.com/");
 }
 
+// Function to update the stored YouTube scrapping data
+function updateYouTubeScrappingData(scrapedData, timeSpent) {
+  chrome.storage.local.get(["youtube_scrapping"], (result) => {
+    const now = new Date();
+    const todayDate = now.toISOString().split("T")[0];
 
-// Function to handle YouTube tab
-function handleYouTubeTab(tabId) {
-  chrome.storage.sync.get("YoutubeContentScrapping", (data) => {
-    if (data.allow) {
-      chrome.scripting.executeScript({
-        target: { tabId: tabId },
-        files: ["youtubeScript.js"],
-      });
-    }
+    let youtubeScrapping = result.youtube_scrapping || {};
+    let todayData = youtubeScrapping[todayDate] || {
+      total_time: { video: 0, shorts: 0 },
+      genres: {},
+    };
+
+    // Update time for the content type
+    todayData.total_time[scrapedData.type] =
+      (todayData.total_time[scrapedData.type] || 0) + timeSpent;
+
+    // Update time for the genre
+    const genreData = todayData.genres[scrapedData.genre] || {
+      type: scrapedData.type,
+      time: 0,
+    };
+    genreData.time += timeSpent;
+    todayData.genres[scrapedData.genre] = genreData;
+
+    // Save the updated data back
+    youtubeScrapping[todayDate] = todayData;
+
+    chrome.storage.local.set({ youtube_scrapping: youtubeScrapping }, () => {
+      console.log("YouTube scrapping data updated:", youtubeScrapping);
+    });
   });
 }
 
+// Function to handle YouTube tab
+function handleYouTubeTab(tabId, timeSpent) {
+  chrome.storage.sync.get("YoutubeContentScrapping", (data) => {
+    if (data.YoutubeContentScrapping) {
+      // Execute script to get video details
+      chrome.scripting.executeScript(
+        {
+          target: { tabId },
+          func: () => {
+            const genreMeta = document.querySelector('meta[itemprop="genre"]');
+            const isShorts = window.location.pathname.startsWith("/shorts");
+
+            return {
+              genre: genreMeta ? genreMeta.getAttribute("content") : "Unknown",
+              type: isShorts ? "shorts" : "video",
+              timestamp: Date.now(),
+            };
+          },
+        },
+        (results) => {
+          if (results && results.length > 0) {
+            const scrapedData = results[0].result;
+            updateYouTubeScrappingData(scrapedData, timeSpent);
+          } else {
+            console.error("No results returned from script execution.");
+          }
+        }
+      );
+    }
+  });
+}
 
 // Function to track website usage
 function trackWebsiteUsage(tab) {
@@ -101,8 +151,13 @@ function trackWebsiteUsage(tab) {
   // Calculate time spent on the previous tab
   if (activeTab && activeTab.url !== tab.url) {
     const sessionEnd = new Date();
-    const timeSpent = Math.max((sessionEnd - sessionStart) / 1000 / 60, 0.5); // Time in minutes, minimum 0.5 mins
+    const timeSpent = Math.max((sessionEnd - sessionStart) / 1000 / 60, 0); // Time in minutes
     saveWebsiteTime(activeTab.url, timeSpent);
+
+    // Handle YouTube-specific scrapping
+    if (isYouTubePage(activeTab.url)) {
+      handleYouTubeTab(activeTab.id, timeSpent);
+    }
   }
 
   // Update session start time for the new tab
@@ -164,34 +219,13 @@ function saveWebsiteTime(url, timeSpent) {
 // Event listener: track tab updates (like switching or loading a new website)
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === "complete") {
-    if (isYouTubePage(tab.url)) {
-      handleYouTubeTab(tabId);
-    }
     trackWebsiteUsage(tab);
   }
-  if (changeInfo.url && changeInfo.url.startsWith("chrome-extension://")) {
-    const urlParts = changeInfo.url.split("/");
-    const extensionId = urlParts[2]; // Extract the extension ID from the URL
-
-    // Assuming the popup URL pattern is consistent across different extensions
-    if (
-      changeInfo.url.startsWith(
-        `chrome-extension://${extensionId}/action/default_popup.html#/dashboard`
-      )
-    ) {
-      // Reload the popup when the user navigates back to it
-      chrome.tabs.reload(tabId);
-    }
-  }
 });
-
 
 // Event listener: track tab switching
 chrome.tabs.onActivated.addListener((activeInfo) => {
   chrome.tabs.get(activeInfo.tabId, (tab) => {
-    if (isYouTubePage(tab.url)) {
-      handleYouTubeTab(activeInfo.tabId);
-    }
     trackWebsiteUsage(tab);
   });
 });
@@ -210,6 +244,7 @@ chrome.runtime.onStartup.addListener(() => {
     }
   });
 });
+
 
 // Add a command to clear local storage (for testing only)
 chrome.commands.onCommand.addListener((command) => {

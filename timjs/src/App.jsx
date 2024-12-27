@@ -39,8 +39,7 @@ const App = () => {
             path="/"
             element={
               <Layout showSidebar={false} showHeader={false}>
-                <InteractionAnalysis />
-                {/* <Popup /> */}
+                { <Popup /> }
               </Layout>
             }
           />
