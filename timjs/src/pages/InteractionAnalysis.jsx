@@ -1,13 +1,6 @@
+// interactionAnalysis.jsx
 import React, { useState, useEffect } from "react";
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-} from "recharts";
+import Sunburst from "sunburst-chart"; // Import Sunburst-chart library
 import { retrieveYouTubeScrappingData } from "../utils/DataProcessor";
 import { useGlobalContext } from "../utils/GlobalContext";
 
@@ -15,6 +8,8 @@ const InteractionAnalysis = () => {
   const { aggregationType } = useGlobalContext(); // Read aggregation type from global context
   const [data, setData] = useState([]);
   const [scrapingAllowed, setScrapingAllowed] = useState(false);
+
+  const chartRef = React.useRef(null); // Reference to the chart container
 
   // Load YoutubeContentScrapping from storage on mount
   useEffect(() => {
@@ -33,6 +28,19 @@ const InteractionAnalysis = () => {
       setData([]); // Clear data if scraping is disabled
     }
   }, [aggregationType, scrapingAllowed]);
+
+  // Render Sunburst chart when data changes
+  useEffect(() => {
+    if (data.length > 0 && chartRef.current) {
+      Sunburst()
+        .data({ name: "YouTube", children: data })
+        .width(chartRef.current.offsetWidth)
+        .height(400)
+        .color((d) => (d.children ? "#82ca9d" : "#8884d8"))
+        .tooltipContent((d) => `${d.data.name}: ${d.value?.toFixed(2)} hrs`)
+        (chartRef.current);
+    }
+  }, [data]);
 
   // Toggle YoutubeContentScrapping value in storage
   const toggleScrapingAllowed = () => {
@@ -57,15 +65,7 @@ const InteractionAnalysis = () => {
         Enable YouTube Scraper
       </label>
       {data.length > 0 ? (
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data}>
-            <XAxis dataKey="type" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="time" fill="#82ca9d" />
-          </BarChart>
-        </ResponsiveContainer>
+        <div ref={chartRef} style={{ width: "100%", height: "400px" }}></div>
       ) : (
         <p>No Enough Data</p>
       )}

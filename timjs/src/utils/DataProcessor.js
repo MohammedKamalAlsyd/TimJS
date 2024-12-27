@@ -137,26 +137,35 @@ const processDashboardData = async (aggregationType) => {
 const retrieveYouTubeScrappingData = async (aggregationType, callback) => {
   chrome.storage.local.get(["youtube_scrapping"], (result) => {
     const scrappingData = result.youtube_scrapping || {};
-    const processedData = processDountData(scrappingData, aggregationType);
+    const processedData = processSunburstData(scrappingData, aggregationType);
     callback(processedData);
   });
 };
 
-const processDountData = (scrappingData, aggregationType) => {
+const processSunburstData = (scrappingData, aggregationType) => {
   const dates = Object.keys(scrappingData).sort();
   const relevantDates = filterDatesByAggregation(dates, aggregationType);
-  const aggregatedData = { video: 0, shorts: 0 };
+
+  const aggregatedData = {};
 
   relevantDates.forEach((date) => {
     const dailyData = scrappingData[date];
-    aggregatedData.video += dailyData.total_time.video;
-    aggregatedData.shorts += dailyData.total_time.shorts;
+
+    Object.entries(dailyData.genres).forEach(([genre, genreData]) => {
+      if (!aggregatedData[genre]) {
+        aggregatedData[genre] = { video: 0, shorts: 0 };
+      }
+      aggregatedData[genre][genreData.type] += genreData.time;
+    });
   });
 
-  return [
-    { type: "Video", time: aggregatedData.video },
-    { type: "Shorts", time: aggregatedData.shorts },
-  ];
+  return Object.entries(aggregatedData).map(([genre, times]) => ({
+    name: genre,
+    children: [
+      { name: "Video", value: times.video },
+      { name: "Shorts", value: times.shorts },
+    ],
+  }));
 };
 
 const filterDatesByAggregation = (dates, aggregationType) => {
@@ -165,8 +174,6 @@ const filterDatesByAggregation = (dates, aggregationType) => {
   if (aggregationType === "month") return dates.slice(-30);
   return dates;
 };
-
-
 
 
 export { processDashboardData, retrieveYouTubeScrappingData };

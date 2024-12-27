@@ -73,6 +73,7 @@ const Header = () => {
 
       {/* User Dropdown Menu */}
       <HStack className="user-section" spacing="1vw" ref={dropdownRef}>
+        <h3 style={{color:'gray', fontSize:"12px",fontWeight:500}}>Version: 1.0.0</h3>
         <FaAngleDown
           className={`dropdown-icon ${showDropdown ? "dropdown-icon-active" : ""}`}
           onClick={() => setShowDropdown((prev) => !prev)}

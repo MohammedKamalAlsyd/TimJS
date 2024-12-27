@@ -98,7 +98,7 @@ function updateYouTubeScrappingData(scrapedData, timeSpent) {
     // Save the updated data back
     youtubeScrapping[todayDate] = todayData;
 
-    chrome.storage.local.set({ youtube_scrapping: youtubeScrapping }, () => {
+    chrome.storage.local.set({ "youtube_scrapping": youtubeScrapping }, () => {
       console.log("YouTube scrapping data updated:", youtubeScrapping);
     });
   });
