@@ -137,34 +137,42 @@ const processDashboardData = async (aggregationType) => {
 const retrieveYouTubeScrappingData = async (aggregationType, callback) => {
   chrome.storage.local.get(["youtube_scrapping"], (result) => {
     const scrappingData = result.youtube_scrapping || {};
-    const processedData = processSunburstData(scrappingData, aggregationType);
+    const processedData = processRadialBarData(scrappingData, aggregationType);
     callback(processedData);
   });
 };
 
-const processSunburstData = (scrappingData, aggregationType) => {
+const processRadialBarData = (scrappingData, aggregationType) => {
   const dates = Object.keys(scrappingData).sort();
   const relevantDates = filterDatesByAggregation(dates, aggregationType);
 
-  const aggregatedData = {};
+  const aggregatedData = [];
 
   relevantDates.forEach((date) => {
     const dailyData = scrappingData[date];
 
     Object.entries(dailyData.genres).forEach(([genre, genreData]) => {
-      if (!aggregatedData[genre]) {
-        aggregatedData[genre] = { video: 0, shorts: 0 };
+      // Ensure that 'Video' and 'Shorts' values are properly initialized
+      const existingGenre = aggregatedData.find((item) => item.name === genre);
+
+      if (existingGenre) {
+        existingGenre[genreData.type] += genreData.time; // Update existing genre's time
+      } else {
+        aggregatedData.push({
+          name: genre,
+          Video: genreData.type === "video" ? genreData.time : 0,
+          Shorts: genreData.type === "shorts" ? genreData.time : 0,
+        });
       }
-      aggregatedData[genre][genreData.type] += genreData.time;
     });
   });
 
-  return Object.entries(aggregatedData).map(([genre, times]) => ({
-    name: genre,
-    children: [
-      { name: "Video", value: times.video },
-      { name: "Shorts", value: times.shorts },
-    ],
+
+  // Ensure each genre has the necessary data fields (Video and Shorts)
+  return aggregatedData.map((genreData) => ({
+    name: genreData.name,
+    Video: genreData.Video || 0, // Default to 0 if not available
+    Shorts: genreData.Shorts || 0, // Default to 0 if not available
   }));
 };
 

@@ -1,6 +1,5 @@
-// interactionAnalysis.jsx
 import React, { useState, useEffect } from "react";
-import Sunburst from "sunburst-chart"; // Import Sunburst-chart library
+import { ResponsiveRadialBar } from '@nivo/radial-bar'; // Import RadialBar from Nivo
 import { retrieveYouTubeScrappingData } from "../utils/DataProcessor";
 import { useGlobalContext } from "../utils/GlobalContext";
 
@@ -8,8 +7,6 @@ const InteractionAnalysis = () => {
   const { aggregationType } = useGlobalContext(); // Read aggregation type from global context
   const [data, setData] = useState([]);
   const [scrapingAllowed, setScrapingAllowed] = useState(false);
-
-  const chartRef = React.useRef(null); // Reference to the chart container
 
   // Load YoutubeContentScrapping from storage on mount
   useEffect(() => {
@@ -29,19 +26,6 @@ const InteractionAnalysis = () => {
     }
   }, [aggregationType, scrapingAllowed]);
 
-  // Render Sunburst chart when data changes
-  useEffect(() => {
-    if (data.length > 0 && chartRef.current) {
-      Sunburst()
-        .data({ name: "YouTube", children: data })
-        .width(chartRef.current.offsetWidth)
-        .height(400)
-        .color((d) => (d.children ? "#82ca9d" : "#8884d8"))
-        .tooltipContent((d) => `${d.data.name}: ${d.value?.toFixed(2)} hrs`)
-        (chartRef.current);
-    }
-  }, [data]);
-
   // Toggle YoutubeContentScrapping value in storage
   const toggleScrapingAllowed = () => {
     const newValue = !scrapingAllowed;
@@ -52,6 +36,24 @@ const InteractionAnalysis = () => {
       }
     });
   };
+
+  // Format the data to match the structure required by Nivo's RadialBar
+  const formattedData = [
+    {
+      id: "Video",
+      data: data.map(entry => ({
+        x: entry.name, // Genre name
+        y: entry.Video, // Video value
+      }))
+    },
+    {
+      id: "Shorts",
+      data: data.map(entry => ({
+        x: entry.name, // Genre name
+        y: entry.Shorts, // Shorts value
+      }))
+    }
+  ];
 
   return (
     <div style={{ padding: "10px" }}>
@@ -64,8 +66,84 @@ const InteractionAnalysis = () => {
         />
         Enable YouTube Scraper
       </label>
+
       {data.length > 0 ? (
-        <div ref={chartRef} style={{ width: "100%", height: "400px" }}></div>
+        <div>
+          {console.log(data)}
+          <h2>Video vs Shorts Interaction</h2>
+          <div style={{ height: "400px" }}>
+            <ResponsiveRadialBar
+              data={formattedData} // Use the formatted data
+              valueFormat=">-.2f"
+              padding={0.4}
+              cornerRadius={2}
+              margin={{ top: 40, right: 120, bottom: 40, left: 40 }}
+              radialAxisStart={{ tickSize: 5, tickPadding: 5, tickRotation: 0 }}
+              circularAxisOuter={{ tickSize: 5, tickPadding: 12, tickRotation: 0 }}
+              legends={[
+                {
+                  anchor: 'right',
+                  direction: 'column',
+                  justify: false,
+                  translateX: 80,
+                  translateY: 0,
+                  itemsSpacing: 6,
+                  itemDirection: 'left-to-right',
+                  itemWidth: 100,
+                  itemHeight: 18,
+                  itemTextColor: '#999',
+                  symbolSize: 18,
+                  symbolShape: 'square',
+                  effects: [
+                    {
+                      on: 'hover',
+                      style: {
+                        itemTextColor: '#000'
+                      }
+                    }
+                  ]
+                }
+              ]}
+            />
+          </div>
+
+          <h2>Genre Distribution</h2>
+          <div style={{ height: "400px" }}>
+            <ResponsiveRadialBar
+              data={formattedData} // Reusing formatted data for this chart as well
+              valueFormat=">-.2f"
+              padding={0.4}
+              cornerRadius={2}
+              margin={{ top: 40, right: 120, bottom: 40, left: 40 }}
+              radialAxisStart={{ tickSize: 5, tickPadding: 5, tickRotation: 0 }}
+              circularAxisOuter={{ tickSize: 5, tickPadding: 12, tickRotation: 0 }}
+              legends={[
+                {
+                  anchor: 'right',
+                  direction: 'column',
+                  justify: false,
+                  translateX: 80,
+                  translateY: 0,
+                  itemsSpacing: 6,
+                  itemDirection: 'left-to-right',
+                  itemWidth: 100,
+                  itemHeight: 18,
+                  itemTextColor: '#999',
+                  symbolSize: 18,
+                  symbolShape: 'square',
+                  effects: [
+                    {
+                      on: 'hover',
+                      style: {
+                        itemTextColor: '#000'
+                      }
+                    }
+                  ]
+                }
+              ]}
+            />
+          </div>
+        </div>
       ) : (
         <p>No Enough Data</p>
       )}
