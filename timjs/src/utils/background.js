@@ -103,18 +103,30 @@ function handleYouTubeTab(tabId, timeSpent) {
         {
           target: { tabId },
           func: () => {
-            const genreMeta = document.querySelector('meta[itemprop="genre"]');
-            const isShorts = window.location.pathname.startsWith("/shorts");
-            return {
-              genre: genreMeta ? genreMeta.getAttribute("content") : "Unknown",
-              type: isShorts ? "shorts" : "video",
-              timestamp: Date.now(),
-            };
+            const scriptText = document.evaluate('//*[@id="microformat"]/player-microformat-renderer/script/text()', document, null, XPathResult.STRING_TYPE, null).stringValue;
+            try {
+              // Parse the JSON data from the scriptText
+              const videoData = JSON.parse(scriptText);
+              const genre = videoData.genre || "Unknown"; // Default to "Unknown" if genre is not found
+              return {
+                genre: genre,
+                type: "video", // This assumes you're not checking for "shorts" in this case
+                timestamp: Date.now(),
+              };
+            } catch (error) {
+              console.error("Error parsing video metadata:", error);
+              return {
+                genre: "Unknown",
+                type: "video",
+                timestamp: Date.now(),
+              };
+            }
           },
         },
         (results) => {
           if (results && results.length > 0) {
             const scrapedData = results[0].result;
+            console.log("YouTube Scrapping Data:", scrapedData);
             updateYouTubeScrappingData(scrapedData, timeSpent);
           } else {
             console.error("No results returned from script execution.");
@@ -124,6 +136,7 @@ function handleYouTubeTab(tabId, timeSpent) {
     }
   });
 }
+
 
 // Function to track website usage
 function trackWebsiteUsage(tab) {
