@@ -35,9 +35,6 @@ const InteractionAnalysis = () => {
     const newValue = !scrapingAllowed;
     chrome.storage.sync.set({ YoutubeContentScrapping: newValue }, () => {
       setScrapingAllowed(newValue);
-      if (!newValue) {
-        chrome.storage.local.set({ youtube_scrapping: {} }); // Clear data if disabled
-      }
     });
   };
 

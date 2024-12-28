@@ -4,6 +4,7 @@
 5-add kast updated in header and remove auto-reload in the dashboard page
 8-update the data processing script
 6-update .browsing_summary padding size to make it more dynamic
+7-edit the script to0 remove older data than 30 day in backgorund script for youtube data
 9-make command to load dummy data for testing purpose where it:
 *should contain more than 1 month data
 *test if the older data than 1 1 month get deleted
@@ -22,9 +23,3 @@
 19-add explaination for the wasted time and working time
 20-dont forget to disable commands in production modes
 21-working time and wasted time not calculated correctly as sum of the browsing not add up to its summation
-
-
-
-import { getComparisonType } from './Header';
-const comparisonType = getComparisonType();
-console.log(comparisonType);
