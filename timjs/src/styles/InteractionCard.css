@@ -23,8 +23,9 @@
   }
   
   .interaction-graph {
-    height: 400px;
-    margin-top: 15px;
+    width: 100%;
+    height: 35vw;
+    margin: 10px auto;
   }
   
   .hidden {

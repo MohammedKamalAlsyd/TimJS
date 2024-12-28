@@ -57,7 +57,7 @@ const InteractionAnalysis = () => {
   ];
 
   return (
-    <VStack className="interaction-analysis-container">
+    <VStack className="interaction-analysis-container" gap={4}>
       <YouTubeInteractionCard
         title="Youtube"
         icon= <SocialIcon url="https://youtube.com" label={`Youtube icon`} as="div" style={{ width: "40px",height: "40px" }}/>

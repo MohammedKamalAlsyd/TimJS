@@ -152,28 +152,19 @@ const processRadialBarData = (scrappingData, aggregationType) => {
     const dailyData = scrappingData[date];
 
     Object.entries(dailyData.genres).forEach(([genre, genreData]) => {
-      // Ensure that 'Video' and 'Shorts' values are properly initialized
-      const existingGenre = aggregatedData.find((item) => item.name === genre);
+      let existingGenre = aggregatedData.find((item) => item.name === genre);
 
-      if (existingGenre) {
-        existingGenre[genreData.type] += genreData.time; // Update existing genre's time
-      } else {
-        aggregatedData.push({
-          name: genre,
-          Video: genreData.type === "video" ? genreData.time : 0,
-          Shorts: genreData.type === "shorts" ? genreData.time : 0,
-        });
+      if (!existingGenre) {
+        existingGenre = { name: genre, Video: 0, Shorts: 0 };
+        aggregatedData.push(existingGenre);
       }
+
+      existingGenre.Video += genreData.video || 0;
+      existingGenre.Shorts += genreData.shorts || 0;
     });
   });
 
-
-  // Ensure each genre has the necessary data fields (Video and Shorts)
-  return aggregatedData.map((genreData) => ({
-    name: genreData.name,
-    Video: genreData.Video || 0, // Default to 0 if not available
-    Shorts: genreData.Shorts || 0, // Default to 0 if not available
-  }));
+  return aggregatedData;
 };
 
 const filterDatesByAggregation = (dates, aggregationType) => {

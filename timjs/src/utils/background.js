@@ -78,28 +78,18 @@ function updateYouTubeScrappingData(scrapedData, timeSpent) {
     const todayDate = now.toISOString().split("T")[0];
 
     let youtubeScrapping = result.youtube_scrapping || {};
-    let todayData = youtubeScrapping[todayDate] || {
-      total_time: { video: 0, shorts: 0 },
-      genres: {},
-    };
+    let todayData = youtubeScrapping[todayDate] || { genres: {} };
 
-    // Update time for the content type
-    todayData.total_time[scrapedData.type] =
-      (todayData.total_time[scrapedData.type] || 0) + timeSpent;
-
-    // Update time for the genre
-    const genreData = todayData.genres[scrapedData.genre] || {
-      type: scrapedData.type,
-      time: 0,
-    };
-    genreData.time += timeSpent;
+    // Update genre data for the specific type (video/shorts)
+    const genreData = todayData.genres[scrapedData.genre] || { video: 0, shorts: 0 };
+    genreData[scrapedData.type] = (genreData[scrapedData.type] || 0) + timeSpent;
     todayData.genres[scrapedData.genre] = genreData;
 
     // Save the updated data back
     youtubeScrapping[todayDate] = todayData;
 
-    chrome.storage.local.set({ "youtube_scrapping": youtubeScrapping }, () => {
-      console.log("YouTube scrapping data updated:", youtubeScrapping);
+    chrome.storage.local.set({ youtube_scrapping: youtubeScrapping }, () => {
+      console.log("Updated YouTube scrapping data:", youtubeScrapping);
     });
   });
 }
@@ -115,7 +105,6 @@ function handleYouTubeTab(tabId, timeSpent) {
           func: () => {
             const genreMeta = document.querySelector('meta[itemprop="genre"]');
             const isShorts = window.location.pathname.startsWith("/shorts");
-
             return {
               genre: genreMeta ? genreMeta.getAttribute("content") : "Unknown",
               type: isShorts ? "shorts" : "video",
