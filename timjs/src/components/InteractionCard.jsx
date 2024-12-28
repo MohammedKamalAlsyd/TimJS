@@ -1,15 +1,20 @@
 import React, { useState } from "react";
-import { Switch, Tooltip } from "@chakra-ui/react"; // Import Chakra UI components
+import { Switch, Tooltip,Box, VStack, Flex ,Spacer } from "@chakra-ui/react"; // Import Chakra UI components
 import '../styles/InteractionCard.css';
+
 
 const InteractionCard = ({ title, icon, graph, onSwitchChange, isActive }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <div className="interaction-card">
-      <div className="interaction-header">
-        <img src={icon} alt={`${title} icon`} className="interaction-icon" />
+    <Box className="roundedBoxStyle interaction-card">
+      <VStack>
+      <Flex className="interaction-header" alignItems='center' gap='4'>
+        {icon}
         <h2 className="interaction-title">{title}</h2>
+        <Spacer />
+        <Box display='flex' alignItems='center' gap={5} padding={"0px 12px"}>
+        <h2>Activate Script:</h2>
         <Tooltip
           label={isActive 
             ? "Any browsing YouTube data during this tool off will not be saved, causing gaps in your analysis."
@@ -23,15 +28,17 @@ const InteractionCard = ({ title, icon, graph, onSwitchChange, isActive }) => {
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             size="lg"
-            colorScheme="blue"
+            colorScheme="gray"
             className={`interaction-switch ${isHovered ? 'hovered' : ''}`}
           />
         </Tooltip>
-      </div>
+        </Box>
+      </Flex>
       <div className={`interaction-graph ${isActive ? '' : 'hidden'}`}>
         {graph}
       </div>
-    </div>
+      </VStack>
+    </Box>
   );
 };
 

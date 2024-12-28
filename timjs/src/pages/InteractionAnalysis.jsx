@@ -3,7 +3,9 @@ import { ResponsiveRadialBar } from "@nivo/radial-bar";
 import { retrieveYouTubeScrappingData } from "../utils/DataProcessor";
 import { useGlobalContext } from "../utils/GlobalContext";
 import YouTubeInteractionCard from "../components/InteractionCard";
+import { SocialIcon } from 'react-social-icons'
 import "../styles/InteractionAnalysis.css";
+import { VStack } from "@chakra-ui/react";
 
 const InteractionAnalysis = () => {
   const { aggregationType } = useGlobalContext();
@@ -58,10 +60,10 @@ const InteractionAnalysis = () => {
   ];
 
   return (
-    <div className="analysis-container">
+    <VStack className="interaction-analysis-container">
       <YouTubeInteractionCard
-        title="YouTube Interaction Analysis"
-        icon="path/to/facebook-icon.png" // Replace with the actual icon path
+        title="Youtube"
+        icon= <SocialIcon url="https://youtube.com" label={`Youtube icon`} as="div" style={{ width: "40px",height: "40px" }}/>
         graph={
           <ResponsiveRadialBar
             data={formattedData}
@@ -100,7 +102,7 @@ const InteractionAnalysis = () => {
         onSwitchChange={toggleScrapingAllowed}
         isActive={scrapingAllowed}
       />
-    </div>
+    </VStack>
   );
 };
 

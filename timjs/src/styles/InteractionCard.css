@@ -1,11 +1,6 @@
 .interaction-card {
-    background-color: #FFFFFF;
-    border: 1px solid #EAEAEA;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    margin: 20px 0;
     transition: all 0.2s ease-in-out;
+    width: 100%;
   }
   
   .interaction-card:hover {
@@ -13,22 +8,14 @@
   }
   
   .interaction-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     margin-bottom: 15px;
-  }
-  
-  .interaction-icon {
-    width: 40px;
-    height: 40px;
+    width: 100%;
+    margin: 0 auto;
   }
   
   .interaction-title {
-    font-size: 1.2rem;
+    letter-spacing: 1.2px;
     font-weight: 600;
-    margin-left: 10px;
-    flex: 1;
   }
   
   .interaction-switch {
