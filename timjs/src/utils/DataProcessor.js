@@ -32,8 +32,10 @@ const fetchFromStorage = async (key) => {
   });
 };
 
-const calculateBrowsingTimeByAggregation = (browsingData, aggregationType) => {
-  const dates = Object.keys(browsingData).sort();
+
+// General aggregation function
+const aggregateData = (data, aggregationType) => {
+  const dates = Object.keys(data).sort();
   let relevantDates = [];
 
   if (aggregationType === "day") {
@@ -45,78 +47,117 @@ const calculateBrowsingTimeByAggregation = (browsingData, aggregationType) => {
     relevantDates = dates.slice(-30);
   }
 
-  const totalBrowsingTime = Math.round(
-    relevantDates.reduce((total, date) => total + (browsingData[date] || 0), 0)
-  );
-
-  return totalBrowsingTime;
+  const aggregatedValue = relevantDates.reduce((total, date) => total + (data[date] || 0), 0);
+  return { aggregatedValue, relevantDates };
 };
 
+
+// Calculate aggregated browsing time
+const calculateAggregatedBrowsingTime = (browsingData, aggregationType) => {
+  const { aggregatedValue } = aggregateData(browsingData, aggregationType);
+  return Math.round(aggregatedValue);
+};
+
+// Calculate aggregated URL count
+const calculateAggregatedURLCount = (urlData, aggregationType) => {
+  const { aggregatedValue } = aggregateData(urlData, aggregationType);
+  return aggregatedValue;
+};
+
+// Get total browsing time
+const getTotalBrowsingTime = (trackingData) => {
+  return trackingData.total_browsing_time || 0;
+};
+
+// Get total URLs opened
+const getTotalURLsOpened = (trackingData) => {
+  return trackingData.total_urls_opened || 0;
+};
+
+// Calculate wasted time
+const calculateWastedTime = (trackingData, relevantDates) => {
+  let totalWastedTime = 0;
+  relevantDates.forEach((date) => {
+    const dailyData = trackingData.sessions[date] || {};
+    Object.keys(dailyData).forEach((website) => {
+      const siteInfo = dailyData[website];
+      const category = WebClassification[website]?.Category || "Other";
+
+      if (WASTED_CATEGORIES.includes(category)) {
+        totalWastedTime += siteInfo.time;
+      }
+    });
+  });
+  return totalWastedTime;
+};
+
+// Calculate working time
+const calculateWorkingTime = (trackingData, relevantDates) => {
+  let totalWorkingTime = 0;
+  relevantDates.forEach((date) => {
+    const dailyData = trackingData.sessions[date] || {};
+    Object.keys(dailyData).forEach((website) => {
+      const siteInfo = dailyData[website];
+      const category = WebClassification[website]?.Category || "Other";
+
+      if (WORKING_CATEGORIES.includes(category)) {
+        totalWorkingTime += siteInfo.time;
+      }
+    });
+  });
+  return totalWorkingTime;
+};
+
+// Get aggregation interval
+const getAggregationInterval = (dates, aggregationType) => {
+  if (aggregationType === "day") {
+    return dates.length > 0 ? dates[dates.length - 1] : "No Data";
+  }
+  if (aggregationType === "week" || aggregationType === "month") {
+    const relevantDates = aggregationType === "week" ? dates.slice(-7) : dates.slice(-30);
+    return relevantDates.length > 0
+      ? `${relevantDates[0]} to ${relevantDates[relevantDates.length - 1]}`
+      : "No Data";
+  }
+  return "No Data";
+};
+
+// Process dashboard data
 const processDashboardData = async (aggregationType) => {
   const trackingData = await fetchFromStorage("trackingData");
   if (!trackingData) {
     return {
       chartData: [],
       websiteDetails: [],
-      wastedTime: 0,
-      workingTime: 0,
-      totalTime: 0,
-      aggBrowsing: 0,
-      aggregationInterval: "",
     };
   }
 
+  const dates = Object.keys(trackingData.sessions).sort();
+  const relevantDates = aggregateData(trackingData.sessions, aggregationType).relevantDates;
+
   const categoryMap = {};
   const websiteDetailsMap = {};
-  let totalWastedTime = 0;
-  let totalWorkingTime = 0;
-
-  const dates = Object.keys(trackingData.sessions).sort();
-  let interval = "";
-  let relevantDates = [];
-
-  if (aggregationType === "day") {
-    const latestDate = dates.length > 0 ? dates[dates.length - 1] : null;
-    relevantDates = latestDate ? [latestDate] : [];
-    interval = latestDate || "No Data";
-  } else if (aggregationType === "week" || aggregationType === "month") {
-    relevantDates = aggregationType === "week" ? dates.slice(-7) : dates.slice(-30);
-    interval =
-      relevantDates.length > 0
-        ? `${relevantDates[0]} to ${relevantDates[relevantDates.length - 1]}`
-        : "No Data";
-  }
 
   relevantDates.forEach((date) => {
     const dailyData = trackingData.sessions[date] || {};
     Object.keys(dailyData).forEach((website) => {
       const siteInfo = dailyData[website];
-      const timeSpent = siteInfo.time;
       const category = WebClassification[website]?.Category || "Other";
 
-      categoryMap[category] = (categoryMap[category] || 0) + timeSpent;
-
-      if (WASTED_CATEGORIES.includes(category)) {
-        totalWastedTime += timeSpent;
-      } else if (WORKING_CATEGORIES.includes(category)) {
-        totalWorkingTime += timeSpent;
-      }
+      categoryMap[category] = (categoryMap[category] || 0) + siteInfo.time;
 
       if (!websiteDetailsMap[website]) {
         websiteDetailsMap[website] = {
           name: website,
-          time: timeSpent,
+          time: siteInfo.time,
           category,
           icon: siteInfo.icon,
         };
       } else {
-        websiteDetailsMap[website].time += timeSpent;
+        websiteDetailsMap[website].time += siteInfo.time;
       }
     });
   });
-
-  const totalBrowsingTime = Object.values(categoryMap).reduce((acc, val) => acc + val, 0);
-  const aggBrowsing = calculateBrowsingTimeByAggregation(trackingData.browsing, aggregationType);
 
   const formattedChartData = Object.keys(categoryMap).map((category) => ({
     name: category,
@@ -126,13 +167,9 @@ const processDashboardData = async (aggregationType) => {
   return {
     chartData: formattedChartData,
     websiteDetails: Object.values(websiteDetailsMap),
-    wastedTime: totalWastedTime,
-    workingTime: totalWorkingTime,
-    totalTime: totalBrowsingTime,
-    aggBrowsing,
-    aggregationInterval: interval,
   };
 };
+
 
 const retrieveYouTubeScrappingData = async (aggregationType, callback) => {
   chrome.storage.local.get(["youtube_scrapping"], (result) => {
@@ -175,4 +212,4 @@ const filterDatesByAggregation = (dates, aggregationType) => {
 };
 
 
-export { processDashboardData, retrieveYouTubeScrappingData };
+export {calculateAggregatedBrowsingTime, calculateAggregatedURLCount, getTotalBrowsingTime, getTotalURLsOpened, calculateWastedTime, calculateWorkingTime, getAggregationInterval, processDashboardData, retrieveYouTubeScrappingData };

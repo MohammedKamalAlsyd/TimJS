@@ -12,31 +12,52 @@ import {
   Cell,
 } from "recharts";
 import InfoTooltip from "../components/InfoTooltip";
-import { processDashboardData } from "../utils/DataProcessor";
+import {
+  calculateAggregatedBrowsingTime,
+  calculateAggregatedURLCount,
+  getTotalBrowsingTime,
+  getTotalURLsOpened,
+  calculateWastedTime,
+  calculateWorkingTime,
+  getAggregationInterval,
+  processDashboardData,
+} from "../utils/DataProcessor";
 import { useGlobalContext } from "../utils/GlobalContext";
 
 const TimeTracker = () => {
   const { aggregationType } = useGlobalContext();
-  const [dashboardData, setDashboardData] = useState({
-    chartData: [],
-    websiteDetails: [],
-    wastedTime: 0,
-    workingTime: 0,
-    totalTime: 0,
-    aggBrowsing: 0,
-    aggregationInterval: "",
-  });
+  const [chartData, setChartData] = useState([]);
+  const [websiteDetails, setWebsiteDetails] = useState([]);
+  const [wastedTime, setWastedTime] = useState(0);
+  const [workingTime, setWorkingTime] = useState(0);
+  const [totalTime, setTotalTime] = useState(0);
+  const [aggBrowsing, setAggBrowsing] = useState(0);
+  const [totalURLs, setTotalURLs] = useState(0);
+  const [aggURLs, setAggURLs] = useState(0);
+  const [aggregationInterval, setAggregationInterval] = useState("");
 
   const [activeCategory, setActiveCategory] = useState(null);
   const [hoveredCategory, setHoveredCategory] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await processDashboardData(aggregationType);
-      setDashboardData(data);
+      const trackingData = await processDashboardData(aggregationType);
+
+      if (trackingData) {
+        setChartData(trackingData.chartData || []);
+        setWebsiteDetails(trackingData.websiteDetails || []);
+        setWastedTime(calculateWastedTime(trackingData.sessions, aggregationType));
+        setWorkingTime(calculateWorkingTime(trackingData.sessions, aggregationType));
+        setTotalTime(getTotalBrowsingTime(trackingData));
+        setAggBrowsing(calculateAggregatedBrowsingTime(trackingData.browsing, aggregationType));
+        setTotalURLs(getTotalURLsOpened(trackingData));
+        setAggURLs(calculateAggregatedURLCount(trackingData.browsing, aggregationType));
+        setAggregationInterval(getAggregationInterval(trackingData.sessions, aggregationType));
+      }
     };
     fetchData();
   }, [aggregationType]);
+
 
   const formatTime = (totalMinutes) => {
     const days = Math.floor(totalMinutes / (24 * 60));
@@ -51,6 +72,16 @@ const TimeTracker = () => {
     return formattedTime;
   };
 
+  const formatNumber = (number) => {
+    if (number >= 1000000) {
+      return (number / 1000000).toFixed(1) + "M";
+    } else if (number >= 1000) {
+      return (number / 1000).toFixed(1) + "K";
+    } else {
+      return number.toString();
+    }
+  };
+
   const handleBarClick = (data) => {
     if (data && data.name) {
       setActiveCategory((prevCategory) =>
@@ -60,10 +91,8 @@ const TimeTracker = () => {
   };
 
   const filteredWebsites = activeCategory
-    ? dashboardData.websiteDetails.filter(
-        (site) => site.category === activeCategory
-      )
-    : dashboardData.websiteDetails;
+    ? websiteDetails.filter((site) => site.category === activeCategory)
+    : websiteDetails;
 
   const getBarColor = (category) => {
     if (category === activeCategory || category === hoveredCategory) {
@@ -84,7 +113,7 @@ const TimeTracker = () => {
       <Box className="current_dashboard">
         <VStack alignItems="left" className="current_dashboard_content">
           <h1>
-            Dashboard {dashboardData.aggregationInterval && `(${dashboardData.aggregationInterval})`}
+            Dashboard {aggregationInterval && `(${aggregationInterval})`}
           </h1>
 
           <Box className="number_cell_grid">
@@ -95,7 +124,7 @@ const TimeTracker = () => {
                   <Spacer />
                   <InfoTooltip message="Wasted Time is the total time spent on websites like social media, shopping, entertainment, games, lifestyle, and travel." />
                 </HStack>
-                <Text className="red-text">{formatTime(dashboardData.wastedTime)}</Text>
+                <Text className="red-text">{formatTime(wastedTime)}</Text>
               </VStack>
             </Box>
 
@@ -106,14 +135,14 @@ const TimeTracker = () => {
                   <Spacer />
                   <InfoTooltip message="Working Time is the total time spent on websites related to technology, tools, business, finance, health, careers, education, and news." />
                 </HStack>
-                <Text className="green-text">{formatTime(dashboardData.workingTime)}</Text>
+                <Text className="green-text">{formatTime(workingTime)}</Text>
               </VStack>
             </Box>
 
             <Box className="bar_chart">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
-                  data={dashboardData.chartData}
+                  data={chartData}
                   margin={{ top: 5, right: 5, left: 10, bottom: 5 }}
                   barSize={40}
                 >
@@ -149,7 +178,7 @@ const TimeTracker = () => {
                     style={{ transition: "fill 0.2s ease-in-out" }}
                     radius={[30, 30, 0, 0]}
                   >
-                    {dashboardData.chartData.map((entry, index) => (
+                    {chartData.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
                         fill={getBarColor(entry.name)}
@@ -187,7 +216,7 @@ const TimeTracker = () => {
                       {site.time > 0
                         ? (
                             (site.time /
-                              dashboardData.websiteDetails.reduce(
+                              websiteDetails.reduce(
                                 (acc, site) => acc + site.time,
                                 0
                               )) *
@@ -200,7 +229,7 @@ const TimeTracker = () => {
                       style={{
                         width: `${
                           (site.time /
-                            dashboardData.websiteDetails.reduce(
+                            websiteDetails.reduce(
                               (acc, site) => acc + site.time,
                               0
                             )) *
@@ -222,18 +251,39 @@ const TimeTracker = () => {
         <VStack alignItems="left">
           <Box className="roundedBoxStyle">
             <h3>Total Browsing Time:</h3>
-            <h3>{formatTime(dashboardData.totalTime)}</h3>
+            <h3>{formatTime(totalTime)}</h3>
           </Box>
           <Box className="roundedBoxStyle">
             <h3>Total Browsing in This {capitalizeFirstWord(aggregationType)}:</h3>
-            <h3>{formatTime(dashboardData.aggBrowsing)}</h3>
+            <h3>{formatTime(aggBrowsing)}</h3>
+          </Box>
+          <Box className="roundedBoxStyle">
+            <h3>Total URLs Opened:</h3>
+            <h3>{formatNumber(totalURLs)}</h3>
+          </Box>
+          <Box className="roundedBoxStyle">
+            <h3>Total URLs in This {capitalizeFirstWord(aggregationType)}:</h3>
+            <h3>{formatNumber(aggURLs)}</h3>
           </Box>
         </VStack>
       </Box>
+
       <Box className="sync_info">
-        <h1 style = {{color:"floralwhite" , fontWeight:200}}>Account Sync Information</h1>
-        <h2 style = {{color:"floralwhite" , fontWeight:200, padding:"15px 0px"}}>Feature Not Implemented Yet</h2>
-          <button disabled={true} className="sync-button" style = {{cursor: "not-allowed",position:'absolute',bottom:'30px',right:'25px'}}>Sync</button>
+        <h1 style={{ color: "floralwhite", fontWeight: 200 }}>
+          Account Sync Information
+        </h1>
+        <h2
+          style={{ color: "floralwhite", fontWeight: 200, padding: "15px 0px" }}
+        >
+          Feature Not Implemented Yet
+        </h2>
+        <button
+          disabled={true}
+          className="sync-button"
+          style={{ cursor: "not-allowed", position: "absolute", bottom: "30px", right: "25px" }}
+        >
+          Sync
+        </button>
       </Box>
     </Box>
   );

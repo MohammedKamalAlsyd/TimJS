@@ -3,6 +3,8 @@ let trackingData = {
   sessions: {}, // Per-day website session tracking
   browsing: {}, // Total browsing time per day
   total_browsing_time: 0, // Overall browsing time across all days
+  urlsOpened: {}, // Total URLs opened per day
+  total_urls_opened: 0 // Total URLs opened across all days
 };
 
 let activeTab = null;
@@ -152,14 +154,14 @@ function trackWebsiteUsage(tab) {
 
   // Calculate time spent on the previous tab
   if (activeTab && activeTab.url !== tab.url) {
-    const sessionEnd = new Date();
-    const timeSpent = Math.max((sessionEnd - sessionStart) / 1000 / 60, 0); // Time in minutes
-    saveWebsiteTime(activeTab.url, timeSpent);
+      const sessionEnd = new Date();
+      const timeSpent = Math.max((sessionEnd - sessionStart) / 1000 / 60, 0); // Time in minutes
+      saveWebsiteTime(activeTab.url, timeSpent);
 
-    // Handle YouTube-specific scrapping
-    if (isYouTubePage(activeTab.url)) {
-      handleYouTubeTab(activeTab.id, timeSpent);
-    }
+      // Handle YouTube-specific scrapping
+      if (isYouTubePage(activeTab.url)) {
+          handleYouTubeTab(activeTab.id, timeSpent);
+      }
   }
 
   // Update session start time for the new tab
@@ -168,26 +170,33 @@ function trackWebsiteUsage(tab) {
 
   // Initialize today's sessions data if not present
   if (!trackingData.sessions[todayDate]) {
-    trackingData.sessions[todayDate] = {};
+      trackingData.sessions[todayDate] = {};
   }
 
   // Initialize current domain data for today if not present
   if (!trackingData.sessions[todayDate][currentDomain]) {
-    trackingData.sessions[todayDate][currentDomain] = {
-      icon: getFaviconUrl(tab.url),
-      time: 0,
-      nextWebsites: {},
-    };
+      trackingData.sessions[todayDate][currentDomain] = {
+          icon: getFaviconUrl(tab.url),
+          time: 0,
+          nextWebsites: {},
+      };
   }
 
   // Track transitions between websites
   if (prevWebsite && prevWebsite !== currentDomain) {
-    const nextWebsites =
-      trackingData.sessions[todayDate][prevWebsite].nextWebsites;
-    nextWebsites[currentDomain] = (nextWebsites[currentDomain] || 0) + 1;
+      const nextWebsites =
+          trackingData.sessions[todayDate][prevWebsite].nextWebsites;
+      nextWebsites[currentDomain] = (nextWebsites[currentDomain] || 0) + 1;
   }
 
   prevWebsite = currentDomain;
+
+  // Track URLs opened
+  if (!trackingData.urlsOpened[todayDate]) {
+      trackingData.urlsOpened[todayDate] = 0;
+  }
+  trackingData.urlsOpened[todayDate] += 1;
+  trackingData.total_urls_opened += 1;
 
   // Save data after every site update
   saveData();
