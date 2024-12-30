@@ -20,6 +20,7 @@ const WORKING_CATEGORIES = [
   "News & Sport",
 ];
 
+///////////////////////////////////Helper Functions/////////////////////////////////////
 const fetchFromStorage = async (key) => {
   return new Promise((resolve, reject) => {
     chrome.storage.local.get(key, (result) => {
@@ -33,46 +34,90 @@ const fetchFromStorage = async (key) => {
 };
 
 
-// General aggregation function
-const aggregateData = (data, aggregationType) => {
-  const dates = Object.keys(data).sort();
-  let relevantDates = [];
+// Helper function to get today's date in "YYYY-MM-DD" format
+function getCurrentDate() {
+  const today = new Date();
+  const localDate = new Date(
+    today.getTime() - today.getTimezoneOffset() * 60000
+  );
+  return localDate.toISOString().split("T")[0];
+}
 
-  if (aggregationType === "day") {
-    const latestDate = dates.length > 0 ? dates[dates.length - 1] : null;
-    relevantDates = latestDate ? [latestDate] : [];
-  } else if (aggregationType === "week") {
-    relevantDates = dates.slice(-7);
-  } else if (aggregationType === "month") {
-    relevantDates = dates.slice(-30);
+
+// Helper function to get previous dates based on the aggregation type
+function getRelevantDates(date, type) {
+  // Convert the date string to a Date object
+  const inputDate = new Date(date);
+  
+  // Helper function to format date as 'YYYY-MM-DD'
+  const formatDate = (d) => {
+      const year = d.getFullYear();
+      const month = (d.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-indexed
+      const day = d.getDate().toString().padStart(2, '0');
+      return `${year}-${month}-${day}`;
+  };
+
+  if (type === "day") {
+      // For day, return the given date as an array
+      return [formatDate(inputDate)];
   }
+  
+  if (type === "week") {
+      // For week, return 7 dates including the current day
+      let weekDates = [];
+      for (let i = 0; i < 7; i++) {
+          let tempDate = new Date(inputDate);
+          tempDate.setDate(tempDate.getDate() - i); // Subtract i days from the input date
+          weekDates.push(formatDate(tempDate));
+      }
+      return weekDates.reverse(); // To keep the order from earliest to latest
+  }
+  
+  if (type === "month") {
+      // For month, return all the previous days of the previous month
+      let monthDates = [];
+      let currentMonth = inputDate.getMonth(); // Get current month (0-indexed)
+      let previousMonth = currentMonth === 0 ? 11 : currentMonth - 1; // Handle January wraparound
+      let year = currentMonth === 0 ? inputDate.getFullYear() - 1 : inputDate.getFullYear();
 
+      // Create a Date object for the first day of the previous month
+      let firstDayOfPreviousMonth = new Date(year, previousMonth, 1);
+      
+      // Get the last date of the previous month
+      let lastDayOfPreviousMonth = new Date(year, previousMonth + 1, 0);
+
+      // Loop through the previous month to collect all dates
+      let currentDate = firstDayOfPreviousMonth;
+      while (currentDate <= lastDayOfPreviousMonth) {
+          monthDates.push(formatDate(currentDate));
+          currentDate.setDate(currentDate.getDate() + 1); // Increment by one day
+      }
+      return monthDates;
+  }
+  return []; // Return an empty array for invalid type
+}
+
+
+// General aggregation function
+const aggregateData = (data, relevantDates) => {
   const aggregatedValue = relevantDates.reduce((total, date) => total + (data[date] || 0), 0);
   return { aggregatedValue, relevantDates };
 };
 
 
 // Calculate aggregated browsing time
-const calculateAggregatedBrowsingTime = (browsingData, aggregationType) => {
-  const { aggregatedValue } = aggregateData(browsingData, aggregationType);
+const calculateAggregatedBrowsingTime = (browsingData, relevantDates) => {
+  const { aggregatedValue } = aggregateData(browsingData, relevantDates);
   return Math.round(aggregatedValue);
 };
 
+
 // Calculate aggregated URL count
-const calculateAggregatedURLCount = (urlData, aggregationType) => {
-  const { aggregatedValue } = aggregateData(urlData, aggregationType);
+const calculateAggregatedURLCount = (urlData, relevantDates) => {
+  const { aggregatedValue } = aggregateData(urlData, relevantDates);
   return aggregatedValue;
 };
 
-// Get total browsing time
-const getTotalBrowsingTime = (trackingData) => {
-  return trackingData.total_browsing_time || 0;
-};
-
-// Get total URLs opened
-const getTotalURLsOpened = (trackingData) => {
-  return trackingData.total_urls_opened || 0;
-};
 
 // Calculate wasted time
 const calculateWastedTime = (trackingData, relevantDates) => {
@@ -108,32 +153,28 @@ const calculateWorkingTime = (trackingData, relevantDates) => {
   return totalWorkingTime;
 };
 
+
 // Get aggregation interval
-const getAggregationInterval = (dates, aggregationType) => {
-  if (aggregationType === "day") {
-    return dates.length > 0 ? dates[dates.length - 1] : "No Data";
+const getAggregationInterval = (relevantDates) => {
+  // If relevantDates is empty, return "No Data"
+  if (relevantDates.length === 0) {
+    return "No Data";
   }
-  if (aggregationType === "week" || aggregationType === "month") {
-    const relevantDates = aggregationType === "week" ? dates.slice(-7) : dates.slice(-30);
-    return relevantDates.length > 0
-      ? `${relevantDates[0]} to ${relevantDates[relevantDates.length - 1]}`
-      : "No Data";
-  }
-  return "No Data";
+
+  // Aggregation logic based on the length of the relevantDates array
+  if (relevantDates.length === 1) {return relevantDates[0];}
+  else {return `${relevantDates[0]} to ${relevantDates[relevantDates.length - 1]}`;}
 };
 
+
 // Process dashboard data
-const processDashboardData = async (aggregationType) => {
-  const trackingData = await fetchFromStorage("trackingData");
+const processDashboardData = async (trackingData, relevantDates) => {
   if (!trackingData) {
     return {
       chartData: [],
       websiteDetails: [],
     };
   }
-
-  const dates = Object.keys(trackingData.sessions).sort();
-  const relevantDates = aggregateData(trackingData.sessions, aggregationType).relevantDates;
 
   const categoryMap = {};
   const websiteDetailsMap = {};
@@ -169,6 +210,36 @@ const processDashboardData = async (aggregationType) => {
     websiteDetails: Object.values(websiteDetailsMap),
   };
 };
+
+
+///////////////////////////////////Pages Data Retreival Functions/////////////////////////////////////
+
+// Retrieve data for the Dashboard page
+const retrieveDashboardData = async (aggregationType) => {
+  const trackingData = await fetchFromStorage("trackingData");
+  const relevantDates = getRelevantDates(getCurrentDate(), aggregationType);
+
+  const totalBrowsingTime = trackingData.total_browsing_time || 0;
+  const totalURLsOpened = trackingData.total_urls_opened || 0;
+  const aggregatedBrowsingTime = calculateAggregatedBrowsingTime(trackingData.browsing, relevantDates);
+  const aggregatedURLCount = calculateAggregatedURLCount(trackingData.urlsOpened, relevantDates);
+  const wastedTime = calculateWastedTime(trackingData, relevantDates);
+  const workingTime = calculateWorkingTime(trackingData, relevantDates);
+  const aggregationInterval = getAggregationInterval(relevantDates);
+  const dashboardData = await processDashboardData(trackingData, relevantDates);
+
+  return {
+    totalBrowsingTime,
+    totalURLsOpened,
+    aggregatedBrowsingTime,
+    aggregatedURLCount,
+    wastedTime,
+    workingTime,
+    aggregationInterval,
+    ...dashboardData,
+  };
+};
+
 
 
 const retrieveYouTubeScrappingData = async (aggregationType, callback) => {
@@ -212,4 +283,4 @@ const filterDatesByAggregation = (dates, aggregationType) => {
 };
 
 
-export {calculateAggregatedBrowsingTime, calculateAggregatedURLCount, getTotalBrowsingTime, getTotalURLsOpened, calculateWastedTime, calculateWorkingTime, getAggregationInterval, processDashboardData, retrieveYouTubeScrappingData };
+export {getCurrentDate,retrieveDashboardData, retrieveYouTubeScrappingData };

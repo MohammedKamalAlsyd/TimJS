@@ -12,16 +12,7 @@ import {
   Cell,
 } from "recharts";
 import InfoTooltip from "../components/InfoTooltip";
-import {
-  calculateAggregatedBrowsingTime,
-  calculateAggregatedURLCount,
-  getTotalBrowsingTime,
-  getTotalURLsOpened,
-  calculateWastedTime,
-  calculateWorkingTime,
-  getAggregationInterval,
-  processDashboardData,
-} from "../utils/DataProcessor";
+import { retrieveDashboardData } from "../utils/DataProcessor";
 import { useGlobalContext } from "../utils/GlobalContext";
 
 const TimeTracker = () => {
@@ -41,18 +32,18 @@ const TimeTracker = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const trackingData = await processDashboardData(aggregationType);
-
-      if (trackingData) {
-        setChartData(trackingData.chartData || []);
-        setWebsiteDetails(trackingData.websiteDetails || []);
-        setWastedTime(calculateWastedTime(trackingData.sessions, aggregationType));
-        setWorkingTime(calculateWorkingTime(trackingData.sessions, aggregationType));
-        setTotalTime(getTotalBrowsingTime(trackingData));
-        setAggBrowsing(calculateAggregatedBrowsingTime(trackingData.browsing, aggregationType));
-        setTotalURLs(getTotalURLsOpened(trackingData));
-        setAggURLs(calculateAggregatedURLCount(trackingData.browsing, aggregationType));
-        setAggregationInterval(getAggregationInterval(trackingData.sessions, aggregationType));
+      const results = await retrieveDashboardData(aggregationType);
+      console.log(results);
+      if (results) {
+        setChartData(results.chartData || []);
+        setWebsiteDetails(results.websiteDetails || []);
+        setWastedTime(results.wastedTime);
+        setWorkingTime(results.workingTime);
+        setTotalTime(results.totalBrowsingTime);
+        setAggBrowsing(results.aggregatedBrowsingTime);
+        setTotalURLs(results.totalURLsOpened);
+        setAggURLs(results.aggregatedURLCount);
+        setAggregationInterval(results.aggregationInterval);
       }
     };
     fetchData();
