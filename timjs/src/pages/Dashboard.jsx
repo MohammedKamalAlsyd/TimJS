@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../styles/Dashboard.css";
 import { Box, HStack, VStack, Text, Spacer } from "@chakra-ui/react";
+import { BiWorld } from "react-icons/bi";
 import {
   ResponsiveContainer,
   BarChart,
@@ -33,7 +34,6 @@ const TimeTracker = () => {
   useEffect(() => {
     const fetchData = async () => {
       const results = await retrieveDashboardData(aggregationType);
-      console.log(results);
       if (results) {
         setChartData(results.chartData || []);
         setWebsiteDetails(results.websiteDetails || []);
@@ -79,6 +79,12 @@ const TimeTracker = () => {
         prevCategory === data.name ? null : data.name
       );
     }
+  };
+
+  const handleImageError = (e) => {
+    // When the image fails to load, hide the image and show the fallback icon
+    e.target.style.display = 'none';  // Hide the image
+    e.target.nextSibling.style.display = 'block';  // Show the fallback icon
   };
 
   const filteredWebsites = activeCategory
@@ -196,6 +202,12 @@ const TimeTracker = () => {
                       src={site.icon}
                       alt={site.name}
                       className="site_icon"
+                      onError={handleImageError} // Attach onError event
+                    />
+                    <BiWorld
+                    size={24}
+                    className= "site_icon"
+                    style={{ display: 'none' }} // Initially hidden
                     />
                     <VStack alignItems="left" flexGrow={1}>
                       <Text fontSize="md">{site.name}</Text>

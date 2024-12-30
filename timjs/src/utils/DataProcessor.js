@@ -74,26 +74,19 @@ function getRelevantDates(date, type) {
   }
   
   if (type === "month") {
-      // For month, return all the previous days of the previous month
-      let monthDates = [];
-      let currentMonth = inputDate.getMonth(); // Get current month (0-indexed)
-      let previousMonth = currentMonth === 0 ? 11 : currentMonth - 1; // Handle January wraparound
-      let year = currentMonth === 0 ? inputDate.getFullYear() - 1 : inputDate.getFullYear();
-
-      // Create a Date object for the first day of the previous month
-      let firstDayOfPreviousMonth = new Date(year, previousMonth, 1);
-      
-      // Get the last date of the previous month
-      let lastDayOfPreviousMonth = new Date(year, previousMonth + 1, 0);
-
-      // Loop through the previous month to collect all dates
-      let currentDate = firstDayOfPreviousMonth;
-      while (currentDate <= lastDayOfPreviousMonth) {
-          monthDates.push(formatDate(currentDate));
-          currentDate.setDate(currentDate.getDate() + 1); // Increment by one day
-      }
-      return monthDates;
+    // For month, return the last 30 days including today
+    let monthDates = [];
+    let currentDate = new Date(inputDate);
+    
+    // Loop through the last 30 days starting from the input date
+    for (let i = 0; i < 30; i++) {
+      monthDates.push(formatDate(currentDate));
+      currentDate.setDate(currentDate.getDate() - 1); // Subtract 1 day to get the previous date
+    }
+    
+    return monthDates.reverse(); // To keep the order from earliest to latest
   }
+  
   return []; // Return an empty array for invalid type
 }
 
@@ -219,8 +212,8 @@ const retrieveDashboardData = async (aggregationType) => {
   const trackingData = await fetchFromStorage("trackingData");
   const relevantDates = getRelevantDates(getCurrentDate(), aggregationType);
 
-  const totalBrowsingTime = trackingData.total_browsing_time || 0;
-  const totalURLsOpened = trackingData.total_urls_opened || 0;
+  const totalBrowsingTime = trackingData?.total_browsing_time || 0;;
+  const totalURLsOpened = trackingData?.total_urls_opened || 0;
   const aggregatedBrowsingTime = calculateAggregatedBrowsingTime(trackingData.browsing, relevantDates);
   const aggregatedURLCount = calculateAggregatedURLCount(trackingData.urlsOpened, relevantDates);
   const wastedTime = calculateWastedTime(trackingData, relevantDates);

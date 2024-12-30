@@ -257,20 +257,27 @@ chrome.runtime.onStartup.addListener(() => {
 });
 
 
-// Add a command to clear local storage (for testing only)
-chrome.commands.onCommand.addListener((command) => {
-  if (command === "clear_local_storage") {
-    deleteLocalStorage();
-  } else if (command === "load_test_data") {
-    loadTestData();
-  }
-});
-
 // Function to load test data (for testing only)
 function loadTestData() {
   const testData = {
     sessions: {
-      "2023-11-18": {
+      // Older than 30 days - should be excluded in processing
+      "2024-11-20": {
+        "old-example.com": {
+          icon: "https://old-example.com/favicon.ico",
+          time: 120,
+          nextWebsites: {
+            "another-old-example.com": 5,
+          },
+        },
+        "another-old-example.com": {
+          icon: "https://another-old-example.com/favicon.ico",
+          time: 50,
+          nextWebsites: {},
+        },
+      },
+      // Data within the last 30 days
+      "2024-11-30": {
         "example.com": {
           icon: "https://example.com/favicon.ico",
           time: 35,
@@ -287,7 +294,7 @@ function loadTestData() {
           },
         },
       },
-      "2023-11-20": {
+      "2024-12-05": {
         "testsite.com": {
           icon: "https://testsite.com/favicon.ico",
           time: 45,
@@ -296,14 +303,14 @@ function loadTestData() {
           },
         },
       },
-      "2023-11-22": {
+      "2024-12-10": {
         "sample.com": {
           icon: "https://sample.com/favicon.ico",
           time: 25,
           nextWebsites: {},
         },
       },
-      "2023-11-25": {
+      "2024-12-15": {
         "example.com": {
           icon: "https://example.com/favicon.ico",
           time: 60,
@@ -317,7 +324,7 @@ function loadTestData() {
           nextWebsites: {},
         },
       },
-      "2023-12-01": {
+      "2024-12-20": {
         "testsite.com": {
           icon: "https://testsite.com/favicon.ico",
           time: 15,
@@ -326,7 +333,7 @@ function loadTestData() {
           },
         },
       },
-      "2023-12-05": {
+      "2024-12-25": {
         "example.com": {
           icon: "https://example.com/favicon.ico",
           time: 90,
@@ -342,26 +349,40 @@ function loadTestData() {
       },
     },
     browsing: {
-      "2023-11-18": 55,
-      "2023-11-20": 45,
-      "2023-11-22": 25,
-      "2023-11-25": 90,
-      "2023-12-01": 15,
-      "2023-12-05": 140,
+      // Older than 30 days
+      "2024-11-20": 170,
+      // Data within the last 30 days
+      "2024-11-30": 55,
+      "2024-12-05": 45,
+      "2024-12-10": 25,
+      "2024-12-15": 90,
+      "2024-12-20": 15,
+      "2024-12-25": 140,
+    },
+    urlsOpened: {
+      // Older than 30 days
+      "2024-11-20": 20,
+      // Data within the last 30 days
+      "2024-11-30": 12,
+      "2024-12-05": 8,
+      "2024-12-10": 5,
+      "2024-12-15": 10,
+      "2024-12-20": 3,
+      "2024-12-25": 18,
     },
     total_browsing_time: 370,
+    total_urls_opened: 56,
   };
 
-  // First, clear existing data
-  chrome.storage.local.clear(() => {
-    console.log("Previous data cleared from storage.");
+  // delete old data
+  deleteLocalStorage();
 
-    // Load the test data
-    chrome.storage.local.set({ trackingData: testData }, () => {
-      console.log("Test data successfully loaded into storage:", testData);
-    });
+  // assign test data
+  chrome.storage.local.set({ trackingData: testData }, () => {
+    trackingData = testData;
   });
 }
+
 
 // Function to delete all local storage (for testing only)
 function deleteLocalStorage() {
@@ -371,3 +392,13 @@ function deleteLocalStorage() {
     );
   });
 }
+
+
+// Add a command to clear local storage (for testing only)
+chrome.commands.onCommand.addListener((command) => {
+  if (command === "clear_local_storage") {
+    deleteLocalStorage();
+  } else if (command === "load_test_data") {
+    loadTestData();
+  }
+});

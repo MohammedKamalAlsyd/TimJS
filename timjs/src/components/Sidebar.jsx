@@ -67,11 +67,11 @@ const Sidebar = () => {
             active={activeItem === '/pattern-finder'}
           />
 
-          <SidebarItem
+          {/* <SidebarItem
             icon={LuChartLine }
             title="Usage Time Forecast"
             active={activeItem === '/usage-time-forecast'}
-          />
+          /> */}
 
           {/* <SidebarItem
             icon={LuBrainCircuit}
