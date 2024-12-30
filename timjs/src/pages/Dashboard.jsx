@@ -31,23 +31,42 @@ const TimeTracker = () => {
   const [activeCategory, setActiveCategory] = useState(null);
   const [hoveredCategory, setHoveredCategory] = useState(null);
 
+
+  // Function to fetch data
+  const fetchData = async () => {
+    const results = await retrieveDashboardData(aggregationType);
+    if (results) {
+      setChartData(results.chartData || []);
+      setWebsiteDetails(results.websiteDetails || []);
+      setWastedTime(results.wastedTime);
+      setWorkingTime(results.workingTime);
+      setTotalTime(results.totalBrowsingTime);
+      setAggBrowsing(results.aggregatedBrowsingTime);
+      setTotalURLs(results.totalURLsOpened);
+      setAggURLs(results.aggregatedURLCount);
+      setAggregationInterval(results.aggregationInterval);
+    }
+  };
+  
+
   useEffect(() => {
-    const fetchData = async () => {
-      const results = await retrieveDashboardData(aggregationType);
-      if (results) {
-        setChartData(results.chartData || []);
-        setWebsiteDetails(results.websiteDetails || []);
-        setWastedTime(results.wastedTime);
-        setWorkingTime(results.workingTime);
-        setTotalTime(results.totalBrowsingTime);
-        setAggBrowsing(results.aggregatedBrowsingTime);
-        setTotalURLs(results.totalURLsOpened);
-        setAggURLs(results.aggregatedURLCount);
-        setAggregationInterval(results.aggregationInterval);
+    // Fetch data when the component is mounted or when aggregationType changes
+    fetchData();
+
+    // Listen for visibility change events (when the tab becomes active)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchData(); // Refetch data when the page is visible again
       }
     };
-    fetchData();
-  }, [aggregationType]);
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Cleanup the event listener on unmount
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [aggregationType]); // Re-run the effect when aggregationType changes
 
 
   const formatTime = (totalMinutes) => {
