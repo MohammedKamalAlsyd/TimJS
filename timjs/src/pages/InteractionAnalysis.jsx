@@ -5,7 +5,7 @@ import { useGlobalContext } from "../utils/GlobalContext";
 import YouTubeInteractionCard from "../components/InteractionCard";
 import { SocialIcon } from 'react-social-icons'
 import "../styles/InteractionAnalysis.css";
-import { VStack } from "@chakra-ui/react";
+import { VStack,Box } from "@chakra-ui/react";
 
 const InteractionAnalysis = () => {
   const { aggregationType } = useGlobalContext();
@@ -83,7 +83,11 @@ const InteractionAnalysis = () => {
   ];
 
   return (
-    <VStack className="interaction-analysis-container" gap={4}>
+    <Box className="interaction-analysis-container">
+      <h1>
+        Interaction Analysis {aggregationInterval && `(${aggregationInterval})`}
+      </h1>
+      <VStack padding={'12px'} gap={4}>
       <YouTubeInteractionCard
         title="Youtube"
         icon= <SocialIcon url="https://youtube.com" label={`Youtube icon`} as="div" style={{ width: "40px",height: "40px" }}/>
@@ -93,9 +97,8 @@ const InteractionAnalysis = () => {
             valueFormat=">-.2f"
             padding={0.4}
             cornerRadius={2}
-            margin={{ top: 40, right: 120, bottom: 40, left: 40 }}
-            radialAxisStart={{ tickSize: 5, tickPadding: 5, tickRotation: 0 }}
-            circularAxisOuter={{ tickSize: 5, tickPadding: 12, tickRotation: 0 }}
+            radialAxisStart={{ tickSize: 12, tickPadding: 12, tickRotation: 0 }}
+            circularAxisOuter={{ tickSize: 12, tickPadding: 12, tickRotation: 0 }}
             legends={[
               {
                 anchor: "right",
@@ -126,6 +129,9 @@ const InteractionAnalysis = () => {
         isActive={scrapingAllowed}
       />
     </VStack>
+    
+    </Box>
+
   );
 };
 

@@ -333,7 +333,7 @@ function loadTestData() {
   const testData = {
     sessions: {
       // Older than 30 days - should be excluded in processing
-      "2024-11-20": {
+      "2024-12-01": {  // Shifting November 20 to December 1
         "old-example.com": {
           icon: "https://old-example.com/favicon.ico",
           time: 120,
@@ -348,7 +348,7 @@ function loadTestData() {
         },
       },
       // Data within the last 30 days
-      "2024-11-30": {
+      "2024-12-10": {  // Shifting November 30 to December 10
         "example.com": {
           icon: "https://example.com/favicon.ico",
           time: 35,
@@ -365,7 +365,7 @@ function loadTestData() {
           },
         },
       },
-      "2024-12-05": {
+      "2024-12-15": {  // Shifting December 5 to December 15
         "testsite.com": {
           icon: "https://testsite.com/favicon.ico",
           time: 45,
@@ -374,14 +374,14 @@ function loadTestData() {
           },
         },
       },
-      "2024-12-10": {
+      "2024-12-20": {  // Shifting December 10 to December 20
         "sample.com": {
           icon: "https://sample.com/favicon.ico",
           time: 25,
           nextWebsites: {},
         },
       },
-      "2024-12-15": {
+      "2024-12-25": {  // Shifting December 15 to December 25
         "example.com": {
           icon: "https://example.com/favicon.ico",
           time: 60,
@@ -395,7 +395,7 @@ function loadTestData() {
           nextWebsites: {},
         },
       },
-      "2024-12-20": {
+      "2024-12-30": {  // Shifting December 20 to December 30
         "testsite.com": {
           icon: "https://testsite.com/favicon.ico",
           time: 15,
@@ -404,7 +404,7 @@ function loadTestData() {
           },
         },
       },
-      "2024-12-25": {
+      "2024-12-31": {  // Shifting December 25 to December 31
         "example.com": {
           icon: "https://example.com/favicon.ico",
           time: 90,
@@ -421,42 +421,72 @@ function loadTestData() {
     },
     browsing: {
       // Older than 30 days
-      "2024-11-20": 170,
+      "2024-12-01": 170,  // Shifting November 20 to December 1
       // Data within the last 30 days
-      "2024-11-30": 55,
-      "2024-12-05": 45,
-      "2024-12-10": 25,
-      "2024-12-15": 90,
-      "2024-12-20": 15,
-      "2024-12-25": 140,
+      "2024-12-10": 55,  // Shifting November 30 to December 10
+      "2024-12-15": 45,  // Shifting December 5 to December 15
+      "2024-12-20": 25,  // Shifting December 10 to December 20
+      "2024-12-25": 90,  // Shifting December 15 to December 25
+      "2024-12-30": 15,  // Shifting December 20 to December 30
+      "2024-12-31": 140,  // Shifting December 25 to December 31
     },
     urlsOpened: {
       // Older than 30 days
-      "2024-11-20": 20,
+      "2024-12-01": 20,  // Shifting November 20 to December 1
       // Data within the last 30 days
-      "2024-11-30": 12,
-      "2024-12-05": 8,
-      "2024-12-10": 5,
-      "2024-12-15": 10,
-      "2024-12-20": 3,
-      "2024-12-25": 18,
+      "2024-12-10": 12,  // Shifting November 30 to December 10
+      "2024-12-15": 8,  // Shifting December 5 to December 15
+      "2024-12-20": 5,  // Shifting December 10 to December 20
+      "2024-12-25": 10,  // Shifting December 15 to December 25
+      "2024-12-30": 3,  // Shifting December 20 to December 30
+      "2024-12-31": 18,  // Shifting December 25 to December 31
     },
     total_browsing_time: 370,
     total_urls_opened: 56,
   };
-
+  
   const testInteractionData = {
     youtube: {
-      "2024-11-30": {
+      "2024-12-10": {  // Shifting November 30 to December 10
         genres: {
           "Music": { video: 30, shorts: 10 },
           "Education": { video: 20, shorts: 5 },
+          "Comedy": { video: 12, shorts: 8 },
+          "Sports": { video: 8, shorts: 4 },
         },
       },
-      "2024-12-05": {
+      "2024-12-15": {  // Shifting December 5 to December 15
         genres: {
           "Music": { video: 15, shorts: 5 },
           "Gaming": { video: 10, shorts: 2 },
+          "Tech": { video: 20, shorts: 6 },
+          "Vlogs": { video: 25, shorts: 10 },
+        },
+      },
+      "2024-12-20": {  // Adding December 20
+        genres: {
+          "Music": { video: 25, shorts: 15 },
+          "Education": { video: 10, shorts: 5 },
+          "Gaming": { video: 5, shorts: 1 },
+          "DIY": { video: 18, shorts: 7 },
+        },
+      },
+      "2024-12-25": {  // Adding December 25
+        genres: {
+          "Music": { video: 40, shorts: 18 },
+          "Gaming": { video: 10, shorts: 3 },
+          "Food": { video: 12, shorts: 9 },
+          "Fitness": { video: 30, shorts: 5 },
+        },
+      },
+      "2024-12-31": {  // Today's date: December 31, 2024
+        genres: {
+          "Music": { video: 50, shorts: 20 },
+          "Gaming": { video: 25, shorts: 5 },
+          "Education": { video: 15, shorts: 10 },
+          "News": { video: 35, shorts: 15 },
+          "Lifestyle": { video: 12, shorts: 7 },
+          "Health": { video: 20, shorts: 8 },
         },
       },
     },
@@ -464,6 +494,7 @@ function loadTestData() {
 
   // delete old data
   deleteLocalStorage();
+  reinitialize();
 
   // assign test data
   chrome.storage.local.set({ trackingData: testData, interactionData: testInteractionData }, () => {
@@ -506,7 +537,6 @@ chrome.commands.onCommand.addListener((command) => {
     reinitialize();
     deleteLocalStorage();
   } else if (command === "load_test_data") {
-    reinitialize();
     loadTestData();
   }
 });

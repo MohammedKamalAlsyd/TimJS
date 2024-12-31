@@ -208,8 +208,9 @@ const processDashboardData = async (trackingData, relevantDates) => {
 // Process YouTube scrapping data
 const processRadialBarData = (scrappingData, relevantDates) => {
   const aggregatedData = [];
-
-  if (Object.keys(scrappingData).length === 0) {return [];}
+  relevantDates = relevantDates.filter(key => key in scrappingData);
+  
+  if (relevantDates.length === 0) {return [];}
 
   relevantDates.forEach((date) => {
     const dailyData = scrappingData[date];
@@ -262,9 +263,8 @@ const retrieveDashboardData = async (aggregationType) => {
 const retrieveInteractionData = async (aggregationType) => {
   const interactionData = await fetchFromStorage("interactionData");
   const relevantDates = getRelevantDates(getCurrentDate(), aggregationType);
-  console.log(interactionData)
 
-  const processedData = processRadialBarData(interactionData.youtube, relevantDates);
+  const processedData = Object.keys(interactionData.youtube).length !== 0? processRadialBarData(interactionData.youtube, relevantDates): [];
   const aggregationInterval = getAggregationInterval(relevantDates);
   return {
     processedData,
