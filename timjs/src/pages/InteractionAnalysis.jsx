@@ -18,14 +18,9 @@ const InteractionAnalysis = () => {
 
   // Fetch chart data when aggregationType or scrapingAllowed changes
   const fetchData = async () => {
-    if (scrapingAllowed) {
-      const { processedData, aggregationInterval } = await retrieveInteractionData(aggregationType);
-      setChartData(processedData || []);
-      setAggregationInterval(aggregationInterval || "");
-    } else {
-      setChartData([]); // Clear data if scraping is disabled
-      setAggregationInterval("");
-    }
+    const { processedData, aggregationInterval } = await retrieveInteractionData(aggregationType);
+    setChartData(processedData || []);
+    setAggregationInterval(aggregationInterval || "");
   };
 
 
@@ -94,25 +89,27 @@ const InteractionAnalysis = () => {
         graph={
           <ResponsiveRadialBar
             data={formattedData}
-            valueFormat=">-.2f"
+            valueFormat={(value) => `${value.toFixed(2)} min`}
             padding={0.4}
             cornerRadius={2}
+            margin={{ right: 500}}
             radialAxisStart={{ tickSize: 12, tickPadding: 12, tickRotation: 0 }}
             circularAxisOuter={{ tickSize: 12, tickPadding: 12, tickRotation: 0 }}
             legends={[
               {
-                anchor: "right",
+                anchor: "top-right",
                 direction: "column",
-                justify: false,
-                translateX: 80,
+                justify: true,
+                translateX: 50,
                 translateY: 0,
-                itemsSpacing: 6,
+                itemHeight: 18,
+                itemsSpacing: 12,
                 itemDirection: "left-to-right",
                 itemWidth: 100,
                 itemHeight: 18,
                 itemTextColor: "#999",
-                symbolSize: 18,
-                symbolShape: "square",
+                symbolSize: 12,
+                symbolShape: "circle",
                 effects: [
                   {
                     on: "hover",
