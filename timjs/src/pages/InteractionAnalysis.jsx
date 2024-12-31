@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ResponsiveRadialBar } from "@nivo/radial-bar";
-import { retrieveYouTubeScrappingData } from "../utils/DataProcessor";
+import { retrieveInteractionData  } from "../utils/DataProcessor";
 import { useGlobalContext } from "../utils/GlobalContext";
 import YouTubeInteractionCard from "../components/InteractionCard";
 import { SocialIcon } from 'react-social-icons'
@@ -9,8 +9,25 @@ import { VStack } from "@chakra-ui/react";
 
 const InteractionAnalysis = () => {
   const { aggregationType } = useGlobalContext();
-  const [data, setData] = useState([]);
+
+  // State variables
+  const [chartData, setChartData] = useState([]);
   const [scrapingAllowed, setScrapingAllowed] = useState(false);
+  const [aggregationInterval, setAggregationInterval] = useState("");
+
+
+  // Fetch chart data when aggregationType or scrapingAllowed changes
+  const fetchData = async () => {
+    if (scrapingAllowed) {
+      const { processedData, aggregationInterval } = await retrieveInteractionData(aggregationType);
+      setChartData(processedData || []);
+      setAggregationInterval(aggregationInterval || "");
+    } else {
+      setChartData([]); // Clear data if scraping is disabled
+      setAggregationInterval("");
+    }
+  };
+
 
   // Load YoutubeContentScrapping from storage on mount
   useEffect(() => {
@@ -19,16 +36,25 @@ const InteractionAnalysis = () => {
     });
   }, []);
 
-  // Fetch chart data when aggregationType or scrapingAllowed changes
+  // Fetch data on mount and when scrapingAllowed changes
   useEffect(() => {
-    if (scrapingAllowed) {
-      retrieveYouTubeScrappingData(aggregationType, (processedData) => {
-        setData(processedData);
-      });
-    } else {
-      setData([]); // Clear data if scraping is disabled
-    }
+    fetchData();
+
+    // Listen for visibility change events
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        fetchData(); // Refetch data when the page becomes visible again
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    // Cleanup the event listener on unmount
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, [aggregationType, scrapingAllowed]);
+
 
   // Toggle YoutubeContentScrapping value in storage
   const toggleScrapingAllowed = () => {
@@ -42,14 +68,14 @@ const InteractionAnalysis = () => {
   const formattedData = [
     {
       id: "Video",
-      data: data.map((entry) => ({
+      data: chartData.map((entry) => ({
         x: entry.name, // Genre name
         y: entry.Video, // Video value
       })),
     },
     {
       id: "Shorts",
-      data: data.map((entry) => ({
+      data: chartData.map((entry) => ({
         x: entry.name, // Genre name
         y: entry.Shorts, // Shorts value
       })),

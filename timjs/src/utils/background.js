@@ -7,6 +7,10 @@ let trackingData = {
   total_urls_opened: 0 // Total URLs opened across all days
 };
 
+let interactionData = {
+  youtube: {} // YouTube interaction data
+};
+
 let activeTab = null;
 let sessionStart = null;
 let prevWebsite = null;
@@ -53,18 +57,54 @@ function getFaviconUrl(url) {
   }/_favicon/?pageUrl=${encodeURIComponent(url)}&size=32`;
 }
 
+// Function to delete data older than 30 days
+function deleteOldData() {
+  const today = new Date();
+  const cutoffDate = new Date(today.setDate(today.getDate() - 30)).toISOString().split("T")[0];
+
+  for (const date in trackingData.sessions) {
+    if (date < cutoffDate) {
+      delete trackingData.sessions[date];
+    }
+  }
+
+  for (const date in trackingData.browsing) {
+    if (date < cutoffDate) {
+      delete trackingData.browsing[date];
+    }
+  }
+
+  for (const date in trackingData.urlsOpened) {
+    if (date < cutoffDate) {
+      delete trackingData.urlsOpened[date];
+    }
+  }
+
+  for (const date in interactionData.youtube) {
+    if (date < cutoffDate) {
+      delete interactionData.youtube[date];
+    }
+  }
+}
+
 // Restore previously saved data on extension startup
-chrome.storage.local.get("trackingData", (data) => {
+chrome.storage.local.get(["trackingData", "interactionData"], (data) => {
   if (data.trackingData) {
     trackingData = data.trackingData;
-    console.log("Restored tracking data:", trackingData);
   }
+  if (data.interactionData) {
+    interactionData = data.interactionData;
+  }
+  deleteOldData();
+  console.log("Restored tracking data:", trackingData);
+  console.log("Restored interaction data:", interactionData);
 });
 
 // Function to save collected data locally
 function saveData() {
-  chrome.storage.local.set({ trackingData }, () => {
+  chrome.storage.local.set({ trackingData, interactionData }, () => {
     console.log("Tracking Data Saved:", trackingData);
+    console.log("Interaction Data Saved:", interactionData);
   });
 }
 
@@ -83,11 +123,11 @@ function periodicUpdateAndSave() {
     sessionStart = new Date(); // Reset session start time
   }
   saveData();
-  setTimeout(periodicUpdateAndSave, 30000); // Schedule the next update and save in 30 sec
+  setTimeout(periodicUpdateAndSave, 15000); // Schedule the next update and save in 15 seconds
 }
 
 // Start the periodic update and save function
-setTimeout(periodicUpdateAndSave, 30000);
+setTimeout(periodicUpdateAndSave, 15000);
 
 // Function to check if a URL is a YouTube page
 function isYouTubePage(url) {
@@ -101,11 +141,11 @@ function isYouTubeShorts(url) {
 
 // Function to update the stored YouTube scrapping data
 function updateYouTubeScrappingData(scrapedData, timeSpent) {
-  chrome.storage.local.get(["youtube_scrapping"], (result) => {
+  chrome.storage.local.get(["interactionData"], (result) => {
     const now = new Date();
     const todayDate = now.toISOString().split("T")[0];
 
-    let youtubeScrapping = result.youtube_scrapping || {};
+    let youtubeScrapping = result.interactionData.youtube || {};
     let todayData = youtubeScrapping[todayDate] || { genres: {} };
 
     // Update genre data for the specific type (video/shorts)
@@ -115,9 +155,10 @@ function updateYouTubeScrappingData(scrapedData, timeSpent) {
 
     // Save the updated data back
     youtubeScrapping[todayDate] = todayData;
+    interactionData.youtube = youtubeScrapping;
 
-    chrome.storage.local.set({ youtube_scrapping: youtubeScrapping }, () => {
-      console.log("Updated YouTube scrapping data:", youtubeScrapping);
+    chrome.storage.local.set({ interactionData }, () => {
+      console.log("Updated YouTube scrapping data:", interactionData.youtube);
     });
   });
 }
@@ -274,14 +315,18 @@ chrome.runtime.onSuspend.addListener(() => {
 
 // Event listener: load the last saved data when the browser reopens
 chrome.runtime.onStartup.addListener(() => {
-  chrome.storage.local.get("trackingData", (data) => {
+  chrome.storage.local.get(["trackingData", "interactionData"], (data) => {
     if (data.trackingData) {
       trackingData = data.trackingData;
-      console.log("Data loaded on startup:", trackingData);
     }
+    if (data.interactionData) {
+      interactionData = data.interactionData;
+    }
+    deleteOldData();
+    console.log("Data loaded on startup:", trackingData);
+    console.log("Interaction data loaded on startup:", interactionData);
   });
 });
-
 
 // Function to load test data (for testing only)
 function loadTestData() {
@@ -400,15 +445,32 @@ function loadTestData() {
     total_urls_opened: 56,
   };
 
+  const testInteractionData = {
+    youtube: {
+      "2024-11-30": {
+        genres: {
+          "Music": { video: 30, shorts: 10 },
+          "Education": { video: 20, shorts: 5 },
+        },
+      },
+      "2024-12-05": {
+        genres: {
+          "Music": { video: 15, shorts: 5 },
+          "Gaming": { video: 10, shorts: 2 },
+        },
+      },
+    },
+  };
+
   // delete old data
   deleteLocalStorage();
 
   // assign test data
-  chrome.storage.local.set({ trackingData: testData }, () => {
+  chrome.storage.local.set({ trackingData: testData, interactionData: testInteractionData }, () => {
     trackingData = testData;
+    interactionData = testInteractionData;
   });
 }
-
 
 // Function to delete all local storage (for testing only)
 function deleteLocalStorage() {
@@ -419,12 +481,32 @@ function deleteLocalStorage() {
   });
 }
 
+// Function to Reinitialize Variables
+function reinitialize() {
+  trackingData = {
+    sessions: {},
+    browsing: {},
+    total_browsing_time: 0,
+    urlsOpened: {},
+    total_urls_opened: 0,
+  };
+
+  interactionData = {
+    youtube: {},
+  };
+
+  activeTab = null;
+  sessionStart = null;
+  prevWebsite = null;
+}
 
 // Add a command to clear local storage (for testing only)
 chrome.commands.onCommand.addListener((command) => {
   if (command === "clear_local_storage") {
+    reinitialize();
     deleteLocalStorage();
   } else if (command === "load_test_data") {
+    reinitialize();
     loadTestData();
   }
 });

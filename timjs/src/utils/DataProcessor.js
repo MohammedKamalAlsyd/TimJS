@@ -205,6 +205,30 @@ const processDashboardData = async (trackingData, relevantDates) => {
 };
 
 
+// Process YouTube scrapping data
+const processRadialBarData = (scrappingData, relevantDates) => {
+  const aggregatedData = [];
+
+  if (Object.keys(scrappingData).length === 0) {return [];}
+
+  relevantDates.forEach((date) => {
+    const dailyData = scrappingData[date];
+
+    Object.entries(dailyData.genres).forEach(([genre, genreData]) => {
+      let existingGenre = aggregatedData.find((item) => item.name === genre);
+
+      if (!existingGenre) {
+        existingGenre = { name: genre, Video: 0, Shorts: 0 };
+        aggregatedData.push(existingGenre);
+      }
+
+      existingGenre.Video += genreData.video || 0;
+      existingGenre.Shorts += genreData.shorts || 0;
+    });
+  });
+  return aggregatedData;
+};
+
 ///////////////////////////////////Pages Data Retreival Functions/////////////////////////////////////
 
 // Retrieve data for the Dashboard page
@@ -234,46 +258,20 @@ const retrieveDashboardData = async (aggregationType) => {
 };
 
 
+// Retrieve data for the Interaction Analysis page
+const retrieveInteractionData = async (aggregationType) => {
+  const interactionData = await fetchFromStorage("interactionData");
+  const relevantDates = getRelevantDates(getCurrentDate(), aggregationType);
+  console.log(interactionData)
 
-const retrieveYouTubeScrappingData = async (aggregationType, callback) => {
-  chrome.storage.local.get(["youtube_scrapping"], (result) => {
-    const scrappingData = result.youtube_scrapping || {};
-    const processedData = processRadialBarData(scrappingData, aggregationType);
-    callback(processedData);
-  });
-};
-
-const processRadialBarData = (scrappingData, aggregationType) => {
-  const dates = Object.keys(scrappingData).sort();
-  const relevantDates = filterDatesByAggregation(dates, aggregationType);
-
-  const aggregatedData = [];
-
-  relevantDates.forEach((date) => {
-    const dailyData = scrappingData[date];
-
-    Object.entries(dailyData.genres).forEach(([genre, genreData]) => {
-      let existingGenre = aggregatedData.find((item) => item.name === genre);
-
-      if (!existingGenre) {
-        existingGenre = { name: genre, Video: 0, Shorts: 0 };
-        aggregatedData.push(existingGenre);
-      }
-
-      existingGenre.Video += genreData.video || 0;
-      existingGenre.Shorts += genreData.shorts || 0;
-    });
-  });
-
-  return aggregatedData;
-};
-
-const filterDatesByAggregation = (dates, aggregationType) => {
-  if (aggregationType === "day") return dates.slice(-1);
-  if (aggregationType === "week") return dates.slice(-7);
-  if (aggregationType === "month") return dates.slice(-30);
-  return dates;
+  const processedData = processRadialBarData(interactionData.youtube, relevantDates);
+  const aggregationInterval = getAggregationInterval(relevantDates);
+  return {
+    processedData,
+    aggregationInterval
+  };
 };
 
 
-export {getCurrentDate,retrieveDashboardData, retrieveYouTubeScrappingData };
+
+export {retrieveDashboardData, retrieveInteractionData };
