@@ -68,9 +68,35 @@ function saveData() {
   });
 }
 
+// Function to periodically update and save data
+function periodicUpdateAndSave() {
+  if (activeTab) {
+    const sessionEnd = new Date();
+    const timeSpent = Math.max((sessionEnd - sessionStart) / 1000 / 60, 0); // Time in minutes
+    saveWebsiteTime(activeTab.url, timeSpent);
+
+    // Handle YouTube-specific scrapping
+    if (isYouTubePage(activeTab.url)) {
+      handleYouTubeTab(activeTab.id, timeSpent);
+    }
+
+    sessionStart = new Date(); // Reset session start time
+  }
+  saveData();
+  setTimeout(periodicUpdateAndSave, 30000); // Schedule the next update and save in 30 sec
+}
+
+// Start the periodic update and save function
+setTimeout(periodicUpdateAndSave, 30000);
+
 // Function to check if a URL is a YouTube page
 function isYouTubePage(url) {
   return url && url.includes("https://www.youtube.com/");
+}
+
+// Function to determine if the YouTube page is a short
+function isYouTubeShorts(url) {
+  return url && url.includes("https://www.youtube.com/shorts/");
 }
 
 // Function to update the stored YouTube scrapping data
@@ -110,16 +136,17 @@ function handleYouTubeTab(tabId, timeSpent) {
               // Parse the JSON data from the scriptText
               const videoData = JSON.parse(scriptText);
               const genre = videoData.genre || "Unknown"; // Default to "Unknown" if genre is not found
+              const type = window.location.href.includes("/shorts/") ? "shorts" : "video";
               return {
                 genre: genre,
-                type: "video", // This assumes you're not checking for "shorts" in this case
+                type: type,
                 timestamp: Date.now(),
               };
             } catch (error) {
               console.error("Error parsing video metadata:", error);
               return {
                 genre: "Unknown",
-                type: "video",
+                type: window.location.href.includes("/shorts/") ? "shorts" : "video",
                 timestamp: Date.now(),
               };
             }
@@ -138,7 +165,6 @@ function handleYouTubeTab(tabId, timeSpent) {
     }
   });
 }
-
 
 // Function to track website usage
 function trackWebsiteUsage(tab) {
