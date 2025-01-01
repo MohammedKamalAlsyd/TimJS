@@ -23,6 +23,18 @@ const InteractionAnalysis = () => {
     setAggregationInterval(aggregationInterval || "");
   };
 
+  // Helper to format time values for human readability
+  const formatTimeValue = (minutes) => {
+    if (minutes >= 1440) {
+      const days = minutes / 1440;
+      return `${days.toFixed(1)} days`;
+    } else if (minutes >= 60) {
+      const hours = minutes / 60;
+      return `${hours.toFixed(1)} hours`;
+    } else {
+      return `${minutes} mins`;
+    }
+  };
 
   // Load YoutubeContentScrapping from storage on mount
   useEffect(() => {
@@ -89,12 +101,12 @@ const InteractionAnalysis = () => {
         graph={
           <ResponsiveRadialBar
             data={formattedData}
-            valueFormat={(value) => `${value.toFixed(2)} min`}
+            valueFormat={(value) => formatTimeValue(value)}
             padding={0.4}
             cornerRadius={2}
             margin={{ right: 500}}
             radialAxisStart={{ tickSize: 12, tickPadding: 12, tickRotation: 0 }}
-            circularAxisOuter={{ tickSize: 12, tickPadding: 12, tickRotation: 0 }}
+            circularAxisOuter={{ tickSize: 12, tickPadding: 12, tickRotation: 0}}
             legends={[
               {
                 anchor: "top-right",
