@@ -1,4 +1,3 @@
-// Header.js
 import React, { useRef, useState, useEffect } from "react";
 import { HStack } from "@chakra-ui/react";
 import { FaAngleDown } from "react-icons/fa";
@@ -20,9 +19,25 @@ const Header = () => {
     { value: "month", label: "Month" },
   ];
 
+  const saveAggregationTypeToStorage = (value) => {
+    chrome.storage.local.set({ aggregationType: value }, () => {
+      console.log("Aggregation type saved:", value);
+    });
+  };
+
+  const getAggregationTypeFromStorage = () => {
+    chrome.storage.local.get(["aggregationType"], (result) => {
+      if (result.aggregationType) {
+        setSelectedOption(result.aggregationType);
+        changeAggregationType(result.aggregationType);
+      }
+    });
+  };
+
   const handleOptionClick = (value) => {
     setSelectedOption(value);
     changeAggregationType(value);
+    saveAggregationTypeToStorage(value);
     setShowDropdown(false);
   };
 
@@ -39,6 +54,8 @@ const Header = () => {
   };
 
   useEffect(() => {
+    // Load aggregation type from storage when component mounts
+    getAggregationTypeFromStorage();
     document.addEventListener("mousedown", handleOutsideClick);
     return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, []);
@@ -73,7 +90,7 @@ const Header = () => {
 
       {/* User Dropdown Menu */}
       <HStack className="user-section" spacing="1vw" ref={dropdownRef}>
-        <h3 style={{color:'gray', fontSize:"12px",fontWeight:500}}>Version: 1.0.0</h3>
+        <h3 style={{ color: "gray", fontSize: "12px", fontWeight: 500 }}>Version: 1.0.0</h3>
         <FaAngleDown
           className={`dropdown-icon ${showDropdown ? "dropdown-icon-active" : ""}`}
           onClick={() => setShowDropdown((prev) => !prev)}
