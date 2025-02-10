@@ -1,32 +1,43 @@
-import React, { useState, useEffect } from 'react';
-import { ResponsiveNetwork } from '@nivo/network';
-import { aggregateGraphData, filterGraphData } from '../utils/DataProcessor';
+import React, { useState, useEffect } from "react";
+import { ResponsiveNetwork } from "@nivo/network";
+import { aggregateGraphData, filterGraphData } from "../utils/DataProcessor";
 import { useGlobalContext } from "../utils/GlobalContext";
 import { BiWorld } from "react-icons/bi";
 
 const PatternFinder = () => {
   const { aggregationType } = useGlobalContext();
-  // Initialize state variables
+
+  // State variables
   const [graphData, setGraphData] = useState({ nodes: [], links: [] });
-  const [threshold, setThreshold] = useState(60);  // Default threshold set to 60%
+  const [threshold, setThreshold] = useState(60); // Default threshold set to 60%
   const [loading, setLoading] = useState(true);
   const [isSliding, setIsSliding] = useState(false);
 
-  // Fetch the data on page load
+  // Fetch and process data
   useEffect(() => {
     const retrieveData = async () => {
       setLoading(true);
       try {
-        // Aggregate node and edge data from the sessions
+        // Aggregate node and edge data from sessions
         const { nodeData, edgeData } = await aggregateGraphData(aggregationType, true);
 
-        // Filter the graph data based on the current threshold
+        // Filter graph data based on the current threshold
         const filteredData = filterGraphData(nodeData, edgeData, threshold);
 
-        // Set the rescaled graph data to the state
-        setGraphData({ nodes: filteredData.nodes, links: filteredData.links });
+        // Normalize edge weights
+        const maxEdgeValue = Math.max(...filteredData.links.map((link) => link.value));
+        const normalizedLinks = filteredData.links.map((link) => ({
+          ...link,
+          value: link.value / (maxEdgeValue || 1), // Avoid division by zero
+        }));
+
+        // Set the processed graph data to state
+        setGraphData({
+          nodes: filteredData.nodes,
+          links: normalizedLinks,
+        });
       } catch (error) {
-        console.error('Error fetching and processing data:', error);
+        console.error("Error fetching and processing data:", error);
       } finally {
         setLoading(false);
       }
@@ -35,19 +46,19 @@ const PatternFinder = () => {
     if (!isSliding) {
       retrieveData();
     }
-  }, [threshold, aggregationType, isSliding]); // Re-run whenever threshold, aggregationType, or isSliding changes
+  }, [threshold, aggregationType, isSliding]);
 
-  // Function to handle threshold slider change
+  // Handle threshold slider changes
   const handleThresholdChange = (event) => {
     setThreshold(event.target.value);
   };
 
-  // Function to handle slider mouse down
+  // Handle slider mouse down event
   const handleSliderMouseDown = () => {
     setIsSliding(true);
   };
 
-  // Function to handle slider mouse up
+  // Handle slider mouse up event
   const handleSliderMouseUp = () => {
     setIsSliding(false);
   };
@@ -80,34 +91,29 @@ const PatternFinder = () => {
       </div>
 
       {/* Graph rendering container */}
-      {console.log(graphData)}
-      <div style={{ height: '100vh', width: '100%' }}>
+      <div style={{ height: "100vh", width: "100%" }}>
         <ResponsiveNetwork
           data={{
             nodes: graphData.nodes,
             links: graphData.links,
           }}
-          margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
-          linkDistance={e => e.distance}
-          centeringStrength={0.3}
-          repulsivity={6}
-          nodeSize={n => n.size}
-          activeNodeSize={n => 1.5 * n.size}
-          nodeColor={e => e.color}
+          margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+          nodeSize={(node) => node.size * 5 + 10} // Scale node size for better visibility
+          activeNodeSize={(node) => node.size * 7 + 15} // Increase size when active
+          nodeColor={(node) => node.color || "rgb(97, 205, 187)"} // Default color for nodes
           nodeBorderWidth={1}
           nodeBorderColor={{
-            from: 'color',
-            modifiers: [
-              [
-                'darker',
-                0.8
-              ]
-            ]
+            from: "color",
+            modifiers: [["darker", 0.8]],
           }}
-          linkThickness={n => 2 + 2 * n.target.data.height}
+          linkDistance={(edge) => 200 - edge.value * 150} // Adjust link distance based on normalized value
+          repulsivity={200} // Spread nodes further apart
+          linkThickness={(edge) => 2 + edge.value * 6} // Adjust link thickness based on normalized value
           linkBlendMode="multiply"
           motionConfig="wobbly"
-
+          enableLabels={true} // Enable labels for nodes
+          labelTextColor={{ from: "color", modifiers: [["darker", 1.6]] }}
+          labelSkipRadius={12} // Minimum radius around nodes to skip labels
         />
       </div>
     </div>
