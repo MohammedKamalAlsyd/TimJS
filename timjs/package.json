@@ -22,6 +22,7 @@
   "dependencies": {
     "@chakra-ui/react": "^2.8.2",
     "@emotion/react": "^11.14.0",
+    "@nivo/network": "^0.88.0",
     "@nivo/radial-bar": "^0.88.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

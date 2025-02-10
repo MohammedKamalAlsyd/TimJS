@@ -5,8 +5,6 @@ import Popup from "./pages/Popup";
 import Dashboard from "./pages/Dashboard";
 import InteractionAnalysis from "./pages/InteractionAnalysis";
 import PatternFinder from "./pages/PatternFinder";
-import UsageForecast from "./pages/UsageForecast";
-import EmptyPage from './pages/empty'
 import "./styles/App.css";
 import customTheme from "./styles/chakra-theme";
 import Sidebar from "./components/Sidebar";
@@ -63,15 +61,7 @@ const App = () => {
             path="/pattern-finder"
             element={
               <Layout showSidebar={true} showHeader={true}>
-                <EmptyPage />
-              </Layout>
-            }
-          />
-          <Route
-            path="/usage-time-forecast"
-            element={
-              <Layout showSidebar={true} showHeader={true}>
-                <EmptyPage />
+                <PatternFinder />
               </Layout>
             }
           />

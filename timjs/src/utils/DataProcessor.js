@@ -230,6 +230,109 @@ const processRadialBarData = (scrappingData, relevantDates) => {
   return aggregatedData;
 };
 
+
+// Aggregate node and edge data for the graph
+const aggregateGraphData = async (aggregationType, scale = false) => {
+  const trackingData = await fetchFromStorage('trackingData');
+  
+  // Get the relevant dates based on aggregation type
+  const relevantDates = getRelevantDates(getCurrentDate(), aggregationType);
+
+  const nodes = {};
+  const links = [];
+
+  // Iterate over the relevant dates and aggregate data
+  relevantDates.forEach((date) => {
+    const sessionData = trackingData.sessions[date] || {};
+
+    Object.keys(sessionData).forEach((website) => {
+      const siteInfo = sessionData[website];
+      const timeSpent = siteInfo.time;
+
+      // Aggregate nodes data
+      if (!nodes[website]) {
+        nodes[website] = { id: website, label: website, size: timeSpent, icon: siteInfo.icon || 'default-icon-url' };
+      } else {
+        nodes[website].size += timeSpent;
+      }
+
+      // Aggregate links (edges) data (consider the transitions between websites)
+      Object.keys(siteInfo.nextWebsites).forEach((nextWebsite) => {
+        const linkValue = siteInfo.nextWebsites[nextWebsite];
+
+        // Add the link (edge) between the website and the next website
+        const existingLink = links.find(link => (link.source === website && link.target === nextWebsite) || (link.source === nextWebsite && link.target === website));
+        if (existingLink) {
+          existingLink.value += linkValue;
+        } else {
+          links.push({ source: website, target: nextWebsite, value: linkValue });
+        }
+      });
+    });
+  });
+
+  // Ensure all nodes referenced in links exist in the nodes array
+  const nodeIds = new Set(Object.keys(nodes));
+  const validLinks = links.filter(link => nodeIds.has(link.source) && nodeIds.has(link.target));
+
+  let nodeData = Object.values(nodes);
+  let edgeData = validLinks;
+
+  // Rescale node sizes and link widths if scale is true
+  if (scale) {
+    const maxNodeSize = Math.max(...nodeData.map(node => node.size));
+    const maxLinkValue = Math.max(...edgeData.map(link => link.value));
+
+    nodeData = nodeData.map(node => ({
+      ...node,
+      size: (node.size / maxNodeSize) * 50 + 10, // Rescale node size between 10 and 60
+      color: "rgb(97, 205, 187)" // Default color for nodes
+    }));
+
+    edgeData = edgeData.map(link => ({
+      ...link,
+      value: (link.value / maxLinkValue) * 10 + 1, // Rescale link width between 1 and 11
+      distance: (link.value / maxLinkValue) * 50 + 50 // Rescale link distance
+    }));
+  }
+
+  return { nodeData, edgeData };
+};
+
+
+// Filter nodes and edges based on threshold percentage
+const filterGraphData = (nodes, edges, thresholdPercentage) => {
+  // Sort nodes based on visit time
+  const sortedNodes = nodes.sort((a, b) => b.size - a.size);
+  const totalVisitTime = nodes.reduce((acc, node) => acc + node.size, 0);
+
+  // Determine the threshold value based on the threshold percentage
+  const thresholdValue = (totalVisitTime * thresholdPercentage) / 100;
+
+  // Filter nodes to only include those above the threshold
+  let filteredNodes = [];
+  let currentSum = 0;
+
+  // Filter nodes
+  sortedNodes.forEach((node) => {
+    if (currentSum <= thresholdValue) {
+      filteredNodes.push(node);
+      currentSum += node.size;
+    }
+  });
+
+  // Create a set of filtered node IDs for quick lookup
+  const filteredNodeIds = new Set(filteredNodes.map(node => node.id));
+
+  // Filter edges to only include those involving the selected nodes
+  const filteredEdges = edges.filter(
+    (edge) => filteredNodeIds.has(edge.source) && filteredNodeIds.has(edge.target)
+  );
+
+  return { nodes: filteredNodes, links: filteredEdges };
+};
+
+
 ///////////////////////////////////Pages Data Retreival Functions/////////////////////////////////////
 
 // Retrieve data for the Dashboard page
@@ -274,4 +377,4 @@ const retrieveInteractionData = async (aggregationType) => {
 
 
 
-export {retrieveDashboardData, retrieveInteractionData };
+export {retrieveDashboardData, retrieveInteractionData, aggregateGraphData, filterGraphData };

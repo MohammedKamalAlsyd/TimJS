@@ -96,15 +96,15 @@ chrome.storage.local.get(["trackingData", "interactionData"], (data) => {
     interactionData = data.interactionData;
   }
   deleteOldData();
-  console.log("Restored tracking data:", trackingData);
-  console.log("Restored interaction data:", interactionData);
+  // console.log("Restored tracking data:", trackingData);
+  // console.log("Restored interaction data:", interactionData);
 });
 
 // Function to save collected data locally
 function saveData() {
   chrome.storage.local.set({ trackingData, interactionData }, () => {
-    console.log("Tracking Data Saved:", trackingData);
-    console.log("Interaction Data Saved:", interactionData);
+    // console.log("Tracking Data Saved:", trackingData);
+    // console.log("Interaction Data Saved:", interactionData);
   });
 }
 
@@ -158,7 +158,7 @@ function updateYouTubeScrappingData(scrapedData, timeSpent) {
     interactionData.youtube = youtubeScrapping;
 
     chrome.storage.local.set({ interactionData }, () => {
-      console.log("Updated YouTube scrapping data:", interactionData.youtube);
+      // console.log("Updated YouTube scrapping data:", interactionData.youtube);
     });
   });
 }
@@ -196,7 +196,7 @@ function handleYouTubeTab(tabId, timeSpent) {
         (results) => {
           if (results && results.length > 0) {
             const scrapedData = results[0].result;
-            console.log("YouTube Scrapping Data:", scrapedData);
+            // console.log("YouTube Scrapping Data:", scrapedData);
             updateYouTubeScrappingData(scrapedData, timeSpent);
           } else {
             console.error("No results returned from script execution.");
@@ -291,7 +291,7 @@ function saveWebsiteTime(url, timeSpent) {
   // Update total browsing time
   trackingData.total_browsing_time += timeSpent;
 
-  console.log(`Saved time for domain ${domain}: ${timeSpent} minutes`);
+  // console.log(`Saved time for domain ${domain}: ${timeSpent} minutes`);
 }
 
 // Event listener: track tab updates (like switching or loading a new website)
@@ -323,8 +323,8 @@ chrome.runtime.onStartup.addListener(() => {
       interactionData = data.interactionData;
     }
     deleteOldData();
-    console.log("Data loaded on startup:", trackingData);
-    console.log("Interaction data loaded on startup:", interactionData);
+    // console.log("Data loaded on startup:", trackingData);
+    // console.log("Interaction data loaded on startup:", interactionData);
   });
 });
 
@@ -506,9 +506,9 @@ function loadTestData() {
 // Function to delete all local storage (for testing only)
 function deleteLocalStorage() {
   chrome.storage.local.clear(() => {
-    console.log(
-      "Local storage cleared. This section is for testing and should be removed later."
-    );
+    // console.log(
+    //   "Local storage cleared. This section is for testing and should be removed later."
+    // );
   });
 }
 
