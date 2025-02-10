@@ -332,116 +332,157 @@ chrome.runtime.onStartup.addListener(() => {
 function loadTestData() {
   const testData = {
     sessions: {
-      "2025-01-11": {  // Shifting December 1 to January 11
-        "old-example.com": {
-          icon: "https://old-example.com/favicon.ico",
+      "2025-01-11": {
+        "google.com": {
+          icon: "https://www.google.com/favicon.ico",
           time: 120,
           nextWebsites: {
-            "another-old-example.com": 5,
+            "youtube.com": 5,
           },
         },
-        "another-old-example.com": {
-          icon: "https://another-old-example.com/favicon.ico",
+        "youtube.com": {
+          icon: "https://www.youtube.com/favicon.ico",
           time: 50,
-          nextWebsites: {},
+          nextWebsites: {
+            "facebook.com": 3,
+            "twitter.com": 2,
+          },
         },
       },
-      "2025-01-20": {  // Shifting December 10 to January 20
-        "example.com": {
-          icon: "https://example.com/favicon.ico",
+      "2025-01-20": {
+        "facebook.com": {
+          icon: "https://www.facebook.com/favicon.ico",
           time: 35,
           nextWebsites: {
-            "another-example.com": 2,
-            "testsite.com": 1,
+            "youtube.com": 4,
+            "twitter.com": 3,
           },
         },
-        "another-example.com": {
-          icon: "https://another-example.com/favicon.ico",
-          time: 20,
+        "twitter.com": {
+          icon: "https://twitter.com/favicon.ico",
+          time: 50,
           nextWebsites: {
-            "example.com": 1,
+            "google.com": 2,
+            "youtube.com": 1,
           },
         },
       },
-      "2025-01-25": {  // Shifting December 15 to January 25
-        "testsite.com": {
-          icon: "https://testsite.com/favicon.ico",
-          time: 45,
-          nextWebsites: {
-            "example.com": 3,
-          },
-        },
-      },
-      "2025-01-30": {  // Shifting December 20 to January 30
-        "sample.com": {
-          icon: "https://sample.com/favicon.ico",
-          time: 25,
-          nextWebsites: {},
-        },
-      },
-      "2025-02-04": {  // Shifting December 25 to February 4
-        "example.com": {
-          icon: "https://example.com/favicon.ico",
+      "2025-01-25": {
+        "reddit.com": {
+          icon: "https://www.reddit.com/favicon.ico",
           time: 60,
           nextWebsites: {
-            "another-example.com": 4,
+            "youtube.com": 6,
+            "facebook.com": 2,
           },
         },
-        "another-example.com": {
-          icon: "https://another-example.com/favicon.ico",
-          time: 30,
-          nextWebsites: {},
-        },
-      },
-      "2025-02-09": {  // Shifting December 30 to February 9
-        "testsite.com": {
-          icon: "https://testsite.com/favicon.ico",
-          time: 15,
+        "youtube.com": {
+          icon: "https://www.youtube.com/favicon.ico",
+          time: 70,
           nextWebsites: {
-            "example.com": 1,
+            "facebook.com": 5,
           },
         },
       },
-      "2025-02-10": {  // Shifting December 31 to February 10 (today)
-        "example.com": {
-          icon: "https://example.com/favicon.ico",
+      "2025-01-30": {
+        "tiktok.com": {
+          icon: "https://www.tiktok.com/favicon.ico",
+          time: 30,
+          nextWebsites: {
+            "youtube.com": 3,
+            "instagram.com": 4,
+          },
+        },
+        "instagram.com": {
+          icon: "https://www.instagram.com/favicon.ico",
+          time: 80,
+          nextWebsites: {
+            "tiktok.com": 1,
+            "facebook.com": 2,
+          },
+        },
+      },
+      "2025-02-04": {
+        "pinterest.com": {
+          icon: "https://www.pinterest.com/favicon.ico",
+          time: 40,
+          nextWebsites: {
+            "youtube.com": 4,
+          },
+        },
+        "youtube.com": {
+          icon: "https://www.youtube.com/favicon.ico",
+          time: 100,
+          nextWebsites: {
+            "pinterest.com": 3,
+            "facebook.com": 7,
+          },
+        },
+      },
+      "2025-02-09": {
+        "linkedin.com": {
+          icon: "https://www.linkedin.com/favicon.ico",
+          time: 20,
+          nextWebsites: {
+            "twitter.com": 3,
+          },
+        },
+        "twitter.com": {
+          icon: "https://twitter.com/favicon.ico",
+          time: 35,
+          nextWebsites: {
+            "linkedin.com": 4,
+            "facebook.com": 2,
+          },
+        },
+      },
+      "2025-02-10": {
+        "google.com": {
+          icon: "https://www.google.com/favicon.ico",
           time: 90,
           nextWebsites: {
-            "sample.com": 2,
+            "youtube.com": 5,
+            "reddit.com": 2,
           },
         },
-        "sample.com": {
-          icon: "https://sample.com/favicon.ico",
-          time: 50,
-          nextWebsites: {},
+        "youtube.com": {
+          icon: "https://www.youtube.com/favicon.ico",
+          time: 60,
+          nextWebsites: {
+            "google.com": 4,
+            "facebook.com": 3,
+          },
         },
       },
     },
+  
     browsing: {
-      "2025-01-11": 170,  // Shifting December 1 to January 11
-      "2025-01-20": 55,   // Shifting December 10 to January 20
-      "2025-01-25": 45,   // Shifting December 15 to January 25
-      "2025-01-30": 25,   // Shifting December 20 to January 30
-      "2025-02-04": 90,   // Shifting December 25 to February 4
-      "2025-02-09": 15,   // Shifting December 30 to February 9
-      "2025-02-10": 140,  // Shifting December 31 to February 10 (today)
+      "2025-01-11": 170,
+      "2025-01-20": 120,
+      "2025-01-25": 160,
+      "2025-01-30": 180,
+      "2025-02-04": 190,
+      "2025-02-09": 100,
+      "2025-02-10": 200,
     },
+  
     urlsOpened: {
-      "2025-01-11": 20,   // Shifting December 1 to January 11
-      "2025-01-20": 12,   // Shifting December 10 to January 20
-      "2025-01-25": 8,    // Shifting December 15 to January 25
-      "2025-01-30": 5,    // Shifting December 20 to January 30
-      "2025-02-04": 10,   // Shifting December 25 to February 4
-      "2025-02-09": 3,    // Shifting December 30 to February 9
-      "2025-02-10": 18,   // Shifting December 31 to February 10 (today)
+      "2025-01-11": 30,
+      "2025-01-20": 25,
+      "2025-01-25": 35,
+      "2025-01-30": 40,
+      "2025-02-04": 45,
+      "2025-02-09": 25,
+      "2025-02-10": 50,
     },
-    total_browsing_time: 370,
-    total_urls_opened: 56,
+  
+    total_browsing_time: 1265,
+    total_urls_opened: 210,
   };
   
   const testInteractionData = {
     youtube: {
-      "2025-01-20": {  // Shifting December 10 to January 20
+      "2025-01-20": {
         genres: {
           "Music": { video: 30, shorts: 10 },
           "Education": { video: 20, shorts: 5 },
@@ -449,7 +490,7 @@ function loadTestData() {
           "Sports": { video: 8, shorts: 4 },
         },
       },
-      "2025-01-25": {  // Shifting December 15 to January 25
+      "2025-01-25": {
         genres: {
           "Music": { video: 15, shorts: 5 },
           "Gaming": { video: 10, shorts: 2 },
@@ -457,7 +498,7 @@ function loadTestData() {
           "Vlogs": { video: 25, shorts: 10 },
         },
       },
-      "2025-01-30": {  // Shifting December 20 to January 30
+      "2025-01-30": {
         genres: {
           "Music": { video: 25, shorts: 15 },
           "Education": { video: 10, shorts: 5 },
@@ -465,7 +506,7 @@ function loadTestData() {
           "DIY": { video: 18, shorts: 7 },
         },
       },
-      "2025-02-04": {  // Shifting December 25 to February 4
+      "2025-02-04": {
         genres: {
           "Music": { video: 40, shorts: 18 },
           "Gaming": { video: 10, shorts: 3 },
@@ -473,7 +514,7 @@ function loadTestData() {
           "Fitness": { video: 30, shorts: 5 },
         },
       },
-      "2025-02-10": {  // Shifting December 31 to February 10 (today)
+      "2025-02-10": {
         genres: {
           "Music": { video: 50, shorts: 20 },
           "Gaming": { video: 25, shorts: 5 },
@@ -484,8 +525,46 @@ function loadTestData() {
         },
       },
     },
-  };
   
+    facebook: {
+      "2025-01-20": {
+        genres: {
+          "Social": { video: 40, shorts: 10 },
+          "News": { video: 20, shorts: 5 },
+          "Entertainment": { video: 15, shorts: 8 },
+        },
+      },
+      "2025-01-25": {
+        genres: {
+          "Sports": { video: 25, shorts: 10 },
+          "Lifestyle": { video: 15, shorts: 8 },
+          "Tech": { video: 10, shorts: 5 },
+        },
+      },
+      "2025-01-30": {
+        genres: {
+          "Health": { video: 30, shorts: 10 },
+          "Fitness": { video: 20, shorts: 7 },
+          "DIY": { video: 12, shorts: 6 },
+        },
+      },
+      "2025-02-04": {
+        genres: {
+          "Family": { video: 50, shorts: 25 },
+          "Lifestyle": { video: 35, shorts: 12 },
+          "News": { video: 15, shorts: 5 },
+        },
+      },
+      "2025-02-10": {
+        genres: {
+          "Music": { video: 45, shorts: 15 },
+          "Comedy": { video: 30, shorts: 10 },
+          "Travel": { video: 25, shorts: 8 },
+          "Health": { video: 20, shorts: 5 },
+        },
+      },
+    },
+  };
   
   // delete old data
   deleteLocalStorage();
