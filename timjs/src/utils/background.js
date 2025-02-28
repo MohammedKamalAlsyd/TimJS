@@ -332,12 +332,16 @@ chrome.runtime.onStartup.addListener(() => {
 function loadTestData() {
   const testData = {
     sessions: {
-      "2025-01-11": {
+      // "2025-01-11" (original) becomes "2025-01-29"
+      "2025-01-29": {
         "google.com": {
           icon: "https://www.google.com/favicon.ico",
           time: 120,
+          // Enriched nextWebsites with additional realistic websites
           nextWebsites: {
             "youtube.com": 5,
+            "wikipedia.org": 4,
+            "stackoverflow.com": 3,
           },
         },
         "youtube.com": {
@@ -346,16 +350,21 @@ function loadTestData() {
           nextWebsites: {
             "facebook.com": 3,
             "twitter.com": 2,
+            "reddit.com": 2,
+            "amazon.com": 1,
           },
         },
       },
-      "2025-01-20": {
+      // "2025-01-20" becomes "2025-02-07"
+      "2025-02-07": {
         "facebook.com": {
           icon: "https://www.facebook.com/favicon.ico",
           time: 35,
           nextWebsites: {
             "youtube.com": 4,
             "twitter.com": 3,
+            "instagram.com": 2,
+            "linkedin.com": 1,
           },
         },
         "twitter.com": {
@@ -364,16 +373,21 @@ function loadTestData() {
           nextWebsites: {
             "google.com": 2,
             "youtube.com": 1,
+            "reddit.com": 3,
+            "wikipedia.org": 2,
           },
         },
       },
-      "2025-01-25": {
+      // "2025-01-25" becomes "2025-02-12"
+      "2025-02-12": {
         "reddit.com": {
           icon: "https://www.reddit.com/favicon.ico",
           time: 60,
           nextWebsites: {
             "youtube.com": 6,
             "facebook.com": 2,
+            "twitter.com": 3,
+            "amazon.com": 2,
           },
         },
         "youtube.com": {
@@ -381,16 +395,21 @@ function loadTestData() {
           time: 70,
           nextWebsites: {
             "facebook.com": 5,
+            "google.com": 4,
+            "wikipedia.org": 3,
           },
         },
       },
-      "2025-01-30": {
+      // "2025-01-30" becomes "2025-02-17"
+      "2025-02-17": {
         "tiktok.com": {
           icon: "https://www.tiktok.com/favicon.ico",
           time: 30,
           nextWebsites: {
             "youtube.com": 3,
             "instagram.com": 4,
+            "facebook.com": 2,
+            "twitter.com": 1,
           },
         },
         "instagram.com": {
@@ -399,15 +418,21 @@ function loadTestData() {
           nextWebsites: {
             "tiktok.com": 1,
             "facebook.com": 2,
+            "reddit.com": 3,
+            "amazon.com": 2,
           },
         },
       },
-      "2025-02-04": {
+      // "2025-02-04" becomes "2025-02-22"
+      "2025-02-22": {
         "pinterest.com": {
           icon: "https://www.pinterest.com/favicon.ico",
           time: 40,
           nextWebsites: {
             "youtube.com": 4,
+            "facebook.com": 3,
+            "twitter.com": 2,
+            "instagram.com": 1,
           },
         },
         "youtube.com": {
@@ -416,15 +441,20 @@ function loadTestData() {
           nextWebsites: {
             "pinterest.com": 3,
             "facebook.com": 7,
+            "google.com": 5,
+            "reddit.com": 2,
           },
         },
       },
-      "2025-02-09": {
+      // "2025-02-09" becomes "2025-02-27"
+      "2025-02-27": {
         "linkedin.com": {
           icon: "https://www.linkedin.com/favicon.ico",
           time: 20,
           nextWebsites: {
             "twitter.com": 3,
+            "google.com": 2,
+            "youtube.com": 1,
           },
         },
         "twitter.com": {
@@ -433,16 +463,21 @@ function loadTestData() {
           nextWebsites: {
             "linkedin.com": 4,
             "facebook.com": 2,
+            "reddit.com": 3,
+            "instagram.com": 2,
           },
         },
       },
-      "2025-02-10": {
+      // "2025-02-10" becomes "2025-02-28" (today)
+      "2025-02-28": {
         "google.com": {
           icon: "https://www.google.com/favicon.ico",
           time: 90,
           nextWebsites: {
             "youtube.com": 5,
             "reddit.com": 2,
+            "wikipedia.org": 3,
+            "stackoverflow.com": 2,
           },
         },
         "youtube.com": {
@@ -451,29 +486,33 @@ function loadTestData() {
           nextWebsites: {
             "google.com": 4,
             "facebook.com": 3,
+            "linkedin.com": 2,
+            "amazon.com": 1,
           },
         },
       },
     },
   
+    // Updated browsing keys with shifted dates
     browsing: {
-      "2025-01-11": 170,
-      "2025-01-20": 120,
-      "2025-01-25": 160,
-      "2025-01-30": 180,
-      "2025-02-04": 190,
-      "2025-02-09": 100,
-      "2025-02-10": 200,
+      "2025-01-29": 170,
+      "2025-02-07": 120,
+      "2025-02-12": 160,
+      "2025-02-17": 180,
+      "2025-02-22": 190,
+      "2025-02-27": 100,
+      "2025-02-28": 200,
     },
   
+    // Updated urlsOpened keys with shifted dates
     urlsOpened: {
-      "2025-01-11": 30,
-      "2025-01-20": 25,
-      "2025-01-25": 35,
-      "2025-01-30": 40,
-      "2025-02-04": 45,
-      "2025-02-09": 25,
-      "2025-02-10": 50,
+      "2025-01-29": 30,
+      "2025-02-07": 25,
+      "2025-02-12": 35,
+      "2025-02-17": 40,
+      "2025-02-22": 45,
+      "2025-02-27": 25,
+      "2025-02-28": 50,
     },
   
     total_browsing_time: 1265,
@@ -482,15 +521,18 @@ function loadTestData() {
   
   const testInteractionData = {
     youtube: {
-      "2025-01-20": {
+      // "2025-01-20" becomes "2025-02-07"
+      "2025-02-07": {
         genres: {
           "Music": { video: 30, shorts: 10 },
           "Education": { video: 20, shorts: 5 },
           "Comedy": { video: 12, shorts: 8 },
           "Sports": { video: 8, shorts: 4 },
+          // Optionally, you can add more genres here if needed.
         },
       },
-      "2025-01-25": {
+      // "2025-01-25" becomes "2025-02-12"
+      "2025-02-12": {
         genres: {
           "Music": { video: 15, shorts: 5 },
           "Gaming": { video: 10, shorts: 2 },
@@ -498,7 +540,8 @@ function loadTestData() {
           "Vlogs": { video: 25, shorts: 10 },
         },
       },
-      "2025-01-30": {
+      // "2025-01-30" becomes "2025-02-17"
+      "2025-02-17": {
         genres: {
           "Music": { video: 25, shorts: 15 },
           "Education": { video: 10, shorts: 5 },
@@ -506,7 +549,8 @@ function loadTestData() {
           "DIY": { video: 18, shorts: 7 },
         },
       },
-      "2025-02-04": {
+      // "2025-02-04" becomes "2025-02-22"
+      "2025-02-22": {
         genres: {
           "Music": { video: 40, shorts: 18 },
           "Gaming": { video: 10, shorts: 3 },
@@ -514,7 +558,8 @@ function loadTestData() {
           "Fitness": { video: 30, shorts: 5 },
         },
       },
-      "2025-02-10": {
+      // "2025-02-10" becomes "2025-02-28"
+      "2025-02-28": {
         genres: {
           "Music": { video: 50, shorts: 20 },
           "Gaming": { video: 25, shorts: 5 },
@@ -527,35 +572,40 @@ function loadTestData() {
     },
   
     facebook: {
-      "2025-01-20": {
+      // "2025-01-20" becomes "2025-02-07"
+      "2025-02-07": {
         genres: {
           "Social": { video: 40, shorts: 10 },
           "News": { video: 20, shorts: 5 },
           "Entertainment": { video: 15, shorts: 8 },
         },
       },
-      "2025-01-25": {
+      // "2025-01-25" becomes "2025-02-12"
+      "2025-02-12": {
         genres: {
           "Sports": { video: 25, shorts: 10 },
           "Lifestyle": { video: 15, shorts: 8 },
           "Tech": { video: 10, shorts: 5 },
         },
       },
-      "2025-01-30": {
+      // "2025-01-30" becomes "2025-02-17"
+      "2025-02-17": {
         genres: {
           "Health": { video: 30, shorts: 10 },
           "Fitness": { video: 20, shorts: 7 },
           "DIY": { video: 12, shorts: 6 },
         },
       },
-      "2025-02-04": {
+      // "2025-02-04" becomes "2025-02-22"
+      "2025-02-22": {
         genres: {
           "Family": { video: 50, shorts: 25 },
           "Lifestyle": { video: 35, shorts: 12 },
           "News": { video: 15, shorts: 5 },
         },
       },
-      "2025-02-10": {
+      // "2025-02-10" becomes "2025-02-28"
+      "2025-02-28": {
         genres: {
           "Music": { video: 45, shorts: 15 },
           "Comedy": { video: 30, shorts: 10 },
@@ -565,6 +615,7 @@ function loadTestData() {
       },
     },
   };
+  
   
   // delete old data
   deleteLocalStorage();

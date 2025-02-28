@@ -20,7 +20,8 @@ const WORKING_CATEGORIES = [
   "News & Sport",
 ];
 
-///////////////////////////////////Helper Functions/////////////////////////////////////
+/////////////////////////////////// Helper Functions /////////////////////////////////////
+
 const fetchFromStorage = async (key) => {
   return new Promise((resolve, reject) => {
     chrome.storage.local.get(key, (result) => {
@@ -33,63 +34,45 @@ const fetchFromStorage = async (key) => {
   });
 };
 
-
 // Helper function to get today's date in "YYYY-MM-DD" format
 function getCurrentDate() {
   const today = new Date();
-  const localDate = new Date(
-    today.getTime() - today.getTimezoneOffset() * 60000
-  );
+  const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
   return localDate.toISOString().split("T")[0];
 }
 
-
 // Helper function to get previous dates based on the aggregation type
 function getRelevantDates(date, type) {
-  // Convert the date string to a Date object
   const inputDate = new Date(date);
-  
-  // Helper function to format date as 'YYYY-MM-DD'
+
   const formatDate = (d) => {
-      const year = d.getFullYear();
-      const month = (d.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-indexed
-      const day = d.getDate().toString().padStart(2, '0');
-      return `${year}-${month}-${day}`;
+    const year = d.getFullYear();
+    const month = (d.getMonth() + 1).toString().padStart(2, "0");
+    const day = d.getDate().toString().padStart(2, "0");
+    return `${year}-${month}-${day}`;
   };
 
   if (type === "day") {
-      // For day, return the given date as an array
-      return [formatDate(inputDate)];
-  }
-  
-  if (type === "week") {
-      // For week, return 7 dates including the current day
-      let weekDates = [];
-      for (let i = 0; i < 7; i++) {
-          let tempDate = new Date(inputDate);
-          tempDate.setDate(tempDate.getDate() - i); // Subtract i days from the input date
-          weekDates.push(formatDate(tempDate));
-      }
-      return weekDates.reverse(); // To keep the order from earliest to latest
-  }
-  
-  if (type === "month") {
-    // For month, return the last 30 days including today
+    return [formatDate(inputDate)];
+  } else if (type === "week") {
+    let weekDates = [];
+    for (let i = 0; i < 7; i++) {
+      let tempDate = new Date(inputDate);
+      tempDate.setDate(tempDate.getDate() - i);
+      weekDates.push(formatDate(tempDate));
+    }
+    return weekDates.reverse();
+  } else if (type === "month") {
     let monthDates = [];
     let currentDate = new Date(inputDate);
-    
-    // Loop through the last 30 days starting from the input date
     for (let i = 0; i < 30; i++) {
       monthDates.push(formatDate(currentDate));
-      currentDate.setDate(currentDate.getDate() - 1); // Subtract 1 day to get the previous date
+      currentDate.setDate(currentDate.getDate() - 1);
     }
-    
-    return monthDates.reverse(); // To keep the order from earliest to latest
+    return monthDates.reverse();
   }
-  
-  return []; // Return an empty array for invalid type
+  return [];
 }
-
 
 // General aggregation function
 const aggregateData = (data, relevantDates) => {
@@ -97,20 +80,17 @@ const aggregateData = (data, relevantDates) => {
   return { aggregatedValue, relevantDates };
 };
 
-
 // Calculate aggregated browsing time
 const calculateAggregatedBrowsingTime = (browsingData, relevantDates) => {
   const { aggregatedValue } = aggregateData(browsingData, relevantDates);
   return Math.round(aggregatedValue);
 };
 
-
 // Calculate aggregated URL count
 const calculateAggregatedURLCount = (urlData, relevantDates) => {
   const { aggregatedValue } = aggregateData(urlData, relevantDates);
   return aggregatedValue;
 };
-
 
 // Calculate wasted time
 const calculateWastedTime = (trackingData, relevantDates) => {
@@ -120,7 +100,6 @@ const calculateWastedTime = (trackingData, relevantDates) => {
     Object.keys(dailyData).forEach((website) => {
       const siteInfo = dailyData[website];
       const category = WebClassification[website]?.Category || "Other";
-
       if (WASTED_CATEGORIES.includes(category)) {
         totalWastedTime += siteInfo.time;
       }
@@ -137,7 +116,6 @@ const calculateWorkingTime = (trackingData, relevantDates) => {
     Object.keys(dailyData).forEach((website) => {
       const siteInfo = dailyData[website];
       const category = WebClassification[website]?.Category || "Other";
-
       if (WORKING_CATEGORIES.includes(category)) {
         totalWorkingTime += siteInfo.time;
       }
@@ -146,19 +124,17 @@ const calculateWorkingTime = (trackingData, relevantDates) => {
   return totalWorkingTime;
 };
 
-
 // Get aggregation interval
 const getAggregationInterval = (relevantDates) => {
-  // If relevantDates is empty, return "No Data"
   if (relevantDates.length === 0) {
     return "No Data";
   }
-
-  // Aggregation logic based on the length of the relevantDates array
-  if (relevantDates.length === 1) {return relevantDates[0];}
-  else {return `${relevantDates[0]} to ${relevantDates[relevantDates.length - 1]}`;}
+  if (relevantDates.length === 1) {
+    return relevantDates[0];
+  } else {
+    return `${relevantDates[0]} to ${relevantDates[relevantDates.length - 1]}`;
+  }
 };
-
 
 // Process dashboard data
 const processDashboardData = async (trackingData, relevantDates) => {
@@ -204,13 +180,14 @@ const processDashboardData = async (trackingData, relevantDates) => {
   };
 };
 
-
-// Process YouTube scrapping data
+// Process YouTube scraping data
 const processRadialBarData = (scrappingData, relevantDates) => {
   const aggregatedData = [];
-  relevantDates = relevantDates.filter(key => key in scrappingData);
-  
-  if (relevantDates.length === 0) {return [];}
+  relevantDates = relevantDates.filter((key) => key in scrappingData);
+
+  if (relevantDates.length === 0) {
+    return [];
+  }
 
   relevantDates.forEach((date) => {
     const dailyData = scrappingData[date];
@@ -230,120 +207,200 @@ const processRadialBarData = (scrappingData, relevantDates) => {
   return aggregatedData;
 };
 
+// Chi-square and normal distribution functions for A/B testing
+function chiSquarePValue(chi2, df = 1) {
+  if (df === 1) {
+    const x = Math.sqrt(chi2);
+    return 2 * (1 - normCdf(x));
+  }
+  return 1;
+}
 
-// Aggregate node and edge data for the graph
-const aggregateGraphData = async (aggregationType, scale = false) => {
-  const trackingData = await fetchFromStorage('trackingData');
-  
-  // Get the relevant dates based on aggregation type
-  const relevantDates = getRelevantDates(getCurrentDate(), aggregationType);
+function normCdf(x) {
+  return 0.5 * (1 + erf(x / Math.sqrt(2)));
+}
 
-  const nodes = {};
-  const links = [];
+function erf(x) {
+  const sign = x >= 0 ? 1 : -1;
+  x = Math.abs(x);
+  const a1 = 0.254829592,
+    a2 = -0.284496736,
+    a3 = 1.421413741,
+    a4 = -1.453152027,
+    a5 = 1.061405429,
+    p = 0.3275911;
+  const t = 1.0 / (1.0 + p * x);
+  const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+  return sign * y;
+}
 
-  // Iterate over the relevant dates and aggregate data
-  relevantDates.forEach((date) => {
-    const sessionData = trackingData.sessions[date] || {};
+// Compute pairwise A/B comparisons using chi-square test
+const computePairComparisons = (links, nodes) => {
+  const totalOut = {};
+  nodes.forEach((node) => {
+    totalOut[node.id] = 0;
+  });
+  links.forEach((link) => {
+    if (link.source in totalOut) {
+      totalOut[link.source] += link.value;
+    }
+  });
+  const totalOutAll = Object.values(totalOut).reduce((a, b) => a + b, 0);
 
-    Object.keys(sessionData).forEach((website) => {
-      const siteInfo = sessionData[website];
-      const timeSpent = siteInfo.time;
+  const pairMap = {};
+  links.forEach((link) => {
+    const { source, target, value } = link;
+    const key = [source, target].sort().join("||");
+    if (!pairMap[key]) {
+      const sorted = [source, target].sort();
+      pairMap[key] = { nodeA: sorted[0], nodeB: sorted[1], a2b: 0, b2a: 0 };
+    }
+    if (link.source === pairMap[key].nodeA && link.target === pairMap[key].nodeB) {
+      pairMap[key].a2b += value;
+    } else if (link.source === pairMap[key].nodeB && link.target === pairMap[key].nodeA) {
+      pairMap[key].b2a += value;
+    }
+  });
 
-      // Aggregate nodes data
-      if (!nodes[website]) {
-        nodes[website] = { id: website, label: website, size: timeSpent, icon: siteInfo.icon || 'default-icon-url' };
-      } else {
-        nodes[website].size += timeSpent;
+  const comparisons = [];
+  for (const key in pairMap) {
+    const pair = pairMap[key];
+    const pairTotal = pair.a2b + pair.b2a;
+    if (pairTotal === 0) continue;
+    let direction;
+    if (pair.a2b >= pair.b2a) {
+      direction = { from: pair.nodeA, to: pair.nodeB };
+    } else {
+      direction = { from: pair.nodeB, to: pair.nodeA };
+    }
+    const user = direction.from;
+    const target = direction.to;
+    const edgeUserToTarget = links.find(
+      (link) => link.source === user && link.target === target
+    );
+    const O1 = edgeUserToTarget ? edgeUserToTarget.value : 0;
+    const totalUser = totalOut[user] || 0;
+    const O2 = totalUser - O1;
+    let O3 = 0;
+    links.forEach((link) => {
+      if (link.source !== user && link.target === target) {
+        O3 += link.value;
       }
+    });
+    const totalNonUser = totalOutAll - totalUser;
+    const O4 = totalNonUser - O3;
+    const grandTotal = O1 + O2 + O3 + O4;
+    const E1 = (totalUser * (O1 + O3)) / grandTotal;
+    const E3 = (totalNonUser * (O1 + O3)) / grandTotal;
+    const E2 = totalUser - E1;
+    const E4 = totalNonUser - E3;
+    const chi2 =
+      ((O1 - E1) ** 2 / E1) +
+      ((O2 - E2) ** 2 / E2) +
+      ((O3 - E3) ** 2 / E3) +
+      ((O4 - E4) ** 2 / E4);
+    const pValue = chiSquarePValue(chi2, 1);
+    let confidence = null;
+    if (pValue < 0.01) confidence = "99%";
+    else if (pValue < 0.05) confidence = "95%";
+    else if (pValue < 0.10) confidence = "90%";
+    else if (pValue < 0.15) confidence = "85%";
+    comparisons.push({
+      key,
+      nodeA: pair.nodeA,
+      nodeB: pair.nodeB,
+      direction,
+      O1,
+      O2,
+      O3,
+      O4,
+      totalUser,
+      totalNonUser,
+      E1,
+      E2,
+      E3,
+      E4,
+      chi2,
+      pValue,
+      confidence,
+    });
+  }
+  return comparisons.sort((a, b) => a.pValue - b.pValue);
+};
 
-      // Aggregate links (edges) data (consider the transitions between websites)
-      Object.keys(siteInfo.nextWebsites).forEach((nextWebsite) => {
-        const linkValue = siteInfo.nextWebsites[nextWebsite];
+// Process graph and A/B testing data for PatternFinder
+const processPatternData = (trackingData, relevantDates) => {
+  if (!trackingData || !trackingData.sessions) {
+    return {
+      graphData: { nodes: [], links: [] },
+      comparisonResults: [],
+    };
+  }
 
-        // Add the link (edge) between the website and the next website
-        const existingLink = links.find(link => (link.source === website && link.target === nextWebsite) || (link.source === nextWebsite && link.target === website));
-        if (existingLink) {
-          existingLink.value += linkValue;
-        } else {
-          links.push({ source: website, target: nextWebsite, value: linkValue });
-        }
+  // Aggregate node frequencies and edge transitions
+  const nodeFrequencies = {};
+  const edgeTransitions = {};
+  const latestDate = relevantDates.sort().reverse()[0];
+  const latestDailyData = trackingData.sessions[latestDate] || {};
+  relevantDates.forEach((date) => {
+    const dailyData = trackingData.sessions[date] || {};
+    Object.keys(dailyData).forEach((website) => {
+      nodeFrequencies[website] = (nodeFrequencies[website] || 0) + dailyData[website].time;
+
+      const nextWebsites = dailyData[website].nextWebsites || {};
+      Object.entries(nextWebsites).forEach(([target, count]) => {
+        const key = `${website}→${target}`;
+        edgeTransitions[key] = (edgeTransitions[key] || 0) + count;
       });
     });
   });
 
-  // Ensure all nodes referenced in links exist in the nodes array
-  const nodeIds = new Set(Object.keys(nodes));
-  const validLinks = links.filter(link => nodeIds.has(link.source) && nodeIds.has(link.target));
-
-  let nodeData = Object.values(nodes);
-  let edgeData = validLinks;
-
-  // Rescale node sizes and link widths if scale is true
-  if (scale) {
-    const maxNodeSize = Math.max(...nodeData.map(node => node.size));
-    const maxLinkValue = Math.max(...edgeData.map(link => link.value));
-
-    nodeData = nodeData.map(node => ({
-      ...node,
-      size: (node.size / maxNodeSize) * 50 + 10, // Rescale node size between 10 and 60
-      color: "rgb(97, 205, 187)" // Default color for nodes
-    }));
-
-    edgeData = edgeData.map(link => ({
-      ...link,
-      value: (link.value / maxLinkValue) * 10 + 1, // Rescale link width between 1 and 11
-      distance: (link.value / maxLinkValue) * 50 + 50 // Rescale link distance
-    }));
-  }
-
-  return { nodeData, edgeData };
-};
-
-
-// Filter nodes and edges based on threshold percentage
-const filterGraphData = (nodes, edges, thresholdPercentage) => {
-  // Sort nodes based on visit time
-  const sortedNodes = nodes.sort((a, b) => b.size - a.size);
-  const totalVisitTime = nodes.reduce((acc, node) => acc + node.size, 0);
-
-  // Determine the threshold value based on the threshold percentage
-  const thresholdValue = (totalVisitTime * thresholdPercentage) / 100;
-
-  // Filter nodes to only include those above the threshold
-  let filteredNodes = [];
-  let currentSum = 0;
-
-  // Filter nodes
-  sortedNodes.forEach((node) => {
-    if (currentSum <= thresholdValue) {
-      filteredNodes.push(node);
-      currentSum += node.size;
-    }
+  // Prepare nodes and links with consistent property names
+  const nodes = Object.keys(nodeFrequencies).map((id) => ({
+    id,
+    size: Math.round(nodeFrequencies[id]),
+    icon: latestDailyData[id]?.icon || null,
+  }));
+  const links = Object.keys(edgeTransitions).map((key) => {
+    const [source, target] = key.split("→");
+    return { source, target, value: Math.round(edgeTransitions[key]) };
   });
 
-  // Create a set of filtered node IDs for quick lookup
-  const filteredNodeIds = new Set(filteredNodes.map(node => node.id));
-
-  // Filter edges to only include those involving the selected nodes
-  const filteredEdges = edges.filter(
-    (edge) => filteredNodeIds.has(edge.source) && filteredNodeIds.has(edge.target)
+  // Filter nodes and links by a 70% threshold
+  const maxSize = Math.max(...nodes.map((node) => node.size || 0));
+  const threshold = 0.1 * maxSize;
+  const filteredNodes = nodes.filter((node) => node.size >= threshold);
+  const filteredNodeIds = new Set(filteredNodes.map((node) => node.id));
+  const filteredLinks = links.filter(
+    (link) => filteredNodeIds.has(link.source) && filteredNodeIds.has(link.target)
   );
 
-  return { nodes: filteredNodes, links: filteredEdges };
+  // Compute A/B testing results
+  const comparisonResults = computePairComparisons(filteredLinks, filteredNodes);
+
+  return {
+    graphData: { nodes: filteredNodes, links: filteredLinks },
+    comparisonResults,
+  };
 };
 
-
-///////////////////////////////////Pages Data Retreival Functions/////////////////////////////////////
+/////////////////////////////////// Pages Data Retrieval Functions /////////////////////////////////////
 
 // Retrieve data for the Dashboard page
 const retrieveDashboardData = async (aggregationType) => {
   const trackingData = await fetchFromStorage("trackingData");
   const relevantDates = getRelevantDates(getCurrentDate(), aggregationType);
 
-  const totalBrowsingTime = trackingData?.total_browsing_time || 0;;
+  const totalBrowsingTime = trackingData?.total_browsing_time || 0;
   const totalURLsOpened = trackingData?.total_urls_opened || 0;
-  const aggregatedBrowsingTime = calculateAggregatedBrowsingTime(trackingData.browsing, relevantDates);
-  const aggregatedURLCount = calculateAggregatedURLCount(trackingData.urlsOpened, relevantDates);
+  const aggregatedBrowsingTime = calculateAggregatedBrowsingTime(
+    trackingData.browsing,
+    relevantDates
+  );
+  const aggregatedURLCount = calculateAggregatedURLCount(
+    trackingData.urlsOpened,
+    relevantDates
+  );
   const wastedTime = calculateWastedTime(trackingData, relevantDates);
   const workingTime = calculateWorkingTime(trackingData, relevantDates);
   const aggregationInterval = getAggregationInterval(relevantDates);
@@ -361,20 +418,27 @@ const retrieveDashboardData = async (aggregationType) => {
   };
 };
 
-
 // Retrieve data for the Interaction Analysis page
 const retrieveInteractionData = async (aggregationType) => {
   const interactionData = await fetchFromStorage("interactionData");
   const relevantDates = getRelevantDates(getCurrentDate(), aggregationType);
 
-  const processedData = Object.keys(interactionData.youtube).length !== 0? processRadialBarData(interactionData.youtube, relevantDates): [];
+  const processedData =
+    Object.keys(interactionData.youtube).length !== 0
+      ? processRadialBarData(interactionData.youtube, relevantDates)
+      : [];
   const aggregationInterval = getAggregationInterval(relevantDates);
   return {
     processedData,
-    aggregationInterval
+    aggregationInterval,
   };
 };
 
+// Retrieve data for the PatternFinder page
+const retrievePatternData = async (aggregationType) => {
+  const trackingData = await fetchFromStorage("trackingData");
+  const relevantDates = getRelevantDates(getCurrentDate(), aggregationType);
+  return processPatternData(trackingData, relevantDates);
+};
 
-
-export {retrieveDashboardData, retrieveInteractionData, aggregateGraphData, filterGraphData };
+export { retrieveDashboardData, retrieveInteractionData, retrievePatternData };
