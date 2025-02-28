@@ -17,10 +17,10 @@ import {
   Tr,
   Th,
   Td,
-  Divider,
 } from "@chakra-ui/react";
 import { useGlobalContext } from "../utils/GlobalContext";
 import { retrievePatternData } from "../utils/DataProcessor";
+import DefaultIcon from "../imgs/BiWorld.png";
 import "../styles/PatternFinder.css";
 
 const PatternFinder = () => {
@@ -31,6 +31,7 @@ const PatternFinder = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [graphData, setGraphData] = useState({ nodes: [], links: [] });
   const [tooltip, setTooltip] = useState({ show: false, x: 0, y: 0, text: "" });
+  const [arrange,setArrange] = useState(false);
   const toast = useToast();
 
   // Fetch data from DataProcessor.js
@@ -88,7 +89,7 @@ const PatternFinder = () => {
             MIN_NODE_SIZE
           : MIN_NODE_SIZE;
       // Use node.icon if available, otherwise a default URL (replace with actual URL)
-      const icon = node.icon || "default-icon-url";
+      const icon = node.icon || DefaultIcon;
       return {
         data: { id: node.id, label: node.id, image: icon, size: normSize },
       };
@@ -158,7 +159,7 @@ const PatternFinder = () => {
       style: {
         label: "data(label)",
         "background-image": "data(image)",
-        "background-color": "transparent", // Transparent background
+        "background-color": "white", // Transparent background
         "background-fit": "cover",
         width: "data(size)",
         height: "data(size)",
@@ -194,10 +195,10 @@ const PatternFinder = () => {
   const layout = {
     name: "cose",
     animate: true,
-    idealEdgeLength: 100, // Adjust edge length
-    nodeRepulsion: 400000, // Increase node separation
+    idealEdgeLength: 100, // Adjust edge length as needed
+    nodeRepulsion: 400000, // Increase to push nodes further apart
     gravity: 80,
-    numIter: 1000,
+    numIter: 100,
     coolingFactor: 0.95,
     fit: true,
   };
@@ -243,8 +244,20 @@ const PatternFinder = () => {
                 borderRadius: "8px",
               }}
               cy={(cy) => {
+                // Disable panning/zooming if desired
                 cy.userPanningEnabled(false);
                 cy.userZoomingEnabled(false);
+
+                // Run the layout explicitly after a short delay to ensure the container is ready
+                if(!arrange)
+                {
+                  cy.resize(); // Ensure container size is updated
+                  cy.layout(layout).run();
+                  setArrange(!arrange)
+                }
+
+
+                // Attach your mouse events
                 cy.on("mouseover", "edge", (event) => {
                   const edge = event.target;
                   const from = edge.source().id();
@@ -262,6 +275,7 @@ const PatternFinder = () => {
                 });
               }}
             />
+
             {tooltip.show && (
               <Box
                 position="fixed"
