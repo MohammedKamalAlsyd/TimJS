@@ -38,7 +38,9 @@ const PatternFinder = () => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const { graphData, comparisonResults } = await retrievePatternData(aggregationType);
+        const { graphData, comparisonResults } = await retrievePatternData(
+          aggregationType
+        );
         setGraphData(graphData);
         setComparisonResults(comparisonResults);
       } catch (error) {
@@ -59,7 +61,8 @@ const PatternFinder = () => {
       if (document.visibilityState === "visible") fetchData();
     };
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, [aggregationType, toast]);
 
   // Graph styling constants
@@ -81,11 +84,14 @@ const PatternFinder = () => {
     const cyNodes = graphData.nodes.map((node) => {
       const normSize =
         maxNodeSize > 0
-          ? ((node.size / maxNodeSize) * (MAX_NODE_SIZE - MIN_NODE_SIZE)) + MIN_NODE_SIZE
+          ? (node.size / maxNodeSize) * (MAX_NODE_SIZE - MIN_NODE_SIZE) +
+            MIN_NODE_SIZE
           : MIN_NODE_SIZE;
       // Use node.icon if available, otherwise a default URL (replace with actual URL)
       const icon = node.icon || "default-icon-url";
-      return { data: { id: node.id, label: node.id, image: icon, size: normSize } };
+      return {
+        data: { id: node.id, label: node.id, image: icon, size: normSize },
+      };
     });
 
     let cyEdges = [];
@@ -93,7 +99,8 @@ const PatternFinder = () => {
       cyEdges = graphData.links.map((link) => {
         const normWidth =
           maxEdgeValue > 0
-            ? ((link.value / maxEdgeValue) * (MAX_EDGE_WIDTH - MIN_EDGE_WIDTH)) + MIN_EDGE_WIDTH
+            ? (link.value / maxEdgeValue) * (MAX_EDGE_WIDTH - MIN_EDGE_WIDTH) +
+              MIN_EDGE_WIDTH
             : MIN_EDGE_WIDTH;
         return {
           data: {
@@ -122,7 +129,8 @@ const PatternFinder = () => {
       cyEdges = Object.values(edgeMap).map((edge) => {
         const normWidth =
           maxEdgeValue > 0
-            ? ((edge.data.value / maxEdgeValue) * (MAX_EDGE_WIDTH - MIN_EDGE_WIDTH)) +
+            ? (edge.data.value / maxEdgeValue) *
+                (MAX_EDGE_WIDTH - MIN_EDGE_WIDTH) +
               MIN_EDGE_WIDTH
             : MIN_EDGE_WIDTH;
         return {
@@ -198,24 +206,24 @@ const PatternFinder = () => {
     <Box className="pattern-finder-container">
       {/* Network Graph Section */}
       <Box mb={6}>
-        <HStack justify={'space-between'} align={'center'}>
-        <h1>Network Graph</h1>
-        <Box mb={3}>
-          <HStack padding="10px">
-            <h3>Network Type:</h3>
-            <RadioGroup
-              colorScheme="gray"
-              onChange={(val) => setIsDirected(val === "directed")}
-              value={isDirected ? "directed" : "undirected"}
-              size="lg"
-            >
-              <HStack spacing="3vw">
-                <Radio value="undirected">Undirected</Radio>
-                <Radio value="directed">Directed</Radio>
-              </HStack>
-            </RadioGroup>
-          </HStack>
-        </Box>
+        <HStack justify={"space-between"} align={"center"}>
+          <h1>Network Graph</h1>
+          <Box mb={3}>
+            <HStack padding="10px">
+              <h3>Network Type:</h3>
+              <RadioGroup
+                colorScheme="gray"
+                onChange={(val) => setIsDirected(val === "directed")}
+                value={isDirected ? "directed" : "undirected"}
+                size="lg"
+              >
+                <HStack spacing="3vw">
+                  <Radio value="undirected">Undirected</Radio>
+                  <Radio value="directed">Directed</Radio>
+                </HStack>
+              </RadioGroup>
+            </HStack>
+          </Box>
         </HStack>
         {isLoading ? (
           <Spinner />
@@ -273,20 +281,27 @@ const PatternFinder = () => {
       </Box>
 
       {/* Divider to separate Network Graph and A/B Testing */}
-      <hr style={{backgroundColor:'gray',height:'2.5px',borderRadius:'10%',margin:'0px 20px'}}/>
+      <hr
+        style={{
+          backgroundColor: "gray",
+          height: "2.5px",
+          borderRadius: "10%",
+          margin: "0px 20px",
+        }}
+      />
 
       {/* A/B Testing Results Section */}
       <Box mb={6}>
         <Text fontSize="xl" fontWeight="bold" mb={2} color="#000000">
           A/B Testing Results
         </Text>
-        <Box height={'17vh'} overflowY="auto">
+        <Box height={"20vh"} overflowY="auto">
           {isLoading ? (
             <Spinner />
           ) : comparisonResults.length === 0 ? (
             <Text>No comparisons available.</Text>
           ) : (
-            comparisonResults.map((comp,index) => (
+            comparisonResults.map((comp, index) => (
               <Box
                 key={comp.key}
                 mb={3}
@@ -298,14 +313,20 @@ const PatternFinder = () => {
                 <HStack justify="space-between" align="center">
                   <Text>
                     {comp.confidence
-                      ? `${index+1}- With ${comp.confidence} confidence, ${comp.direction.to} was opened after ${comp.direction.from}.`
-                      : `${index+1}- No significant difference between ${comp.nodeA} and ${comp.nodeB}.`}
+                      ? `${index + 1}- With ${comp.confidence} confidence, ${
+                          comp.direction.to
+                        } was opened after ${comp.direction.from}.`
+                      : `${index + 1}- No significant difference between ${
+                          comp.nodeA
+                        } and ${comp.nodeB}.`}
                   </Text>
                   <Button
                     size="xs"
                     bg="#000000"
                     color="#FFFFFF"
                     borderRadius="0"
+                    px={6}
+                    py={4}
                     onClick={() => toggleDetails(comp.key)}
                     _hover={{ bg: "#333333" }}
                   >
@@ -314,78 +335,96 @@ const PatternFinder = () => {
                 </HStack>
                 {showDetails[comp.key] && (
                   <Box mt={2}>
-                    <BlockMath
-                      math={`\\chi^2 = \\sum_{i=1}^{4} \\frac{(O_i - E_i)^2}{E_i} \\approx ${comp.chi2.toFixed(
-                        2
-                      )} \\quad (df = 1)`}
-                    />
-                    <Text mt={1}>
-                      For the contingency table below, where:
-                      <br />
-                      • <InlineMath math="O_1" /> = transitions from{" "}
-                      <strong>{comp.direction.from}</strong> to{" "}
-                      <strong>{comp.direction.to}</strong>,
-                      • <InlineMath math="O_2" /> = transitions from{" "}
-                      <strong>{comp.direction.from}</strong> to others,
-                      <br />
-                      • <InlineMath math="O_3" /> = transitions from non-
-                      <strong>{comp.direction.from}</strong> to{" "}
-                      <strong>{comp.direction.to}</strong>,
-                      • <InlineMath math="O_4" /> = transitions from non-
-                      <strong>{comp.direction.from}</strong> to others.
-                    </Text>
-                    <Table variant="simple" size="sm" mt={2} border="1px solid #ccc">
-                      <Thead bg="#f0f0f0">
-                        <Tr>
-                          <Th border="1px solid #ccc" p={2}>
-                            Transition Type
-                          </Th>
-                          <Th border="1px solid #ccc" p={2}>
-                            {comp.direction.from} Users
-                          </Th>
-                          <Th border="1px solid #ccc" p={2}>
-                            Non-{comp.direction.from} Users
-                          </Th>
-                        </Tr>
-                      </Thead>
-                      <Tbody>
-                        <Tr>
-                          <Td border="1px solid #ccc" p={2}>
-                            Transition to {comp.direction.to} (<InlineMath math="O_1" />)
-                          </Td>
-                          <Td border="1px solid #ccc" p={2}>
-                            {comp.O1}
-                          </Td>
-                          <Td border="1px solid #ccc" p={2}>
-                            {comp.O3}
-                          </Td>
-                        </Tr>
-                        <Tr>
-                          <Td border="1px solid #ccc" p={2}>
-                            Transition to Others (<InlineMath math="O_2" />)
-                          </Td>
-                          <Td border="1px solid #ccc" p={2}>
-                            {comp.O2}
-                          </Td>
-                          <Td border="1px solid #ccc" p={2}>
-                            {comp.O4}
-                          </Td>
-                        </Tr>
-                        <Tr>
-                          <Td border="1px solid #ccc" p={2}>
-                            Expected (<InlineMath math="E_1" />, <InlineMath math="E_3" />)
-                          </Td>
-                          <Td border="1px solid #ccc" p={2}>
-                            {comp.E1.toFixed(1)}
-                          </Td>
-                          <Td border="1px solid #ccc" p={2}>
-                            {comp.E3.toFixed(1)}
-                          </Td>
-                        </Tr>
-                      </Tbody>
-                    </Table>
-                    <Text mt={1}>
-                      For χ² = {comp.chi2.toFixed(2)} and df = 1, the p-value is approximately{" "}
+                    <HStack justify={"space-between"} align={"start"}>
+                      <Box>
+                        <BlockMath
+                          math={`\\chi^2 = \\sum_{i=1}^{4} \\frac{(O_i - E_i)^2}{E_i} \\approx ${comp.chi2.toFixed(
+                            2
+                          )} \\quad (df = 1)`}
+                        />
+                        <Text mt={1}>
+                          For the contingency table below, where:
+                          <br />
+                          • <InlineMath math="O_1" /> = transitions from{" "}
+                          <strong>{comp.direction.from}</strong> to{" "}
+                          <strong>{comp.direction.to}</strong>, •{" "}
+                          <InlineMath math="O_2" /> = transitions from{" "}
+                          <strong>{comp.direction.from}</strong> to others,
+                          <br />
+                          • <InlineMath math="O_3" /> = transitions from non-
+                          <strong>{comp.direction.from}</strong> to{" "}
+                          <strong>{comp.direction.to}</strong>, •{" "}
+                          <InlineMath math="O_4" /> = transitions from non-
+                          <strong>{comp.direction.from}</strong> to others.
+                        </Text>
+                      </Box>
+
+                      <Table
+                        variant="simple"
+                        size="sm"
+                        mt={2}
+                        width={"50%"}
+                        border="1px solid #ccc"
+                      >
+                        <Thead bg="#f0f0f0">
+                          <Tr backgroundColor={"#C4C4C4"}>
+                            <Th border="1px solid #ccc" p={2}>
+                              Transition Type
+                            </Th>
+                            <Th border="1px solid #ccc" p={2}>
+                              {comp.direction.from} Users
+                            </Th>
+                            <Th border="1px solid #ccc" p={2}>
+                              Non-{comp.direction.from} Users
+                            </Th>
+                          </Tr>
+                        </Thead>
+                        <Tbody>
+                          <Tr>
+                            <Td border="1px solid #ccc" p={2}>
+                              Transition to {comp.direction.to} (
+                              <InlineMath math="O_1" />)
+                            </Td>
+                            <Td border="1px solid #ccc" p={2}>
+                              {comp.O1}
+                            </Td>
+                            <Td border="1px solid #ccc" p={2}>
+                              {comp.O3}
+                            </Td>
+                          </Tr>
+                          <Tr>
+                            <Td border="1px solid #ccc" p={2}>
+                              Transition to Others (<InlineMath math="O_2" />)
+                            </Td>
+                            <Td border="1px solid #ccc" p={2}>
+                              {comp.O2}
+                            </Td>
+                            <Td border="1px solid #ccc" p={2}>
+                              {comp.O4}
+                            </Td>
+                          </Tr>
+                          <Tr>
+                            <Td border="1px solid #ccc" p={2}>
+                              Expected (<InlineMath math="E_1" />,{" "}
+                              <InlineMath math="E_3" />)
+                            </Td>
+                            <Td border="1px solid #ccc" p={2}>
+                              {comp.E1.toFixed(1)}
+                            </Td>
+                            <Td border="1px solid #ccc" p={2}>
+                              {comp.E3.toFixed(1)}
+                            </Td>
+                          </Tr>
+                        </Tbody>
+                      </Table>
+                    </HStack>
+
+                    <Text mt={1} fontWeight={600}>
+                      For{" "}
+                      <Box as="span" display="inline-block">
+                        <BlockMath math={"\\chi^2"} />
+                      </Box>{" "}
+                      = {comp.chi2.toFixed(2)}, the p-value is approximately{" "}
                       {comp.pValue.toFixed(3)}.
                     </Text>
                   </Box>
@@ -406,8 +445,8 @@ const PatternFinder = () => {
             Icon Size & Edges Reflect Usage Frequency.
           </Box>
           <Box as="li">
-            A/B testing aims to determine whether observed patterns are the result of actual
-            changes or if they reflect consistent usage trends.
+            A/B testing aims to determine whether observed patterns are the
+            result of actual changes or if they reflect consistent usage trends.
           </Box>
         </Box>
       </Box>

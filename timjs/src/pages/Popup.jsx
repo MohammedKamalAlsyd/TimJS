@@ -49,7 +49,6 @@ const Popup = () => {
       borderRadius={8}
       boxShadow="0 4px 12px rgba(0, 0, 0, 0.1)"
       w="100%" // Full width
-      maxW="500px" // Optional: limit max width for readability
       mx="auto" // Center horizontally
       textAlign="center"
     >

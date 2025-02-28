@@ -1,6 +1,6 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom"; // Import Routes and Route
-import { ChakraProvider, HStack, VStack } from "@chakra-ui/react";
+import { Routes, Route } from "react-router-dom"; // React Router for routing
+import { ChakraProvider, HStack, VStack,Box } from "@chakra-ui/react";
 import Popup from "./pages/Popup";
 import Dashboard from "./pages/Dashboard";
 import InteractionAnalysis from "./pages/InteractionAnalysis";
@@ -9,19 +9,30 @@ import "./styles/App.css";
 import customTheme from "./styles/chakra-theme";
 import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
-import { GlobalProvider } from "./utils/GlobalContext"; // Adjust the import path
+import { GlobalProvider } from "./utils/GlobalContext";
 
-const Layout = ({ children, showSidebar = true, showHeader = true }) => {
+// Layout component now uses a single "isPage" prop to conditionally render layout structure
+const Layout = ({ isPage, children }) => {
+  // If not a page, simply render the children as is.
+  if (!isPage) {
+    return (    
+    <Box style={{height:'360px',width:'360px'}}>
+      {children}
+    </Box>
+    )
+  }
+
+  // If it's a page, render the layout with sidebar and header.
   return (
-    <HStack justifyContent={"start"} height={"100%"} width={"100%"}>
-      {showSidebar && <Sidebar />}
+    <HStack justifyContent="start" height="100%" width="100%">
+      <Sidebar />
       <VStack
-        height={"full"}
-        width={"full"}
-        padding={"35px"}
-        margin={showSidebar ? "0px 35px" : "0px"}
+        height="full"
+        width="full"
+        padding="35px"
+        margin="0px 35px"
       >
-        {showHeader && <Header />}
+        <Header />
         {children}
       </VStack>
     </HStack>
@@ -36,15 +47,17 @@ const App = () => {
           <Route
             path="/"
             element={
-              <Layout showSidebar={false} showHeader={false}>
-                { <Popup /> }
+              // Render as non-page: no header or sidebar
+              <Layout isPage={false}>
+                <Popup />
               </Layout>
             }
           />
           <Route
             path="/dashboard"
             element={
-              <Layout showSidebar={true} showHeader={true}>
+              // Render as page: include header and sidebar
+              <Layout isPage={true}>
                 <Dashboard />
               </Layout>
             }
@@ -52,7 +65,7 @@ const App = () => {
           <Route
             path="/interaction-analysis"
             element={
-              <Layout showSidebar={true} showHeader={true}>
+              <Layout isPage={true}>
                 <InteractionAnalysis />
               </Layout>
             }
@@ -60,7 +73,7 @@ const App = () => {
           <Route
             path="/pattern-finder"
             element={
-              <Layout showSidebar={true} showHeader={true}>
+              <Layout isPage={true}>
                 <PatternFinder />
               </Layout>
             }
