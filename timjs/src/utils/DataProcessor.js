@@ -368,7 +368,7 @@ const processPatternData = (trackingData, relevantDates) => {
 
   // Filter nodes and links by a 70% threshold
   const maxSize = Math.max(...nodes.map((node) => node.size || 0));
-  const threshold = 0.1 * maxSize;
+  const threshold = 0.2 * maxSize;
   const filteredNodes = nodes.filter((node) => node.size >= threshold);
   const filteredNodeIds = new Set(filteredNodes.map((node) => node.id));
   const filteredLinks = links.filter(

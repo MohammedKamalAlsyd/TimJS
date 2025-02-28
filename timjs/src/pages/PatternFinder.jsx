@@ -17,8 +17,8 @@ import {
   Tr,
   Th,
   Td,
+  Divider,
 } from "@chakra-ui/react";
-import { FaGlobe } from "react-icons/fa";
 import { useGlobalContext } from "../utils/GlobalContext";
 import { retrievePatternData } from "../utils/DataProcessor";
 import "../styles/PatternFinder.css";
@@ -83,7 +83,8 @@ const PatternFinder = () => {
         maxNodeSize > 0
           ? ((node.size / maxNodeSize) * (MAX_NODE_SIZE - MIN_NODE_SIZE)) + MIN_NODE_SIZE
           : MIN_NODE_SIZE;
-      const icon = node.icon || <FaGlobe />;
+      // Use node.icon if available, otherwise a default URL (replace with actual URL)
+      const icon = node.icon || "default-icon-url";
       return { data: { id: node.id, label: node.id, image: icon, size: normSize } };
     });
 
@@ -142,17 +143,18 @@ const PatternFinder = () => {
     setShowDetails((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
+  // Cytoscape stylesheet
   const stylesheet = [
     {
       selector: "node",
       style: {
         label: "data(label)",
         "background-image": "data(image)",
-        "background-color": "transparent", // Transparent background for nodes
+        "background-color": "transparent", // Transparent background
         "background-fit": "cover",
         width: "data(size)",
         height: "data(size)",
-        "font-size": "10px",
+        "font-size": "8px", // Smaller labels
         "text-valign": "bottom",
         "text-halign": "center",
       },
@@ -165,29 +167,41 @@ const PatternFinder = () => {
         "line-color": (ele) => {
           const value = ele.data("value");
           const normalized = maxEdgeValue > 0 ? value / maxEdgeValue : 0;
-          const opacity = Math.min(1, normalized); // Range from 0 (transparent) to 1 (black)
-          return `rgba(0, 0, 0, ${opacity})`;
+          // Interpolate from gray (128) to black (0)
+          const grayValue = Math.round(128 + (255 - 128) * (1 - normalized));
+          return `rgb(${grayValue}, ${grayValue}, ${grayValue})`;
         },
         "target-arrow-color": (ele) => {
           const value = ele.data("value");
           const normalized = maxEdgeValue > 0 ? value / maxEdgeValue : 0;
-          const opacity = Math.min(1, normalized);
-          return `rgba(0, 0, 0, ${opacity})`;
+          const grayValue = Math.round(128 + (255 - 128) * (1 - normalized));
+          return `rgb(${grayValue}, ${grayValue}, ${grayValue})`;
         },
-        "target-arrow-shape": isDirected ? "triangle" : "none", // Arrowheads only in directed mode
+        "target-arrow-shape": isDirected ? "triangle" : "none",
       },
     },
   ];
 
-  const layout = { name: "cose", animate: true };
+  // Improved layout for better organization
+  const layout = {
+    name: "cose",
+    animate: true,
+    idealEdgeLength: 100, // Adjust edge length
+    nodeRepulsion: 400000, // Increase node separation
+    gravity: 80,
+    numIter: 1000,
+    coolingFactor: 0.95,
+    fit: true,
+  };
 
   return (
     <Box className="pattern-finder-container">
       {/* Network Graph Section */}
       <Box mb={6}>
+        <HStack justify={'space-between'} align={'center'}>
         <h1>Network Graph</h1>
         <Box mb={3}>
-          <HStack padding={"10px"}>
+          <HStack padding="10px">
             <h3>Network Type:</h3>
             <RadioGroup
               colorScheme="gray"
@@ -195,13 +209,14 @@ const PatternFinder = () => {
               value={isDirected ? "directed" : "undirected"}
               size="lg"
             >
-              <HStack spacing={"3vw"}>
+              <HStack spacing="3vw">
                 <Radio value="undirected">Undirected</Radio>
                 <Radio value="directed">Directed</Radio>
               </HStack>
             </RadioGroup>
           </HStack>
         </Box>
+        </HStack>
         {isLoading ? (
           <Spinner />
         ) : (
@@ -215,7 +230,7 @@ const PatternFinder = () => {
               layout={layout}
               style={{
                 width: "100%",
-                height: "400px",
+                height: "35vh",
                 border: "1px solid #EAEAEA",
                 borderRadius: "8px",
               }}
@@ -244,7 +259,7 @@ const PatternFinder = () => {
                 position="fixed"
                 left={tooltip.x}
                 top={tooltip.y}
-                bg="black"
+                bg="gray"
                 color="white"
                 p={2}
                 borderRadius="md"
@@ -257,121 +272,128 @@ const PatternFinder = () => {
         )}
       </Box>
 
+      {/* Divider to separate Network Graph and A/B Testing */}
+      <hr style={{backgroundColor:'gray',height:'2.5px',borderRadius:'10%',margin:'0px 20px'}}/>
+
       {/* A/B Testing Results Section */}
       <Box mb={6}>
         <Text fontSize="xl" fontWeight="bold" mb={2} color="#000000">
           A/B Testing Results
         </Text>
-        {isLoading ? (
-          <Spinner />
-        ) : comparisonResults.length === 0 ? (
-          <Text>No comparisons available.</Text>
-        ) : (
-          comparisonResults.map((comp) => (
-            <Box
-              key={comp.key}
-              mb={3}
-              p={3}
-              border="1px solid #EAEAEA"
-              borderRadius="8px"
-              bg="#FFFFFF"
-            >
-              <HStack justify="space-between" align="center">
-                <Text>
-                  {comp.confidence
-                    ? `With ${comp.confidence} confidence, ${comp.direction.to} was opened after ${comp.direction.from}.`
-                    : `No significant difference between ${comp.nodeA} and ${comp.nodeB}.`}
-                </Text>
-                <Button
-                  size="xs"
-                  bg="#000000"
-                  color="#FFFFFF"
-                  borderRadius="0"
-                  onClick={() => toggleDetails(comp.key)}
-                  _hover={{ bg: "#333333" }}
-                >
-                  {showDetails[comp.key] ? "Hide Details" : "View Details"}
-                </Button>
-              </HStack>
-              {showDetails[comp.key] && (
-                <Box mt={2}>
-                  <BlockMath
-                    math={`\\chi^2 = \\sum_{i=1}^{4} \\frac{(O_i - E_i)^2}{E_i} \\approx ${comp.chi2.toFixed(
-                      2
-                    )} \\quad (df = 1)`}
-                  />
-                  <Text mt={1}>
-                    For the contingency table below, where:
-                    <br />
-                    • <InlineMath math="O_1" /> = transitions from{" "}
-                    <strong>{comp.direction.from}</strong> to <strong>{comp.direction.to}</strong>,
-                    • <InlineMath math="O_2" /> = transitions from{" "}
-                    <strong>{comp.direction.from}</strong> to others,
-                    <br />
-                    • <InlineMath math="O_3" /> = transitions from non-
-                    <strong>{comp.direction.from}</strong> to <strong>{comp.direction.to}</strong>,
-                    • <InlineMath math="O_4" /> = transitions from non-
-                    <strong>{comp.direction.from}</strong> to others.
+        <Box height={'17vh'} overflowY="auto">
+          {isLoading ? (
+            <Spinner />
+          ) : comparisonResults.length === 0 ? (
+            <Text>No comparisons available.</Text>
+          ) : (
+            comparisonResults.map((comp,index) => (
+              <Box
+                key={comp.key}
+                mb={3}
+                p={3}
+                border="1px solid #EAEAEA"
+                borderRadius="8px"
+                bg="#FFFFFF"
+              >
+                <HStack justify="space-between" align="center">
+                  <Text>
+                    {comp.confidence
+                      ? `${index+1}- With ${comp.confidence} confidence, ${comp.direction.to} was opened after ${comp.direction.from}.`
+                      : `${index+1}- No significant difference between ${comp.nodeA} and ${comp.nodeB}.`}
                   </Text>
-                  <Table variant="simple" size="sm" mt={2} border="1px solid #ccc">
-                    <Thead bg="#f0f0f0">
-                      <Tr>
-                        <Th border="1px solid #ccc" p={2}>
-                          Transition Type
-                        </Th>
-                        <Th border="1px solid #ccc" p={2}>
-                          {comp.direction.from} Users
-                        </Th>
-                        <Th border="1px solid #ccc" p={2}>
-                          Non-{comp.direction.from} Users
-                        </Th>
-                      </Tr>
-                    </Thead>
-                    <Tbody>
-                      <Tr>
-                        <Td border="1px solid #ccc" p={2}>
-                          Transition to {comp.direction.to} (<InlineMath math="O_1" />)
-                        </Td>
-                        <Td border="1px solid #ccc" p={2}>
-                          {comp.O1}
-                        </Td>
-                        <Td border="1px solid #ccc" p={2}>
-                          {comp.O3}
-                        </Td>
-                      </Tr>
-                      <Tr>
-                        <Td border="1px solid #ccc" p={2}>
-                          Transition to Others (<InlineMath math="O_2" />)
-                        </Td>
-                        <Td border="1px solid #ccc" p={2}>
-                          {comp.O2}
-                        </Td>
-                        <Td border="1px solid #ccc" p={2}>
-                          {comp.O4}
-                        </Td>
-                      </Tr>
-                      <Tr>
-                        <Td border="1px solid #ccc" p={2}>
-                          Expected (<InlineMath math="E_1" />, <InlineMath math="E_3" />)
-                        </Td>
-                        <Td border="1px solid #ccc" p={2}>
-                          {comp.E1.toFixed(1)}
-                        </Td>
-                        <Td border="1px solid #ccc" p={2}>
-                          {comp.E3.toFixed(1)}
-                        </Td>
-                      </Tr>
-                    </Tbody>
-                  </Table>
-                  <Text mt={1}>
-                    For χ² = {comp.chi2.toFixed(2)} and df = 1, the p-value is approximately{" "}
-                    {comp.pValue.toFixed(3)}.
-                  </Text>
-                </Box>
-              )}
-            </Box>
-          ))
-        )}
+                  <Button
+                    size="xs"
+                    bg="#000000"
+                    color="#FFFFFF"
+                    borderRadius="0"
+                    onClick={() => toggleDetails(comp.key)}
+                    _hover={{ bg: "#333333" }}
+                  >
+                    {showDetails[comp.key] ? "Hide Details" : "View Details"}
+                  </Button>
+                </HStack>
+                {showDetails[comp.key] && (
+                  <Box mt={2}>
+                    <BlockMath
+                      math={`\\chi^2 = \\sum_{i=1}^{4} \\frac{(O_i - E_i)^2}{E_i} \\approx ${comp.chi2.toFixed(
+                        2
+                      )} \\quad (df = 1)`}
+                    />
+                    <Text mt={1}>
+                      For the contingency table below, where:
+                      <br />
+                      • <InlineMath math="O_1" /> = transitions from{" "}
+                      <strong>{comp.direction.from}</strong> to{" "}
+                      <strong>{comp.direction.to}</strong>,
+                      • <InlineMath math="O_2" /> = transitions from{" "}
+                      <strong>{comp.direction.from}</strong> to others,
+                      <br />
+                      • <InlineMath math="O_3" /> = transitions from non-
+                      <strong>{comp.direction.from}</strong> to{" "}
+                      <strong>{comp.direction.to}</strong>,
+                      • <InlineMath math="O_4" /> = transitions from non-
+                      <strong>{comp.direction.from}</strong> to others.
+                    </Text>
+                    <Table variant="simple" size="sm" mt={2} border="1px solid #ccc">
+                      <Thead bg="#f0f0f0">
+                        <Tr>
+                          <Th border="1px solid #ccc" p={2}>
+                            Transition Type
+                          </Th>
+                          <Th border="1px solid #ccc" p={2}>
+                            {comp.direction.from} Users
+                          </Th>
+                          <Th border="1px solid #ccc" p={2}>
+                            Non-{comp.direction.from} Users
+                          </Th>
+                        </Tr>
+                      </Thead>
+                      <Tbody>
+                        <Tr>
+                          <Td border="1px solid #ccc" p={2}>
+                            Transition to {comp.direction.to} (<InlineMath math="O_1" />)
+                          </Td>
+                          <Td border="1px solid #ccc" p={2}>
+                            {comp.O1}
+                          </Td>
+                          <Td border="1px solid #ccc" p={2}>
+                            {comp.O3}
+                          </Td>
+                        </Tr>
+                        <Tr>
+                          <Td border="1px solid #ccc" p={2}>
+                            Transition to Others (<InlineMath math="O_2" />)
+                          </Td>
+                          <Td border="1px solid #ccc" p={2}>
+                            {comp.O2}
+                          </Td>
+                          <Td border="1px solid #ccc" p={2}>
+                            {comp.O4}
+                          </Td>
+                        </Tr>
+                        <Tr>
+                          <Td border="1px solid #ccc" p={2}>
+                            Expected (<InlineMath math="E_1" />, <InlineMath math="E_3" />)
+                          </Td>
+                          <Td border="1px solid #ccc" p={2}>
+                            {comp.E1.toFixed(1)}
+                          </Td>
+                          <Td border="1px solid #ccc" p={2}>
+                            {comp.E3.toFixed(1)}
+                          </Td>
+                        </Tr>
+                      </Tbody>
+                    </Table>
+                    <Text mt={1}>
+                      For χ² = {comp.chi2.toFixed(2)} and df = 1, the p-value is approximately{" "}
+                      {comp.pValue.toFixed(3)}.
+                    </Text>
+                  </Box>
+                )}
+              </Box>
+            ))
+          )}
+        </Box>
       </Box>
 
       {/* Information Section */}
