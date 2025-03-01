@@ -101,15 +101,12 @@ const Header = () => {
               <span className="submenu-arrow">◀</span>Support The Project
             </span>
             <div className="submenu-options">
-              <a href="https://github.com" target="_blank" rel="noopener noreferrer">
+              <a href="https://github.com/MohammedKamalAlsyd/TimJS" target="_blank" rel="noopener noreferrer">
                 Give Star on GitHub
-              </a>
-              <a href="https://donate.example.com" target="_blank" rel="noopener noreferrer">
-                Donate
               </a>
             </div>
           </div>
-          <a href="https://github.com/issues" target="_blank" rel="noopener noreferrer">
+          <a href="https://github.com/MohammedKamalAlsyd/TimJS/issues" target="_blank" rel="noopener noreferrer">
             Report Issue
           </a>
         </div>
