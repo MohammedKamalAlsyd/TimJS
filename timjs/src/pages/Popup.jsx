@@ -31,8 +31,7 @@ const Popup = () => {
     const fetchData = async () => {
       const trackingData = await fetchFromStorage('trackingData');
       const today = getCurrentDate();
-      const todaySessions = trackingData?.sessions?.[today] || {};
-      const totalTime = Object.values(todaySessions).reduce((acc, site) => acc + site.time, 0);
+      const totalTime = trackingData?.browsing?.[today] || {};
       setBrowsingTime(totalTime);
     };
     fetchData();
