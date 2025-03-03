@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Button, Text, VStack } from '@chakra-ui/react';
-import { GoClockFill } from 'react-icons/go'; // High-quality icon from sidebar
-import '../styles/App.css';
+import React, { useState, useEffect } from "react";
+import { Box, Button, Text, VStack } from "@chakra-ui/react";
+import { GoClockFill } from "react-icons/go";
+
+// Removed external CSS import
 
 // Helper function to fetch data from chrome.storage.local
 const fetchFromStorage = async (key) => {
@@ -20,7 +21,7 @@ const fetchFromStorage = async (key) => {
 function getCurrentDate() {
   const today = new Date();
   const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
-  return localDate.toISOString().split('T')[0];
+  return localDate.toISOString().split("T")[0];
 }
 
 const Popup = () => {
@@ -29,28 +30,32 @@ const Popup = () => {
   // Fetch browsing time for today on component mount
   useEffect(() => {
     const fetchData = async () => {
-      const trackingData = await fetchFromStorage('trackingData');
+      const trackingData = await fetchFromStorage("trackingData");
       const today = getCurrentDate();
-      const totalTime = trackingData?.browsing?.[today] || {};
+      const totalTime = trackingData?.browsing?.[today] || 0;
       setBrowsingTime(totalTime);
     };
     fetchData();
   }, []);
 
   const handleButtonClick = () => {
-    chrome.tabs.create({ url: chrome.runtime.getURL('action/default_popup.html#/dashboard') });
+    chrome.tabs.create({ url: chrome.runtime.getURL("action/default_popup.html#/dashboard") });
+  };
+
+  // Inline style for the popup container (modern and centered)
+  const popupContainerStyle = {
+    padding: "24px",
+    backgroundColor: "#FFFFFF",
+    borderRadius: "8px",
+    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+    width: "100%",
+    maxWidth: "400px",
+    margin: "0 auto",
+    textAlign: "center",
   };
 
   return (
-    <Box
-      p={6}
-      bg="#FFFFFF"
-      borderRadius={8}
-      boxShadow="0 4px 12px rgba(0, 0, 0, 0.1)"
-      w="100%" // Full width
-      mx="auto" // Center horizontally
-      textAlign="center"
-    >
+    <Box style={popupContainerStyle}>
       <VStack spacing={4} align="center">
         {/* Logo */}
         <GoClockFill size={50} color="#000000" />
@@ -66,20 +71,20 @@ const Popup = () => {
         </Text>
 
         {/* Description */}
-        <Text fontSize="md" color="#666666" maxW="80%">
+        <Text fontSize="md" color="#666666" maxWidth="80%">
           TimJS tracks your web usage to help you optimize productivity. Explore detailed insights and patterns in the dashboard.
         </Text>
 
         {/* Navigation Button */}
         <Button
           onClick={handleButtonClick}
-          bg="#000000"
+          backgroundColor="#000000"
           color="#FFFFFF"
           borderRadius="0"
           px={6}
           py={3}
-          _hover={{ bg: '#333333' }}
-          _focus={{ outline: 'none', boxShadow: '0 0 0 3px rgba(0, 0, 0, 0.3)' }}
+          _hover={{ backgroundColor: "#333333" }}
+          _focus={{ outline: "none", boxShadow: "0 0 0 3px rgba(0, 0, 0, 0.3)" }}
         >
           Go to Dashboard
         </Button>

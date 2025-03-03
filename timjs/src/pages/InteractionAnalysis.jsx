@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { ResponsiveRadialBar } from "@nivo/radial-bar";
-import { retrieveInteractionData  } from "../utils/DataProcessor";
+import { retrieveInteractionData } from "../utils/DataProcessor";
 import { useGlobalContext } from "../utils/GlobalContext";
 import YouTubeInteractionCard from "../components/InteractionCard";
-import { SocialIcon } from 'react-social-icons'
-import "../styles/InteractionAnalysis.css";
-import { VStack,Box } from "@chakra-ui/react";
+import { SocialIcon } from "react-social-icons";
+import { VStack, Box, Text } from "@chakra-ui/react";
 
 const InteractionAnalysis = () => {
   const { aggregationType } = useGlobalContext();
@@ -14,7 +13,6 @@ const InteractionAnalysis = () => {
   const [chartData, setChartData] = useState([]);
   const [scrapingAllowed, setScrapingAllowed] = useState(false);
   const [aggregationInterval, setAggregationInterval] = useState("");
-
 
   // Fetch chart data when aggregationType or scrapingAllowed changes
   const fetchData = async () => {
@@ -27,12 +25,12 @@ const InteractionAnalysis = () => {
   const formatTimeValue = (minutes) => {
     if (minutes >= 1440) {
       const days = minutes / 1440;
-      return `${days.toFixed(1)} days`;
+      return `${days.toFixed(2)} days`;
     } else if (minutes >= 60) {
       const hours = minutes / 60;
-      return `${hours.toFixed(1)} hours`;
+      return `${hours.toFixed(2)} hours`;
     } else {
-      return `${minutes} mins`;
+      return `${minutes.toFixed(2)} mins`;
     }
   };
 
@@ -62,7 +60,6 @@ const InteractionAnalysis = () => {
     };
   }, [aggregationType, scrapingAllowed]);
 
-
   // Toggle YoutubeContentScrapping value in storage
   const toggleScrapingAllowed = () => {
     const newValue = !scrapingAllowed;
@@ -89,58 +86,79 @@ const InteractionAnalysis = () => {
     },
   ];
 
-  return (
-    <Box className="interaction-analysis-container">
-      <h1>
-        Interaction Analysis {aggregationInterval && `(${aggregationInterval})`}
-      </h1>
-      <VStack padding={'12px'} gap={4}>
-      <YouTubeInteractionCard
-        title="Youtube"
-        icon= <SocialIcon url="https://youtube.com" label={`Youtube icon`} as="div" style={{ width: "40px",height: "40px" }}/>
-        graph={
-          <ResponsiveRadialBar
-            data={formattedData}
-            valueFormat={(value) => formatTimeValue(value)}
-            padding={0.4}
-            cornerRadius={2}
-            margin={{ right: 500}}
-            radialAxisStart={{ tickSize: 12, tickPadding: 12, tickRotation: 0 }}
-            circularAxisOuter={{ tickSize: 12, tickPadding: 12, tickRotation: 0}}
-            legends={[
-              {
-                anchor: "top-right",
-                direction: "column",
-                justify: true,
-                translateX: 50,
-                translateY: 0,
-                itemHeight: 18,
-                itemsSpacing: 12,
-                itemDirection: "left-to-right",
-                itemWidth: 100,
-                itemHeight: 18,
-                itemTextColor: "#999",
-                symbolSize: 12,
-                symbolShape: "circle",
-                effects: [
-                  {
-                    on: "hover",
-                    style: {
-                      itemTextColor: "#000",
-                    },
-                  },
-                ],
-              },
-            ]}
-          />
-        }
-        onSwitchChange={toggleScrapingAllowed}
-        isActive={scrapingAllowed}
-      />
-    </VStack>
-    
-    </Box>
+  // Inline style for the container
+  const containerStyle = {
+    padding: "10px 25px",
+    width: "100%",
+    height: "100%",
+    position: "relative",
+    backgroundColor: "#f7f9fc",
+    borderRadius: "8px",
+    // Simple fade-in effect using opacity transition
+    opacity: 1,
+    transition: "opacity 0.5s ease-out",
+  };
 
+  const headerStyle = {
+    marginBottom: "20px",
+    fontFamily: "Arial, sans-serif",
+  };
+
+  return (
+    <Box style={containerStyle}>
+      <Text as="h1" style={headerStyle}>
+        Interaction Analysis {aggregationInterval && `(${aggregationInterval})`}
+      </Text>
+      <VStack padding="12px" gap={4}>
+        <YouTubeInteractionCard
+          title="Youtube"
+          icon={
+            <SocialIcon
+              url="https://youtube.com"
+              label="Youtube icon"
+              style={{ width: "40px", height: "40px" }}
+            />
+          }
+          graph={
+            <ResponsiveRadialBar
+              data={formattedData}
+              valueFormat={(value) => formatTimeValue(value)}
+              padding={0.4}
+              cornerRadius={2}
+              margin={{ right: 500 }}
+              radialAxisStart={{ tickSize: 12, tickPadding: 12, tickRotation: 0 }}
+              circularAxisOuter={{ tickSize: 12, tickPadding: 12, tickRotation: 0 }}
+              legends={[
+                {
+                  anchor: "top-right",
+                  direction: "column",
+                  justify: true,
+                  translateX: 50,
+                  translateY: 0,
+                  itemHeight: 18,
+                  itemsSpacing: 12,
+                  itemDirection: "left-to-right",
+                  itemWidth: 100,
+                  itemTextColor: "#999",
+                  symbolSize: 12,
+                  symbolShape: "circle",
+                  effects: [
+                    {
+                      on: "hover",
+                      style: {
+                        itemTextColor: "#000",
+                      },
+                    },
+                  ],
+                },
+              ]}
+            />
+          }
+          onSwitchChange={toggleScrapingAllowed}
+          isActive={scrapingAllowed}
+        />
+      </VStack>
+    </Box>
   );
 };
 
