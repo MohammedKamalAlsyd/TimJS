@@ -280,6 +280,14 @@ const Header = () => {
               >
                 Give Star on GitHub
               </a>
+              <a
+                href="https://www.kaggle.com/code/mohammedkamalalsyd/timjs-data-processing"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={dropdownMenuLinkStyle}
+              >
+                Upvote on Kaggle
+              </a>
             </div>
           </div>
           <a

@@ -17,6 +17,7 @@ import {
   Tr,
   Th,
   Td,
+  Collapse,
 } from "@chakra-ui/react";
 import { useGlobalContext } from "../utils/GlobalContext";
 import { retrievePatternData } from "../utils/DataProcessor";
@@ -31,6 +32,7 @@ const PatternFinder = () => {
   const [graphData, setGraphData] = useState({ nodes: [], links: [] });
   const [tooltip, setTooltip] = useState({ show: false, x: 0, y: 0, text: "" });
   const [arrange, setArrange] = useState(false);
+  const [infoExpanded, setInfoExpanded] = useState(false);
   const toast = useToast();
 
   // Container style (replacing PatternFinder.css)
@@ -74,7 +76,9 @@ const PatternFinder = () => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const { graphData, comparisonResults } = await retrievePatternData(aggregationType);
+        const { graphData, comparisonResults } = await retrievePatternData(
+          aggregationType
+        );
         setGraphData(graphData);
         setComparisonResults(comparisonResults);
       } catch (error) {
@@ -106,11 +110,17 @@ const PatternFinder = () => {
   const MIN_EDGE_WIDTH = 1;
 
   const maxNodeSize = useMemo(() => {
-    return graphData.nodes.reduce((max, node) => Math.max(max, node.size), 0);
+    return graphData.nodes.reduce(
+      (max, node) => Math.max(max, node.size),
+      0
+    );
   }, [graphData.nodes]);
 
   const maxEdgeValue = useMemo(() => {
-    return graphData.links.reduce((max, link) => Math.max(max, link.value), 0);
+    return graphData.links.reduce(
+      (max, link) => Math.max(max, link.value),
+      0
+    );
   }, [graphData.links]);
 
   // Compute Cytoscape elements
@@ -118,7 +128,8 @@ const PatternFinder = () => {
     const cyNodes = graphData.nodes.map((node) => {
       const normSize =
         maxNodeSize > 0
-          ? (node.size / maxNodeSize) * (MAX_NODE_SIZE - MIN_NODE_SIZE) + MIN_NODE_SIZE
+          ? (node.size / maxNodeSize) * (MAX_NODE_SIZE - MIN_NODE_SIZE) +
+            MIN_NODE_SIZE
           : MIN_NODE_SIZE;
       const icon = node.icon || DefaultIcon;
       return {
@@ -131,7 +142,9 @@ const PatternFinder = () => {
       cyEdges = graphData.links.map((link) => {
         const normWidth =
           maxEdgeValue > 0
-            ? (link.value / maxEdgeValue) * (MAX_EDGE_WIDTH - MIN_EDGE_WIDTH) + MIN_EDGE_WIDTH
+            ? (link.value / maxEdgeValue) *
+                (MAX_EDGE_WIDTH - MIN_EDGE_WIDTH) +
+              MIN_EDGE_WIDTH
             : MIN_EDGE_WIDTH;
         return {
           data: {
@@ -159,7 +172,9 @@ const PatternFinder = () => {
       cyEdges = Object.values(edgeMap).map((edge) => {
         const normWidth =
           maxEdgeValue > 0
-            ? (edge.data.value / maxEdgeValue) * (MAX_EDGE_WIDTH - MIN_EDGE_WIDTH) + MIN_EDGE_WIDTH
+            ? (edge.data.value / maxEdgeValue) *
+                (MAX_EDGE_WIDTH - MIN_EDGE_WIDTH) +
+              MIN_EDGE_WIDTH
             : MIN_EDGE_WIDTH;
         return {
           data: {
@@ -203,13 +218,17 @@ const PatternFinder = () => {
         "line-color": (ele) => {
           const value = ele.data("value");
           const normalized = maxEdgeValue > 0 ? value / maxEdgeValue : 0;
-          const grayValue = Math.round(128 + (255 - 128) * (1 - normalized));
+          const grayValue = Math.round(
+            128 + (255 - 128) * (1 - normalized)
+          );
           return `rgb(${grayValue}, ${grayValue}, ${grayValue})`;
         },
         "target-arrow-color": (ele) => {
           const value = ele.data("value");
           const normalized = maxEdgeValue > 0 ? value / maxEdgeValue : 0;
-          const grayValue = Math.round(128 + (255 - 128) * (1 - normalized));
+          const grayValue = Math.round(
+            128 + (255 - 128) * (1 - normalized)
+          );
           return `rgb(${grayValue}, ${grayValue}, ${grayValue})`;
         },
         "target-arrow-shape": isDirected ? "triangle" : "none",
@@ -463,7 +482,7 @@ const PatternFinder = () => {
         </Box>
       </Box>
 
-      {/* Information Section */}
+      {/* Information Section (Collapsible) */}
       <Box
         backgroundColor="#000000"
         p={5}
@@ -472,17 +491,44 @@ const PatternFinder = () => {
         borderRadius="8px"
         boxShadow="0 2px 4px rgba(0,0,0,0.1)"
       >
-        <Text fontSize="xl" fontWeight="bold" mb={2}>
-          Information:
-        </Text>
-        <Box as="ul" pl={4}>
-          <Box as="li" mb={1}>
-            Icon Size & Edges Reflect Usage Frequency.
+        <HStack justify="space-between" align="center">
+          <Text fontSize="xl" fontWeight="bold" mb={2}>
+            Information:
+          </Text>
+          <Button
+            style={{
+              backgroundColor: "#F0F0F0",
+              border: "1px solid #D0D0D0",
+              padding: "10px 20px",
+              borderRadius: "4px",
+              fontSize: "16px",
+              fontWeight: "bold",
+              color: "#333",
+              transition: "background-color 0.3s",
+            }}
+            onClick={() => setInfoExpanded(!infoExpanded)}
+          >
+            {infoExpanded ? "Show Less" : "Show More"}
+          </Button>
+        </HStack>
+        <Collapse in={infoExpanded} animateOpacity>
+          <Box mt={2}>
+            <Box as="ul" pl={4}>
+              <Box as="li" mb={1}>
+                Icon Size & Edges Reflect Usage Frequency.
+              </Box>
+              <Box as="li" mb={1}>
+                A/B testing aims to determine whether observed patterns are the result of actual changes or if they reflect consistent usage trends.
+              </Box>
+              <Box as="li" mb={1}>
+                Not All Data is used in The Graph & A/B testing. Only the Top 80% used Websites are used to plot the network graph and implement the A/B Testing.
+              </Box>
+              <Box as="li" mb={1}>
+                Data can be misleading on small frequencies, but the certainty increases with sample size.
+              </Box>
+            </Box>
           </Box>
-          <Box as="li">
-            A/B testing aims to determine whether observed patterns are the result of actual changes or if they reflect consistent usage trends.
-          </Box>
-        </Box>
+        </Collapse>
       </Box>
     </Box>
   );

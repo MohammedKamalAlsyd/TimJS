@@ -366,7 +366,7 @@ const processPatternData = (trackingData, relevantDates) => {
     return { source, target, value: Math.round(edgeTransitions[key]) };
   });
 
-  // Filter nodes and links by a 70% threshold
+  // Filter nodes and links by a 80% threshold
   const maxSize = Math.max(...nodes.map((node) => node.size || 0));
   const threshold = 0.2 * maxSize;
   const filteredNodes = nodes.filter((node) => node.size >= threshold);
