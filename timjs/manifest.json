@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/chrome-manifest.json",
   "manifest_version": 3,
-  "version": "0.0.1",
+  "version": "1.0.0",
   "author": "Mohammed Kamal",
   "name": "TimJS",
   "description": "TimJS is an AI-powered browser tool that helps you understand and improve your online behavior.",
@@ -27,6 +27,6 @@
   "background": {
     "service_worker": "src/utils/background.js"
   },
-  "permissions": ["tabs", "activeTab", "storage", "favicon","webNavigation"],
+  "permissions": ["tabs", "activeTab", "storage","scripting","windows", "favicon","webNavigation"],
   "host_permissions": ["<all_urls>"]
 }
