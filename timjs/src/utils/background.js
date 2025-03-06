@@ -207,9 +207,9 @@ function periodicUpdateAndSave() {
     }
   }
   saveData();
-  setTimeout(periodicUpdateAndSave, 15000); // Schedule next update in 15 seconds
+  setTimeout(periodicUpdateAndSave, 4000); // Schedule next update in 15 seconds
 }
-setTimeout(periodicUpdateAndSave, 15000);
+setTimeout(periodicUpdateAndSave, 4000);
 
 // Function to check if a URL is a YouTube page
 function isYouTubePage(url) {
