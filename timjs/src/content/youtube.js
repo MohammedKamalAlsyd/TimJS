@@ -1,23 +1,37 @@
-/**
- * content/youtube.js
- * This content script runs on YouTube video and shorts pages.
- * It extracts the video genre from the page’s meta tag and returns it to the background script.
- */
-
-console.log("Content script loaded for tab " + chrome.runtime.getManifest().name);
-chrome.runtime.sendMessage({ action: "contentScriptLoaded" });
-
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => { // Added sender argument for completeness, though not used in this case
-  if (message.action === "extractGenre") {
-    // Attempt to find a meta tag with the genre information
-    const metaTag = document.querySelector('meta[itemprop="genre"]');
-    let genre = "Unknown";
-    if (metaTag) {
-      genre = metaTag.getAttribute('content') || "Unknown";
+(function() {
+    let genreExtracted = null;
+    let currentUrl = location.href;
+  
+    // Extract genre from the current document using a regex.
+    function extractGenre() {
+      let rawHTML = new XMLSerializer().serializeToString(document);
+      const regex = /<meta\s+itemprop=["']genre["']\s+content=["']([^"']+)["']/i;
+      const match = regex.exec(rawHTML);
+      return match ? match[1] : "Unknown";
     }
-    // Send the genre back as a response
-    sendResponse({ genre });
-    return true; // Indicate you wish to use sendResponse asynchronously (important for onMessage in background script, even if response is immediate here)
-  }
-  return false; // Indicate you will send response synchronously or not at all for other messages.
-});
+  
+    // Update the extracted genre and log it.
+    function updateGenre() {
+      genreExtracted = extractGenre();
+      console.log("Extracted genre:", genreExtracted);
+    }
+  
+    // Initial extraction when the content script loads.
+    updateGenre();
+  
+    setInterval(() => {
+        if (window.location.href !== currentUrl) {
+            currentUrl = window.location.href;
+            console.log("URL changed in YouTube tab:", currentUrl);
+            updateGenre()
+        }
+    }, 1000); // Check every 1 second (adjust interval as needed)
+  
+    // Listen for background messages requesting the YouTube genre.
+    chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+      if (msg.type === 'get_youtube_genre') {
+        sendResponse({ genre: genreExtracted || "Unknown" });
+      }
+    });
+  })();
+  

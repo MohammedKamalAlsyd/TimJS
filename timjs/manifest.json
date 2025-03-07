@@ -14,19 +14,30 @@
     "48": "src/imgs/icon.png",
     "128": "src/imgs/icon.png"
   },
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/shorts/*","https://www.youtube.com/watch*"],
+      "js": ["src/content/youtube.js"],
+      "run_at": "document_idle"
+    }
+  ],
   "web_accessible_resources": [
     {
       "resources": ["_favicon/*"],
       "matches": ["<all_urls>"]
-    },
-    {
-      "resources": ["youtubeScript.js"],
-      "matches": ["https://www.youtube.com/*"]
     }
   ],
   "background": {
     "service_worker": "src/utils/background.js"
   },
-  "permissions": ["tabs", "activeTab", "storage","scripting","windows", "favicon","webNavigation"],
+  "permissions": [
+    "tabs",
+    "activeTab",
+    "storage",
+    "scripting",
+    "windows",
+    "favicon",
+    "webNavigation"
+  ],
   "host_permissions": ["<all_urls>"]
 }

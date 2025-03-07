@@ -13,23 +13,17 @@ async function getBackgroundPage(context) {
 
 test.describe('Background Script Tests', () => {
   test.beforeEach(async ({ page, context }) => {
-    // Attempt to clear localStorage if accessible.
-    try {
-      await page.evaluate(() => localStorage.clear());
-    } catch (err) {
-      console.warn('localStorage.clear() failed, skipping:', err);
-    }
-    
-    // Clear chrome.storage.local via the background page.
     const backgroundPage = await getBackgroundPage(context);
     await backgroundPage.evaluate(() => {
       return new Promise((resolve) => {
-        chrome.runtime.sendMessage({ action: 'clearStorage' }, (response) => {
-          resolve(response && response.status);
+        chrome.storage.local.clear(() => {
+          resolve();
         });
       });
     });
   });
+
+
 
   // Test 1: Verify that time spent on a regular website is recorded accurately.
   test('records time spent on a website', async ({ page, context }) => {
@@ -43,7 +37,6 @@ test.describe('Background Script Tests', () => {
 
     const backgroundPage = await getBackgroundPage(context);
     const trackingData = await backgroundPage.evaluate(() => trackingData);
-    console.log('ttt',trackingData)
     const today = new Date().toISOString().split('T')[0];
     const domain = 'example.com';
     const recordedTime = trackingData.sessions[today][domain].time; // Recorded in minutes.
@@ -51,6 +44,8 @@ test.describe('Background Script Tests', () => {
     // Allow a maximum error of 5 seconds (~0.0833 minutes).
     expect(Math.abs(recordedTime - expectedTime)).toBeLessThanOrEqual(0.0833);
   });
+
+
 
   // Test 2: Verify that transitioning from one website to another is tracked correctly.
   test('records next website transition correctly', async ({ page, context }) => {
@@ -69,19 +64,15 @@ test.describe('Background Script Tests', () => {
     expect(nextWebsites['google.com']).toBe(1);
   });
 
+
+
   // Test 3: Verify YouTube video session time for a 5-minute session.
   test('records YouTube video time for a 5 minute session', async ({ page, context }) => {
-    // Intercept the proxy fetch for YouTube to return dummy HTML with genre "Educational".
-    await page.route('https://api.codetabs.com/v1/proxy*', (route) => {
-      route.fulfill({
-        status: 200,
-        contentType: 'text/html',
-        body: '<html><head><meta itemprop="genre" content="Educational"></head><body></body></html>',
-      });
-    });
-
     const videoUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
     await page.goto(videoUrl);
+    // Wait briefly to simulate user activity.
+    await page.waitForTimeout(5000);
+  
     const backgroundPage = await getBackgroundPage(context);
     // Adjust session start time to simulate a 5-minute session.
     await backgroundPage.evaluate(() => {
@@ -94,33 +85,29 @@ test.describe('Background Script Tests', () => {
     });
     // Navigate away to trigger saving of the session.
     await page.goto('https://example.com');
-    await page.waitForTimeout(1000); // Allow data to be saved.
-
+    await page.waitForTimeout(1000); // Allow background save time.
+  
     const interactionData = await backgroundPage.evaluate(() => interactionData);
+    console.log(interactionData) // { youtube: {} }
     const today = new Date().toISOString().split('T')[0];
-    console.log(interactionData)
     const youtubeData = interactionData.youtube[today];
     expect(youtubeData).toBeDefined();
     const genres = youtubeData.genres;
     expect(Object.keys(genres).length).toBeGreaterThan(0);
-    const recordedVideoTime = genres['Educational'] ? genres['Educational'].video || 0 : 0;
+    const recordedVideoTime = genres['Music'] ? genres['Music'].video || 0 : 0;
     const expectedTime = 5; // Expected 5 minutes.
     expect(Math.abs(recordedVideoTime - expectedTime)).toBeLessThanOrEqual(0.0833);
   });
 
+
+  
   // Test 4: Verify YouTube shorts session time for a 5-minute session.
   test('records YouTube shorts time for a 5 minute session', async ({ page, context }) => {
-    // Intercept the proxy fetch for YouTube to return dummy HTML with genre "Gaming".
-    await page.route('https://api.codetabs.com/v1/proxy*', (route) => {
-      route.fulfill({
-        status: 200,
-        contentType: 'text/html',
-        body: '<html><head><meta itemprop="genre" content="Gaming"></head><body></body></html>',
-      });
-    });
-
-    const shortsUrl = 'https://www.youtube.com/shorts/8J9Z_G8r8YQ';
+    const shortsUrl = 'https://www.youtube.com/shorts/ggcWTdwWYgo';
     await page.goto(shortsUrl);
+    // Wait briefly to simulate user activity.
+    await page.waitForTimeout(1000);
+    
     const backgroundPage = await getBackgroundPage(context);
     // Adjust session start time to simulate a 5-minute session.
     await backgroundPage.evaluate(() => {
@@ -133,7 +120,7 @@ test.describe('Background Script Tests', () => {
     });
     // Navigate away to trigger saving of the session.
     await page.goto('https://example.com');
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(1000); // Allow background save time.
 
     const interactionData = await backgroundPage.evaluate(() => interactionData);
     const today = new Date().toISOString().split('T')[0];
