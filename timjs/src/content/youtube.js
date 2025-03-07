@@ -2,30 +2,64 @@
     let genreExtracted = null;
     let currentUrl = location.href;
   
-    // Extract genre from the current document using a regex.
-    function extractGenre() {
-      let rawHTML = new XMLSerializer().serializeToString(document);
+    /**
+     * Extracts the genre from a given document's HTML.
+     * @param {Document} doc - The document to extract from.
+     * @returns {string} The extracted genre or "Unknown".
+     */
+    function extractGenreFromDocument(doc) {
+      // Serialize the entire document to string.
+      const rawHTML = new XMLSerializer().serializeToString(doc);
+      // Look for the meta tag with itemprop="genre".
       const regex = /<meta\s+itemprop=["']genre["']\s+content=["']([^"']+)["']/i;
       const match = regex.exec(rawHTML);
       return match ? match[1] : "Unknown";
     }
   
-    // Update the extracted genre and log it.
+    /**
+     * Updates the genre variable.
+     * For regular videos, it uses the current document.
+     * For shorts (or cases where the head isn’t updated), it fetches the new URL.
+     */
     function updateGenre() {
-      genreExtracted = extractGenre();
-      console.log("Extracted genre:", genreExtracted);
+      if (!currentUrl.includes('/shorts/')) {
+        // For non-shorts, simply extract from the current document.
+        genreExtracted = extractGenreFromDocument(document);
+        console.log("Extracted genre:", genreExtracted);
+      } else {
+        // For shorts, fetch the new page HTML and then extract.
+        fetch(currentUrl)
+          .then(response => response.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const newDoc = parser.parseFromString(html, 'text/html');
+            genreExtracted = extractGenreFromDocument(newDoc);
+            console.log("Extracted genre for shorts:", genreExtracted);
+          })
+          .catch(err => {
+            console.error("Failed to fetch page for shorts:", err);
+            genreExtracted = "Unknown";
+          });
+      }
     }
   
-    // Initial extraction when the content script loads.
-    updateGenre();
+    // Listen to YouTube's navigation event (SPA navigation)
+    window.addEventListener('yt-navigate-finish', () => {
+      if (window.location.href !== currentUrl) {
+        currentUrl = window.location.href;
+        console.log("yt-navigate-finish event, new URL:", currentUrl);
+        updateGenre();
+      }
+    });
   
+    // Fallback: poll for URL changes every second.
     setInterval(() => {
-        if (window.location.href !== currentUrl) {
-            currentUrl = window.location.href;
-            console.log("URL changed in YouTube tab:", currentUrl);
-            updateGenre()
-        }
-    }, 1000); // Check every 1 second (adjust interval as needed)
+      if (window.location.href !== currentUrl) {
+        currentUrl = window.location.href;
+        console.log("URL changed (polling), new URL:", currentUrl);
+        updateGenre();
+      }
+    }, 1000);
   
     // Listen for background messages requesting the YouTube genre.
     chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
@@ -33,5 +67,8 @@
         sendResponse({ genre: genreExtracted || "Unknown" });
       }
     });
+  
+    // Initial genre extraction on content script load.
+    updateGenre();
   })();
   
