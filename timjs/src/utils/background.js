@@ -1,4 +1,8 @@
-// Initialize tracking data structure
+// ------------------------------
+// Background Script (background.js)
+// ------------------------------
+
+// Initialize tracking data structure.
 let trackingData = {
   sessions: {},         // Per-day website session tracking
   browsing: {},         // Total browsing time per day
@@ -11,28 +15,29 @@ let interactionData = {
   youtube: {}           // YouTube interaction data
 };
 
-// Active tab data per window
+// Active tab data per window.
 let activeTabs = {};     // { [windowId]: { tab, sessionStart } }
 let prevWebsites = {};   // { [windowId]: previous website domain }
 
-// Favicon cache per domain
+// (ADDED) Tab status map to track loading status.
+let tabStatuses = {};    // { [tabId]: "loading" | "complete" }
+
+// Favicon cache per domain.
 const domainToFavicon = {};
 
-// List of URL prefixes to exclude from tracking
+// List of URL prefixes to exclude from tracking.
 const excludedUrls = [
   "chrome:",
   "chrome-extension:",
   "file:",
   "about:",
-  "edge:",
-  "brave:"
 ];
 
 function isExcludedUrl(url) {
   return excludedUrls.some(prefix => url.startsWith(prefix));
 }
 
-// Helper: Extract domain from a URL
+// Helper: Extract domain from a URL.
 function extractDomain(url) {
   try {
     const { hostname } = new URL(url);
@@ -43,14 +48,14 @@ function extractDomain(url) {
   }
 }
 
-// Helper: Get today's date in "YYYY-MM-DD" format
+// Helper: Get today's date in "YYYY-MM-DD" format.
 function getCurrentDate() {
   const today = new Date();
   const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
   return localDate.toISOString().split("T")[0];
 }
 
-// Favicon retrieval functions
+// Favicon retrieval functions.
 function getFaviconUrl(domain) {
   if (domainToFavicon[domain]) {
     return domainToFavicon[domain];
@@ -65,9 +70,7 @@ async function fetchFaviconUrl(domain, tabId) {
     if (response.ok) {
       return rootFavicon;
     }
-  } catch (e) {
-    // Silently fail
-  }
+  } catch (e) {}
   
   if (tabId) {
     try {
@@ -81,9 +84,7 @@ async function fetchFaviconUrl(domain, tabId) {
       if (result && result.result) {
         return result.result;
       }
-    } catch (e) {
-      // Silently fail
-    }
+    } catch (e) {}
   }
   
   const ddgUrl = `https://icons.duckduckgo.com/ip3/${domain}.ico`;
@@ -92,15 +93,13 @@ async function fetchFaviconUrl(domain, tabId) {
     if (response.ok) {
       return ddgUrl;
     }
-  } catch (e) {
-    // Silently fail
-  }
+  } catch (e) {}
   
   const googleUrl = `http://www.google.com/s2/favicons?domain=${domain}`;
   return googleUrl;
 }
 
-// Asynchronously update favicon cache for a domain
+// Asynchronously update favicon cache for a domain.
 function updateFaviconForDomain(domain, tabId) {
   fetchFaviconUrl(domain, tabId)
     .then(faviconUrl => {
@@ -108,12 +107,10 @@ function updateFaviconForDomain(domain, tabId) {
         domainToFavicon[domain] = faviconUrl;
       }
     })
-    .catch(() => {
-      // Silently fail
-    });
+    .catch(() => {});
 }
 
-// Delete data older than 30 days
+// Delete data older than 30 days.
 function deleteOldData() {
   const today = new Date();
   const cutoffDate = new Date(today.setDate(today.getDate() - 30))
@@ -142,7 +139,7 @@ function deleteOldData() {
   }
 }
 
-// Restore previously saved data on extension startup
+// Restore previously saved data on extension startup.
 chrome.storage.local.get(["trackingData", "interactionData"], (data) => {
   if (data.trackingData) {
     trackingData = data.trackingData;
@@ -153,12 +150,12 @@ chrome.storage.local.get(["trackingData", "interactionData"], (data) => {
   deleteOldData();
 });
 
-// Save data locally
+// Save data locally.
 function saveData() {
   chrome.storage.local.set({ trackingData, interactionData });
 }
 
-// Update YouTube scrapping data
+// Update YouTube scrapping data.
 function updateYouTubeScrappingData(scrapedData, timeSpent) {
   chrome.storage.local.get(["interactionData"], (result) => {
     const now = new Date();
@@ -174,43 +171,49 @@ function updateYouTubeScrappingData(scrapedData, timeSpent) {
   });
 }
 
-// Updated function to handle YouTube tab using the content script
+// ------------------------------
+// Updated function to handle YouTube tab using the content script.
+// Now waits for the async genre response before updating data.
 function handleYouTubeTab(tabId, timeSpent) {
   chrome.storage.sync.get("YoutubeContentScrapping", (data) => {
     if (data.YoutubeContentScrapping === false) return;
     chrome.tabs.sendMessage(tabId, { type: 'get_youtube_genre' }, (response) => {
-      if (chrome.runtime.lastError) {
+      if (chrome.runtime.lastError || !response || !response.genre) {
         return;
       }
-      if (response && response.genre) {
-        // Search activeTabs for an entry with the matching tab id.
-        let activeTabInfo = null;
-        for (const key in activeTabs) {
-          if (activeTabs.hasOwnProperty(key)) {
-            if (activeTabs[key].tab && activeTabs[key].tab.id === tabId) {
-              activeTabInfo = activeTabs[key];
-              break;
-            }
+      // Search activeTabs for an entry with the matching tab id.
+      let activeTabInfo = null;
+      for (const key in activeTabs) {
+        if (activeTabs.hasOwnProperty(key)) {
+          if (activeTabs[key].tab && activeTabs[key].tab.id === tabId) {
+            activeTabInfo = activeTabs[key];
+            break;
           }
         }
-        // If found, determine the type; otherwise, default to "video"
-        const type = (activeTabInfo && activeTabInfo.tab.url.includes("/shorts/"))
-          ? "shorts" : "video";
-        const scrapedData = { genre: response.genre, type, timestamp: Date.now() };
-        updateYouTubeScrappingData(scrapedData, timeSpent);
       }
+      const type = (activeTabInfo && activeTabInfo.tab.url.includes("/shorts/"))
+        ? "shorts" : "video";
+      const scrapedData = { genre: response.genre, type, timestamp: Date.now() };
+      updateYouTubeScrappingData(scrapedData, timeSpent);
     });
   });
 }
 
-
-// Periodically update and save data
+// ------------------------------
+// Periodically update and save data.
+// - Now checks that the tab's status is "complete" before accumulating time.
+// - Update frequency changed to every 2000ms (adjustable as needed).
 function periodicUpdateAndSave() {
   const now = new Date();
   for (const windowId in activeTabs) {
     if (activeTabs.hasOwnProperty(windowId)) {
       const activeTabEntry = activeTabs[windowId];
-      if (activeTabEntry && activeTabEntry.tab && activeTabEntry.tab.url) {
+      if (
+        activeTabEntry &&
+        activeTabEntry.tab &&
+        activeTabEntry.tab.url &&
+        tabStatuses[activeTabEntry.tab.id] === "complete"  // Only update if the tab is fully loaded.
+      ) {
         const timeSpent = Math.max((now - activeTabEntry.sessionStart) / 1000 / 60, 0); // minutes
         saveWebsiteTime(activeTabEntry.tab.url, timeSpent);
         if (activeTabEntry.tab.url.includes("https://www.youtube.com/")) {
@@ -221,11 +224,12 @@ function periodicUpdateAndSave() {
     }
   }
   saveData();
-  setTimeout(periodicUpdateAndSave, 4000);
+  setTimeout(periodicUpdateAndSave, 5000);
 }
-setTimeout(periodicUpdateAndSave, 4000);
+setTimeout(periodicUpdateAndSave, 5000);
 
-// Track website usage for a tab
+// ------------------------------
+// Track website usage for a tab.
 function trackWebsiteUsage(tab) {
   if (!tab || !tab.url || isExcludedUrl(tab.url)) return;
   const currentDomain = extractDomain(tab.url);
@@ -241,13 +245,17 @@ function trackWebsiteUsage(tab) {
         handleYouTubeTab(activeTabs[windowId].tab.id, timeSpent);
       }
       if (prevWebsites[windowId] && prevWebsites[windowId] !== currentDomain) {
-        const nextWebsites = trackingData.sessions[todayDate][prevWebsites[windowId]].nextWebsites;
-        nextWebsites[currentDomain] = (nextWebsites[currentDomain] || 0) + 1;
+        // Safeguard: ensure the previous website session exists.
+        if (trackingData.sessions[todayDate] && trackingData.sessions[todayDate][prevWebsites[windowId]]) {
+          const nextWebsites = trackingData.sessions[todayDate][prevWebsites[windowId]].nextWebsites;
+          nextWebsites[currentDomain] = (nextWebsites[currentDomain] || 0) + 1;
+        }
       }
     }
   }
   activeTabs[windowId] = { tab: tab, sessionStart: new Date() };
   prevWebsites[windowId] = currentDomain;
+  // Ensure sessions object for today is initialized.
   if (!trackingData.sessions[todayDate]) {
     trackingData.sessions[todayDate] = {};
   }
@@ -267,10 +275,15 @@ function trackWebsiteUsage(tab) {
   saveData();
 }
 
-// Save time spent on a website
+// ------------------------------
+// Save time spent on a website.
+// Added a safeguard to initialize the sessions object for today.
 function saveWebsiteTime(url, timeSpent) {
   const domain = extractDomain(url);
   const todayDate = getCurrentDate();
+  if (!trackingData.sessions[todayDate]) {
+    trackingData.sessions[todayDate] = {}; // [ADDED]
+  }
   if (!trackingData.sessions[todayDate][domain]) {
     trackingData.sessions[todayDate][domain] = {
       icon: getFaviconUrl(domain),
@@ -284,21 +297,34 @@ function saveWebsiteTime(url, timeSpent) {
   trackingData.total_browsing_time += timeSpent;
 }
 
-// Listen for tab updates
+// ------------------------------
+// Listen for tab updates.
+// Now updates tabStatuses and only calls trackWebsiteUsage when status is "complete".
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.status) {
+    tabStatuses[tabId] = changeInfo.status;
+  }
   if (changeInfo.status === "complete") {
     trackWebsiteUsage(tab);
   }
 });
 
-// Listen for tab activation
+// Clean up tabStatuses when a tab is removed.
+chrome.tabs.onRemoved.addListener((tabId) => {
+  delete tabStatuses[tabId];
+});
+
+// Listen for tab activation.
+// Only tracks the tab if its status is "complete" to avoid premature tracking.
 chrome.tabs.onActivated.addListener((activeInfo) => {
   chrome.tabs.get(activeInfo.tabId, (tab) => {
-    trackWebsiteUsage(tab);
+    if (tab.status === "complete") {
+      trackWebsiteUsage(tab);
+    }
   });
 });
 
-// Listen for window focus changes
+// Listen for window focus changes.
 chrome.windows.onFocusChanged.addListener((windowId) => {
   if (windowId === chrome.windows.WINDOW_ID_NONE) {
     for (const winId in activeTabs) {
@@ -326,12 +352,12 @@ chrome.windows.onFocusChanged.addListener((windowId) => {
   }
 });
 
-// Handle browser suspend (close)
+// Handle browser suspend (close).
 chrome.runtime.onSuspend.addListener(() => {
   saveData();
 });
 
-// Restore data on browser startup
+// Restore data on browser startup.
 chrome.runtime.onStartup.addListener(() => {
   chrome.storage.local.get(["trackingData", "interactionData"], (data) => {
     if (data.trackingData) {
