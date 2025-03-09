@@ -30,6 +30,9 @@
   "background": {
     "service_worker": "src/utils/background.js"
   },
+  "externally_connectable": {
+    "matches": ["*://*.youtube.com/*"]
+  },
   "permissions": [
     "tabs",
     "activeTab",

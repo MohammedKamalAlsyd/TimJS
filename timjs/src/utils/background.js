@@ -66,7 +66,7 @@ async function fetchFaviconUrl(domain, tabId) {
       return rootFavicon;
     }
   } catch (e) {
-    console.error(`Root favicon not available for ${domain}:`, e);
+    // Silently fail
   }
   
   if (tabId) {
@@ -82,7 +82,7 @@ async function fetchFaviconUrl(domain, tabId) {
         return result.result;
       }
     } catch (e) {
-      console.error(`Content script favicon extraction failed for ${domain}:`, e);
+      // Silently fail
     }
   }
   
@@ -93,7 +93,7 @@ async function fetchFaviconUrl(domain, tabId) {
       return ddgUrl;
     }
   } catch (e) {
-    console.error(`DuckDuckGo favicon not available for ${domain}:`, e);
+    // Silently fail
   }
   
   const googleUrl = `http://www.google.com/s2/favicons?domain=${domain}`;
@@ -108,8 +108,8 @@ function updateFaviconForDomain(domain, tabId) {
         domainToFavicon[domain] = faviconUrl;
       }
     })
-    .catch(e => {
-      console.error(`Failed to update favicon for ${domain}:`, e);
+    .catch(() => {
+      // Silently fail
     });
 }
 
@@ -170,9 +170,7 @@ function updateYouTubeScrappingData(scrapedData, timeSpent) {
     todayData.genres[scrapedData.genre] = genreData;
     youtubeScrapping[todayDate] = todayData;
     interactionData.youtube = youtubeScrapping;
-    chrome.storage.local.set({ interactionData }, () => {
-      console.log("Updated YouTube scrapping data:", interactionData.youtube);
-    });
+    chrome.storage.local.set({ interactionData });
   });
 }
 
@@ -182,21 +180,29 @@ function handleYouTubeTab(tabId, timeSpent) {
     if (data.YoutubeContentScrapping === false) return;
     chrome.tabs.sendMessage(tabId, { type: 'get_youtube_genre' }, (response) => {
       if (chrome.runtime.lastError) {
-        console.error("Error communicating with YouTube content script:", chrome.runtime.lastError);
         return;
       }
-      console.log('genre',response.genre)
       if (response && response.genre) {
-        const type = (activeTabs[tabId] &&
-                      activeTabs[tabId].tab &&
-                      activeTabs[tabId].tab.url.includes("/shorts/"))
-                      ? "shorts" : "video";
-        const scrapedData = { genre: response.genre, type: type, timestamp: Date.now() };
+        // Search activeTabs for an entry with the matching tab id.
+        let activeTabInfo = null;
+        for (const key in activeTabs) {
+          if (activeTabs.hasOwnProperty(key)) {
+            if (activeTabs[key].tab && activeTabs[key].tab.id === tabId) {
+              activeTabInfo = activeTabs[key];
+              break;
+            }
+          }
+        }
+        // If found, determine the type; otherwise, default to "video"
+        const type = (activeTabInfo && activeTabInfo.tab.url.includes("/shorts/"))
+          ? "shorts" : "video";
+        const scrapedData = { genre: response.genre, type, timestamp: Date.now() };
         updateYouTubeScrappingData(scrapedData, timeSpent);
       }
     });
   });
 }
+
 
 // Periodically update and save data
 function periodicUpdateAndSave() {

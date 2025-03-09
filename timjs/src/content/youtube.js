@@ -25,7 +25,6 @@
       if (!currentUrl.includes('/shorts/')) {
         // For non-shorts, simply extract from the current document.
         genreExtracted = extractGenreFromDocument(document);
-        console.log("Extracted genre:", genreExtracted);
       } else {
         // For shorts, fetch the new page HTML and then extract.
         fetch(currentUrl)
@@ -34,10 +33,8 @@
             const parser = new DOMParser();
             const newDoc = parser.parseFromString(html, 'text/html');
             genreExtracted = extractGenreFromDocument(newDoc);
-            console.log("Extracted genre for shorts:", genreExtracted);
           })
-          .catch(err => {
-            console.error("Failed to fetch page for shorts:", err);
+          .catch(() => {
             genreExtracted = "Unknown";
           });
       }
@@ -47,7 +44,6 @@
     window.addEventListener('yt-navigate-finish', () => {
       if (window.location.href !== currentUrl) {
         currentUrl = window.location.href;
-        console.log("yt-navigate-finish event, new URL:", currentUrl);
         updateGenre();
       }
     });
@@ -56,7 +52,6 @@
     setInterval(() => {
       if (window.location.href !== currentUrl) {
         currentUrl = window.location.href;
-        console.log("URL changed (polling), new URL:", currentUrl);
         updateGenre();
       }
     }, 1000);
@@ -71,4 +66,3 @@
     // Initial genre extraction on content script load.
     updateGenre();
   })();
-  
