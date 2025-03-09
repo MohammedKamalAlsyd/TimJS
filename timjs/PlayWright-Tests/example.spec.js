@@ -24,8 +24,6 @@ test.describe('Background Script Tests', () => {
           });
         });
       });
-    } else {
-      console.log('WARNING: chrome.storage is not defined in service worker. Check manifest.json for "storage" permission.');
     }
   });
 
