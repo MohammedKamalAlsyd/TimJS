@@ -20,7 +20,6 @@ const Header = () => {
 
   const saveAggregationTypeToStorage = (value) => {
     chrome.storage.local.set({ aggregationType: value }, () => {
-      console.log("Aggregation type saved:", value);
     });
   };
 
