@@ -31,3 +31,6 @@ extension-env.d.ts
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Web Scrapping
+WebScrapping/raw data
