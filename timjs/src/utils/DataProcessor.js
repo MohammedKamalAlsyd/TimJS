@@ -436,7 +436,436 @@ const retrieveInteractionData = async (aggregationType) => {
 
 // Retrieve data for the PatternFinder page
 const retrievePatternData = async (aggregationType) => {
-  const trackingData = await fetchFromStorage("trackingData");
+  //const trackingData = await fetchFromStorage("trackingData");
+  //console.log(trackingData);
+  const trackingData = {
+    "browsing": {
+        "2025-03-04": 180.0,
+        "2025-03-06": 200.0,
+        "2025-03-07": 250.0,
+        "2025-03-09": 60.0,
+        "2025-03-13": 140.0,
+        "2025-03-14": 160.0,
+        "2025-03-16": 180.0
+    },
+    "sessions": {
+        "2025-03-04": {
+            "google.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/google.com.ico",
+                "nextWebsites": {
+                    "youtube.com": 10,
+                    "stackoverflow.com": 8,
+                    "github.com": 5,
+                    "facebook.com": 4,
+                    "wikipedia.org": 3
+                },
+                "time": 15.0
+            },
+            "youtube.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/youtube.com.ico",
+                "nextWebsites": {
+                    "google.com": 7,
+                    "facebook.com": 5,
+                    "netflix.com": 4,
+                    "reddit.com": 3
+                },
+                "time": 40.0
+            },
+            "facebook.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/facebook.com.ico",
+                "nextWebsites": {
+                    "youtube.com": 6,
+                    "instagram.com": 4,
+                    "twitter.com": 3,
+                    "google.com": 2
+                },
+                "time": 25.0
+            },
+            "stackoverflow.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/stackoverflow.com.ico",
+                "nextWebsites": {
+                    "github.com": 6,
+                    "google.com": 5,
+                    "youtube.com": 3
+                },
+                "time": 30.0
+            },
+            "github.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/github.com.ico",
+                "nextWebsites": {
+                    "stackoverflow.com": 4,
+                    "codesandbox.io": 3,
+                    "google.com": 2
+                },
+                "time": 20.0
+            },
+            "codesandbox.io": {
+                "icon": "https://icons.duckduckgo.com/ip3/codesandbox.io.ico",
+                "nextWebsites": {
+                    "github.com": 2,
+                    "stackoverflow.com": 1
+                },
+                "time": 10.0
+            },
+            "instagram.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/instagram.com.ico",
+                "nextWebsites": {
+                    "facebook.com": 3,
+                    "twitter.com": 2
+                },
+                "time": 15.0
+            },
+            "twitter.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/twitter.com.ico",
+                "nextWebsites": {
+                    "facebook.com": 2,
+                    "instagram.com": 1,
+                    "reddit.com": 1
+                },
+                "time": 10.0
+            },
+            "reddit.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/reddit.com.ico",
+                "nextWebsites": {
+                    "youtube.com": 2,
+                    "google.com": 1
+                },
+                "time": 15.0
+            }
+        },
+        "2025-03-06": {
+            "google.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/google.com.ico",
+                "nextWebsites": {
+                    "youtube.com": 12,
+                    "facebook.com": 6,
+                    "reddit.com": 5,
+                    "quora.com": 4,
+                    "cnn.com": 3
+                },
+                "time": 20.0
+            },
+            "youtube.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/youtube.com.ico",
+                "nextWebsites": {
+                    "google.com": 8,
+                    "facebook.com": 6,
+                    "netflix.com": 5,
+                    "reddit.com": 4
+                },
+                "time": 45.0
+            },
+            "facebook.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/facebook.com.ico",
+                "nextWebsites": {
+                    "youtube.com": 7,
+                    "instagram.com": 5,
+                    "twitter.com": 4,
+                    "linkedin.com": 2
+                },
+                "time": 30.0
+            },
+            "reddit.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/reddit.com.ico",
+                "nextWebsites": {
+                    "youtube.com": 3,
+                    "google.com": 2,
+                    "quora.com": 1
+                },
+                "time": 20.0
+            },
+            "quora.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/quora.com.ico",
+                "nextWebsites": {
+                    "google.com": 2,
+                    "reddit.com": 1,
+                    "youtube.com": 1
+                },
+                "time": 15.0
+            },
+            "cnn.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/cnn.com.ico",
+                "nextWebsites": {
+                    "google.com": 2,
+                    "bbc.com": 1
+                },
+                "time": 10.0
+            },
+            "bbc.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/bbc.com.ico",
+                "nextWebsites": {
+                    "cnn.com": 1,
+                    "google.com": 1
+                },
+                "time": 10.0
+            },
+            "netflix.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/netflix.com.ico",
+                "nextWebsites": {
+                    "youtube.com": 3,
+                    "amazon.com": 2
+                },
+                "time": 30.0
+            }
+        },
+        "2025-03-07": {
+            "youtube.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/youtube.com.ico",
+                "nextWebsites": {
+                    "google.com": 10,
+                    "netflix.com": 8,
+                    "facebook.com": 6,
+                    "stackoverflow.com": 5
+                },
+                "time": 60.0
+            },
+            "google.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/google.com.ico",
+                "nextWebsites": {
+                    "youtube.com": 12,
+                    "stackoverflow.com": 7,
+                    "amazon.com": 4,
+                    "wikipedia.org": 3
+                },
+                "time": 25.0
+            },
+            "stackoverflow.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/stackoverflow.com.ico",
+                "nextWebsites": {
+                    "github.com": 6,
+                    "google.com": 5,
+                    "youtube.com": 4
+                },
+                "time": 35.0
+            },
+            "netflix.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/netflix.com.ico",
+                "nextWebsites": {
+                    "youtube.com": 5,
+                    "amazon.com": 3,
+                    "google.com": 2
+                },
+                "time": 50.0
+            },
+            "facebook.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/facebook.com.ico",
+                "nextWebsites": {
+                    "youtube.com": 4,
+                    "instagram.com": 3,
+                    "twitter.com": 2
+                },
+                "time": 20.0
+            }
+        },
+        "2025-03-09": {
+            "adobe.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/adobe.com.ico",
+                "nextWebsites": {
+                    "google.com": 2,
+                    "youtube.com": 1
+                },
+                "time": 15.0
+            },
+            "google.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/google.com.ico",
+                "nextWebsites": {
+                    "adobe.com": 1,
+                    "youtube.com": 2,
+                    "wikipedia.org": 1
+                },
+                "time": 10.0
+            },
+            "youtube.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/youtube.com.ico",
+                "nextWebsites": {
+                    "google.com": 1,
+                    "netflix.com": 1
+                },
+                "time": 25.0
+            },
+            "wikipedia.org": {
+                "icon": "https://icons.duckduckgo.com/ip3/wikipedia.org.ico",
+                "nextWebsites": {
+                    "google.com": 1
+                },
+                "time": 10.0
+            }
+        },
+        "2025-03-13": {
+            "google.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/google.com.ico",
+                "nextWebsites": {
+                    "github.com": 5,
+                    "youtube.com": 4,
+                    "mozilla.org": 3,
+                    "stackoverflow.com": 2
+                },
+                "time": 20.0
+            },
+            "github.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/github.com.ico",
+                "nextWebsites": {
+                    "codesandbox.io": 3,
+                    "stackoverflow.com": 2,
+                    "google.com": 1
+                },
+                "time": 25.0
+            },
+            "youtube.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/youtube.com.ico",
+                "nextWebsites": {
+                    "google.com": 3,
+                    "netflix.com": 2,
+                    "facebook.com": 1
+                },
+                "time": 35.0
+            },
+            "mozilla.org": {
+                "icon": "https://icons.duckduckgo.com/ip3/mozilla.org.ico",
+                "nextWebsites": {
+                    "google.com": 2,
+                    "codesandbox.io": 1
+                },
+                "time": 15.0
+            },
+            "codesandbox.io": {
+                "icon": "https://icons.duckduckgo.com/ip3/codesandbox.io.ico",
+                "nextWebsites": {
+                    "github.com": 2,
+                    "google.com": 1
+                },
+                "time": 20.0
+            },
+            "stackoverflow.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/stackoverflow.com.ico",
+                "nextWebsites": {
+                    "github.com": 1,
+                    "google.com": 1
+                },
+                "time": 25.0
+            }
+        },
+        "2025-03-14": {
+            "google.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/google.com.ico",
+                "nextWebsites": {
+                    "youtube.com": 6,
+                    "codesandbox.io": 4,
+                    "mozilla.org": 3,
+                    "amazon.com": 2
+                },
+                "time": 30.0
+            },
+            "youtube.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/youtube.com.ico",
+                "nextWebsites": {
+                    "google.com": 5,
+                    "netflix.com": 3,
+                    "facebook.com": 2
+                },
+                "time": 40.0
+            },
+            "codesandbox.io": {
+                "icon": "https://icons.duckduckgo.com/ip3/codesandbox.io.ico",
+                "nextWebsites": {
+                    "github.com": 3,
+                    "mozilla.org": 2,
+                    "google.com": 1
+                },
+                "time": 25.0
+            },
+            "mozilla.org": {
+                "icon": "https://icons.duckduckgo.com/ip3/mozilla.org.ico",
+                "nextWebsites": {
+                    "google.com": 2,
+                    "codesandbox.io": 1
+                },
+                "time": 20.0
+            },
+            "netflix.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/netflix.com.ico",
+                "nextWebsites": {
+                    "youtube.com": 2,
+                    "amazon.com": 1
+                },
+                "time": 35.0
+            },
+            "amazon.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/amazon.com.ico",
+                "nextWebsites": {
+                    "google.com": 1,
+                    "youtube.com": 1
+                },
+                "time": 10.0
+            }
+        },
+        "2025-03-16": {
+            "google.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/google.com.ico",
+                "nextWebsites": {
+                    "youtube.com": 8,
+                    "codesandbox.io": 5,
+                    "mozilla.org": 4,
+                    "linkedin.com": 3
+                },
+                "time": 25.0
+            },
+            "youtube.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/youtube.com.ico",
+                "nextWebsites": {
+                    "google.com": 6,
+                    "netflix.com": 4,
+                    "facebook.com": 3
+                },
+                "time": 45.0
+            },
+            "codesandbox.io": {
+                "icon": "https://icons.duckduckgo.com/ip3/codesandbox.io.ico",
+                "nextWebsites": {
+                    "github.com": 3,
+                    "google.com": 2,
+                    "mozilla.org": 1
+                },
+                "time": 30.0
+            },
+            "mozilla.org": {
+                "icon": "https://icons.duckduckgo.com/ip3/mozilla.org.ico",
+                "nextWebsites": {
+                    "google.com": 3,
+                    "codesandbox.io": 2
+                },
+                "time": 20.0
+            },
+            "linkedin.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/linkedin.com.ico",
+                "nextWebsites": {
+                    "google.com": 2,
+                    "twitter.com": 1
+                },
+                "time": 15.0
+            },
+            "netflix.com": {
+                "icon": "https://icons.duckduckgo.com/ip3/netflix.com.ico",
+                "nextWebsites": {
+                    "youtube.com": 3,
+                    "google.com": 1
+                },
+                "time": 40.0
+            }
+        }
+    },
+    "total_browsing_time": 1170.0,
+    "total_urls_opened": 2500,
+    "urlsOpened": {
+        "2025-03-04": 400,
+        "2025-03-06": 450,
+        "2025-03-07": 500,
+        "2025-03-09": 150,
+        "2025-03-13": 350,
+        "2025-03-14": 400,
+        "2025-03-16": 450
+    }
+}
   const relevantDates = getRelevantDates(getCurrentDate(), aggregationType);
   return processPatternData(trackingData, relevantDates);
 };
