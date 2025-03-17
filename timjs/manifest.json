@@ -42,5 +42,9 @@
     "favicon",
     "webNavigation"
   ],
-  "host_permissions": ["<all_urls>"]
+  "host_permissions": [
+    "https://www.youtube.com/*",
+    "https://icons.duckduckgo.com/ip3/*",
+    "http://www.google.com/s2/favicons?domain=*"
+  ]
 }
