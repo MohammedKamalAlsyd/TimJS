@@ -1,18 +1,26 @@
 # Version History
 
 ## v0.1
-- Initial implementation of tracking features:
-  - Website sessions and time tracking.
-  - Total URLs opened daily and overall count.
-  - Total browsing time calculation.
-  - YouTube interaction tracking (videos/shorts, genres, and types).
-- Transition tracking between domains.
-- Periodic data saving and automatic deletion of older data.
-- Data persistence across browser restarts.
+- Initial implementation of tracking features, including:
+  - Website session tracking and time monitoring.
+  - Tracking of total URLs opened daily and cumulative count.
+  - Calculation of total browsing time.
+  - Tracking of YouTube interactions (videos/shorts, genres, and content types).
+- Domain transition tracking.
+- Periodic data saving with automatic deletion of outdated data.
+- Ensured data persistence across browser restarts.
 
-## v0.2 (Planned)
-- Preserve Aggregation Type State
+## v0.2
+- Introduced aggregation type state preservation.
 - **Pattern Finder Page**:
-  - Introduce a dedicated page to analyze browsing patterns, visualize trends, and display usage statistics.
-- **Popup Pages**:
-  - Add popup interfaces to Provide concise and actionable user instructions directly within the extension.
+  - Added a dedicated page for analyzing browsing patterns, visualizing trends, and displaying key usage statistics.
+- **Popup Interfaces**:
+  - Integrated popup pages to provide concise, actionable instructions for users directly within the extension.
+
+## v0.3
+- Added Playwright tests to improve test coverage.
+- Enhanced background script functionality for better performance.
+
+## v0.4
+- Integrated source code for web scraping functionality.
+- Improved overall page design and user interface consistency.
