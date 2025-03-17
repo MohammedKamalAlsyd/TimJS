@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import CytoscapeComponent from "react-cytoscapejs";
 import { InlineMath, BlockMath } from "react-katex";
 import "katex/dist/katex.min.css";
@@ -19,7 +19,7 @@ import {
   Td,
   Collapse,
 } from "@chakra-ui/react";
-import { motion } from "framer-motion"; // Framer Motion for container animations
+import { motion } from "framer-motion";
 import { useGlobalContext } from "../utils/GlobalContext";
 import { retrievePatternData } from "../utils/DataProcessor";
 import DefaultIcon from "../imgs/BiWorld.png";
@@ -33,10 +33,12 @@ const PatternFinder = () => {
   const [graphData, setGraphData] = useState({ nodes: [], links: [] });
   const [tooltip, setTooltip] = useState({ show: false, x: 0, y: 0, text: "" });
   const [infoExpanded, setInfoExpanded] = useState(false);
-  const [cyInstance, setCyInstance] = useState(null);
+  const [graphVisible, setGraphVisible] = useState(false);
+  const [layoutFinished, setLayoutFinished] = useState(false);
+  const cyRef = useRef(null); // Use a ref to store the Cytoscape instance
   const toast = useToast();
 
-  // Container style for overall layout
+  // Overall container style
   const containerStyle = {
     display: "flex",
     flexDirection: "column",
@@ -57,7 +59,7 @@ const PatternFinder = () => {
     border: "none",
   };
 
-  // Inject fade-in keyframes into document head
+  // Inject fade-in keyframes using template literals
   useEffect(() => {
     const styleSheet = document.createElement("style");
     styleSheet.innerText = `
@@ -77,9 +79,7 @@ const PatternFinder = () => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const { graphData, comparisonResults } = await retrievePatternData(
-          aggregationType
-        );
+        const { graphData, comparisonResults } = await retrievePatternData(aggregationType);
         setGraphData(graphData);
         setComparisonResults(comparisonResults);
       } catch (error) {
@@ -104,56 +104,106 @@ const PatternFinder = () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, [aggregationType, toast]);
 
-  // Graph styling constants
-  const MAX_NODE_SIZE = 50;
-  const MIN_NODE_SIZE = 20;
-  const MAX_EDGE_WIDTH = 5;
-  const MIN_EDGE_WIDTH = 1;
+  // Layout configuration with improved parameters for better spacing.
+  // Note: randomize is set to false to avoid top-left clumping.
+  const layout = useMemo(
+    () => ({
+      name: "cose",
+      animate: true,
+      animationDuration: 1000,
+      refresh: 20,
+      fit: true,
+      padding: 50,
+      idealEdgeLength: 150,
+      nodeRepulsion: 8000,
+      nodeOverlap: 20,
+      gravity: 100,
+      numIter: 1000,
+      initialTemp: 200,
+      coolingFactor: 0.95,
+      randomize: true, // Ensure consistent initial placement
+    }),
+    []
+  );
 
-  // Compute maximum node size and edge value
+  // Run layout after graphData changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setGraphVisible(true);
+      if (cyRef.current && cyRef.current.nodes().length > 0) {
+        cyRef.current.ready(() => {
+          const layoutInstance = cyRef.current.makeLayout(layout);
+          setLayoutFinished(false);
+          layoutInstance.run();
+          layoutInstance.on("layoutstop", () => {
+            setLayoutFinished(true);
+            cyRef.current.fit();
+          });
+        });
+      }
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [graphData, layout]);
+
+  // Compute maximum node size for normalization
   const maxNodeSize = useMemo(() => {
     return graphData.nodes.reduce((max, node) => Math.max(max, node.size), 0);
   }, [graphData.nodes]);
 
-  const maxEdgeValue = useMemo(() => {
+  // Compute maximum edge value for directed case
+  const maxEdgeValueDirected = useMemo(() => {
     return graphData.links.reduce((max, link) => Math.max(max, link.value), 0);
   }, [graphData.links]);
 
-  // Compute Cytoscape elements (nodes and edges)
+  // Interpolate link color from light gray (low value) to black (high value)
+  const interpolateLinkColor = (value, max) => {
+    const ratio = max > 0 ? value / max : 0;
+    const colorVal = Math.round(200 - ratio * 200);
+    return `rgb(${colorVal}, ${colorVal}, ${colorVal})`;
+  };
+
+  // Compute Cytoscape elements for nodes and edges.
+  // The raw frequency is stored as "frequency", while the normalized size/width are used for display.
   const cyElements = useMemo(() => {
+    // Nodes: assign normalized size and raw frequency.
     const cyNodes = graphData.nodes.map((node) => {
       const normSize =
-        maxNodeSize > 0
-          ? (node.size / maxNodeSize) * (MAX_NODE_SIZE - MIN_NODE_SIZE) +
-            MIN_NODE_SIZE
-          : MIN_NODE_SIZE;
+        maxNodeSize > 0 ? (node.size / maxNodeSize) * (50 - 20) + 20 : 20;
       const icon = node.icon || DefaultIcon;
       return {
-        data: { id: node.id, label: node.id, image: icon, size: normSize },
+        data: {
+          id: node.id,
+          label: node.id,
+          image: icon,
+          size: normSize,       // Display size (normalized)
+          frequency: node.size, // Raw frequency value
+        },
       };
     });
 
     let cyEdges = [];
     if (isDirected) {
+      // Directed edges: assign normalized width and raw frequency.
       cyEdges = graphData.links.map((link) => {
         const normWidth =
-          maxEdgeValue > 0
-            ? (link.value / maxEdgeValue) *
-                (MAX_EDGE_WIDTH - MIN_EDGE_WIDTH) +
-              MIN_EDGE_WIDTH
-            : MIN_EDGE_WIDTH;
+          maxEdgeValueDirected > 0
+            ? (link.value / maxEdgeValueDirected) * (5 - 1) + 1
+            : 1;
+        const lineColor = interpolateLinkColor(link.value, maxEdgeValueDirected);
         return {
           data: {
             id: `${link.source}->${link.target}`,
             source: link.source,
             target: link.target,
+            frequency: link.value, // Raw frequency value
             value: link.value,
-            width: normWidth,
+            width: normWidth,      // Display width (normalized)
+            lineColor,
           },
         };
       });
     } else {
-      // Combine duplicate undirected edges
+      // For undirected edges, combine duplicate links.
       const edgeMap = {};
       graphData.links.forEach((link) => {
         const sorted = [link.source, link.target].sort();
@@ -165,46 +215,37 @@ const PatternFinder = () => {
         }
         edgeMap[key].data.value += link.value;
       });
-
-      cyEdges = Object.values(edgeMap).map((edge) => {
+      const undirectedEdges = Object.values(edgeMap);
+      const maxEdgeValueUndirected = undirectedEdges.reduce(
+        (max, edge) => Math.max(max, edge.data.value),
+        0
+      );
+      cyEdges = undirectedEdges.map((edge) => {
         const normWidth =
-          maxEdgeValue > 0
-            ? (edge.data.value / maxEdgeValue) *
-                (MAX_EDGE_WIDTH - MIN_EDGE_WIDTH) +
-              MIN_EDGE_WIDTH
-            : MIN_EDGE_WIDTH;
+          maxEdgeValueUndirected > 0
+            ? (edge.data.value / maxEdgeValueUndirected) * (5 - 1) + 1
+            : 1;
+        const lineColor = interpolateLinkColor(
+          edge.data.value,
+          maxEdgeValueUndirected
+        );
         return {
           data: {
             id: edge.data.id,
             source: edge.data.source,
             target: edge.data.target,
+            frequency: edge.data.value, // Raw frequency value
             value: edge.data.value,
-            width: normWidth,
+            width: normWidth,           // Display width (normalized)
+            lineColor,
           },
         };
       });
     }
     return { nodes: cyNodes, edges: cyEdges };
-  }, [graphData, maxNodeSize, maxEdgeValue, isDirected]);
+  }, [graphData, maxNodeSize, maxEdgeValueDirected, isDirected]);
 
-  // Layout configuration for Cytoscape with animation options
-  const layout = useMemo(
-    () => ({
-      name: "cose",
-      animate: true,
-      animationDuration: 1000, // duration for animated transitions
-      idealEdgeLength: 100,
-      nodeRepulsion: 400000,
-      gravity: 80,
-      numIter: 100,
-      coolingFactor: 0.95,
-      fit: true,
-    }),
-    []
-  );
-
-
-  // Cytoscape stylesheet with added transitions and highlight style for interactivity
+  // Cytoscape stylesheet with rounded edges (using "line-cap": "round").
   const stylesheet = [
     {
       selector: "node",
@@ -218,60 +259,143 @@ const PatternFinder = () => {
         "font-size": "8px",
         "text-valign": "bottom",
         "text-halign": "center",
-        transitionProperty: "transform",
-        transitionDuration: "0.5s",
+        "overlay-opacity": 0,
+        "z-index": 10,
       },
     },
     {
       selector: "edge",
       style: {
-        "curve-style": "bezier",
+        "curve-style": "unbundled-bezier",
+        "control-point-distances": [40],
+        "control-point-weights": [0.5],
         width: "data(width)",
-        "line-color": (ele) => {
-          const value = ele.data("value");
-          const normalized = maxEdgeValue > 0 ? value / maxEdgeValue : 0;
-          const grayValue = Math.round(128 + (255 - 128) * (1 - normalized));
-          return `rgb(${grayValue}, ${grayValue}, ${grayValue})`;
-        },
-        "target-arrow-color": (ele) => {
-          const value = ele.data("value");
-          const normalized = maxEdgeValue > 0 ? value / maxEdgeValue : 0;
-          const grayValue = Math.round(128 + (255 - 128) * (1 - normalized));
-          return `rgb(${grayValue}, ${grayValue}, ${grayValue})`;
-        },
-        "target-arrow-shape": isDirected ? "triangle" : "none",
-        transitionProperty: "line-color, width",
-        transitionDuration: "0.5s",
+        "line-color": "data(lineColor)",
+        "target-arrow-color": "data(lineColor)",
+        "target-arrow-shape": isDirected ? "vee" : "none",
+        "arrow-scale": 1.5,
+        "target-distance-from-node": 3,
+        "line-cap": "round", // Rounds the edge ends
+        opacity: 1,
       },
     },
     {
-      selector: ".highlighted",
+      selector: ".teal-edge",
+      style: {
+        "line-color": "teal",
+        "target-arrow-color": "teal",
+        opacity: 1,
+      },
+    },
+    {
+      selector: ".focused",
       style: {
         "border-color": "#FFD700",
-        "border-width": 3,
-        "transition-property": "border-width, border-color",
-        "transition-duration": "0.5s",
+        "border-width": 4,
+        "z-index": 30,
+      },
+    },
+    {
+      selector: ".faded",
+      style: {
+        opacity: 0.2,
       },
     },
   ];
 
-  // Toggle A/B testing details
+  // Toggle A/B testing details.
   const toggleDetails = (key) => {
     setShowDetails((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // Node tap handler to add simple interactivity (highlight node and its neighbors)
-  const handleNodeTap = (event) => {
-    if (!cyInstance) return;
-    const node = event.target;
-    // Reset previous highlights
-    cyInstance.elements().removeClass("highlighted");
-    // Highlight the tapped node and its neighborhood
-    node.addClass("highlighted");
-    node.neighborhood().addClass("highlighted");
-  };
+  // Node tap handler: highlights the tapped node and its neighborhood.
+  const handleNodeTap = useCallback(
+    (event) => {
+      if (!cyRef.current || !layoutFinished) return;
+      const node = event.target;
+      cyRef.current.elements().removeClass("focused teal-edge faded");
+      node.addClass("focused");
+      node.neighborhood("edge").addClass("teal-edge");
+      node.neighborhood("node").addClass("focused");
+      cyRef.current.elements().not(node).not(node.neighborhood()).addClass("faded");
+    },
+    [layoutFinished]
+  );
 
-  // Framer Motion config for a smooth container entrance animation
+  // Node hover handler: shows tooltip with frequency and normalized size.
+  const handleNodeMouseOver = useCallback((event) => {
+    if (!cyRef.current) return;
+    const node = event.target;
+    const frequency = node.data("frequency");
+    const normSize = node.data("size");
+    setTooltip({
+      show: true,
+      x: event.originalEvent.clientX,
+      y: event.originalEvent.clientY,
+      text: `Node: ${node.id()}\nFrequency: ${frequency}\nSize: ${Math.round(normSize)}px`,
+    });
+    node.addClass("focused");
+    node.neighborhood("edge").addClass("teal-edge");
+  }, []);
+
+  const handleNodeMouseOut = useCallback(() => {
+    setTooltip({ show: false, x: 0, y: 0, text: "" });
+    if (cyRef.current) {
+      cyRef.current.elements().removeClass("focused teal-edge faded");
+    }
+  }, []);
+
+  // Edge hover handler: shows tooltip with frequency and rounded normalized width.
+  const handleEdgeMouseOver = useCallback(
+    (event) => {
+      if (!cyRef.current || !layoutFinished) return;
+      const edge = event.target;
+      const frequency = edge.data("frequency");
+      const normWidth = edge.data("width");
+      // Show "→" for directed, "—" for undirected
+      const arrowSymbol = isDirected ? "→" : "—";
+      setTooltip({
+        show: true,
+        x: event.originalEvent.clientX,
+        y: event.originalEvent.clientY,
+        text: `Edge: ${edge.source().id()} ${arrowSymbol} ${edge.target().id()}\n` +
+              `Frequency: ${frequency}\n` +
+              `Width: ${Math.round(normWidth)}px`,
+      });
+      edge.addClass("focused");
+    },
+    [layoutFinished, isDirected]
+  );
+
+  const handleEdgeMouseOut = useCallback(() => {
+    setTooltip({ show: false, x: 0, y: 0, text: "" });
+  }, []);
+
+  // Cytoscape instance callback: sets up the instance and event handlers.
+  const cyCallback = useCallback(
+    (cy) => {
+      // Store the Cytoscape instance in the ref
+      cyRef.current = cy;
+      // Enable user interactions
+      cy.userPanningEnabled(true);
+      cy.userZoomingEnabled(true);
+      // Set up event handlers for nodes and edges
+      cy.on("tap", "node", handleNodeTap);
+      cy.on("mouseover", "node", handleNodeMouseOver);
+      cy.on("mouseout", "node", handleNodeMouseOut);
+      cy.on("mouseover", "edge", handleEdgeMouseOver);
+      cy.on("mouseout", "edge", handleEdgeMouseOut);
+    },
+    [
+      handleNodeTap,
+      handleNodeMouseOver,
+      handleNodeMouseOut,
+      handleEdgeMouseOver,
+      handleEdgeMouseOut,
+    ]
+  );
+
+  // Framer Motion config for container entrance animation.
   const motionConfig = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
@@ -281,11 +405,19 @@ const PatternFinder = () => {
   return (
     <Box style={containerStyle}>
       {/* Network Graph Section */}
-      <Box mb={6}>
+      <Box mb={6} position="relative">
         <HStack justify="space-between" align="center">
-          <Text as="h1" fontSize="2xl" fontWeight="bold">
-            Network Graph
-          </Text>
+          <Box>
+            <Text as="h1" fontSize="2xl" fontWeight="bold">
+              Network Graph
+            </Text>
+            {/* Show different message for directed vs undirected */}
+            <Text fontSize="md" color="gray.600">
+              {isDirected
+                ? "Directed Graph: Edges have a direction from source to target."
+                : "Undirected Graph: Edges do not imply a particular direction."}
+            </Text>
+          </Box>
           <Box mb={3}>
             <HStack padding="10px">
               <Text as="h3" fontSize="lg" fontWeight="semibold">
@@ -305,49 +437,32 @@ const PatternFinder = () => {
             </HStack>
           </Box>
         </HStack>
-        {isLoading ? (
-          <Spinner />
+        {/* Show spinner overlay for graph if still loading */}
+        {(!graphVisible || isLoading) ? (
+          <Box
+            height="35vh"
+            border="1px solid #EAEAEA"
+            borderRadius="8px"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Spinner size="xl" />
+          </Box>
         ) : (
           <>
-            {/* Wrap the Cytoscape graph with Framer Motion for animated entrance */}
+            {/* Animated Cytoscape graph */}
             <motion.div {...motionConfig}>
               <CytoscapeComponent
-                elements={CytoscapeComponent.normalizeElements({
-                  nodes: cyElements.nodes,
-                  edges: cyElements.edges,
-                })}
+                elements={[...cyElements.nodes, ...cyElements.edges]}
                 stylesheet={stylesheet}
-                layout={layout}
                 style={{
                   width: "100%",
                   height: "35vh",
                   border: "1px solid #EAEAEA",
                   borderRadius: "8px",
                 }}
-                cy={(cy) => {
-                  setCyInstance(cy);
-                  // Enable zooming and panning for interactivity
-                  cy.userPanningEnabled(true);
-                  cy.userZoomingEnabled(true);
-                  // Set up node tap to highlight neighbors
-                  cy.on("tap", "node", handleNodeTap);
-                  // Edge hover events for tooltip
-                  cy.on("mouseover", "edge", (event) => {
-                    const edge = event.target;
-                    const from = edge.source().id();
-                    const to = edge.target().id();
-                    const value = edge.data("value");
-                    setTooltip({
-                      show: true,
-                      x: event.originalEvent.clientX,
-                      y: event.originalEvent.clientY,
-                      text: `${from} to ${to}: ${value}`,
-                    });
-                  });
-                  cy.on("mouseout", "edge", () => {
-                    setTooltip({ show: false, x: 0, y: 0, text: "" });
-                  });
-                }}
+                cy={cyCallback}
               />
             </motion.div>
             {tooltip.show && (
@@ -361,6 +476,7 @@ const PatternFinder = () => {
                 borderRadius="4px"
                 zIndex={1000}
                 fontSize="sm"
+                whiteSpace="pre-wrap"
               >
                 {tooltip.text}
               </Box>
@@ -379,7 +495,16 @@ const PatternFinder = () => {
         </Text>
         <Box height="20vh" overflowY="auto">
           {isLoading ? (
-            <Spinner />
+            <Box
+              height="35vh"
+              border="1px solid #EAEAEA"
+              borderRadius="8px"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Spinner size="xl" />
+            </Box>
           ) : comparisonResults.length === 0 ? (
             <Text>No comparisons available.</Text>
           ) : (
@@ -462,8 +587,7 @@ const PatternFinder = () => {
                         <Tbody>
                           <Tr>
                             <Td border="1px solid #ccc" p={2}>
-                              Transition to {comp.direction.to} (
-                              <InlineMath math="O_1" />)
+                              Transition to {comp.direction.to} (<InlineMath math="O_1" />)
                             </Td>
                             <Td border="1px solid #ccc" p={2}>
                               {comp.O1}
@@ -485,8 +609,7 @@ const PatternFinder = () => {
                           </Tr>
                           <Tr>
                             <Td border="1px solid #ccc" p={2}>
-                              Expected (<InlineMath math="E_1" />,{" "}
-                              <InlineMath math="E_3" />)
+                              Expected (<InlineMath math="E_1" />, <InlineMath math="E_3" />)
                             </Td>
                             <Td border="1px solid #ccc" p={2}>
                               {comp.E1.toFixed(1)}
@@ -551,18 +674,13 @@ const PatternFinder = () => {
                 Icon Size & Edges Reflect Usage Frequency.
               </Box>
               <Box as="li" mb={1}>
-                A/B testing aims to determine whether observed patterns are the
-                result of actual changes or if they reflect consistent usage
-                trends.
+                A/B testing aims to determine whether observed patterns are the result of actual changes or if they reflect consistent usage trends.
               </Box>
               <Box as="li" mb={1}>
-                Not All Data is used in The Graph & A/B testing. Only the Top
-                80% used Websites are used to plot the network graph and
-                implement the A/B Testing.
+                Not All Data is used in The Graph & A/B testing. Only the Top 80% used Websites are used to plot the network graph and implement the A/B Testing.
               </Box>
               <Box as="li" mb={1}>
-                Data can be misleading on small frequencies, but the certainty
-                increases with sample size.
+                Data can be misleading on small frequencies, but the certainty increases with sample size.
               </Box>
             </Box>
           </Box>
