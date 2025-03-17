@@ -4,7 +4,7 @@ import { Switch, Tooltip, Box, VStack, Flex, Spacer, Text } from "@chakra-ui/rea
 const InteractionCard = ({ title, icon, graph, onSwitchChange, isActive }) => {
   const [isHovered, setIsHovered] = useState(false);
 
-  // Inline styles for the card container and its elements
+  // Card container style: fixed width, hidden overflow to prevent expansion.
   const cardContainerStyle = {
     width: "100%",
     transition: "opacity 0.3s ease-in-out, height 0.3s ease-in-out",
@@ -14,6 +14,7 @@ const InteractionCard = ({ title, icon, graph, onSwitchChange, isActive }) => {
     padding: "15px",
     marginBottom: "15px",
     boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    overflow: "hidden",
   };
 
   const headerStyle = {
@@ -36,11 +37,14 @@ const InteractionCard = ({ title, icon, graph, onSwitchChange, isActive }) => {
     transform: isHovered ? "scale(1.05)" : "scale(1)",
   };
 
+  // Graph style: use relative units with a maximum height and hidden overflow.
   const graphStyle = {
     width: "100%",
     height: "20vw",
+    maxHeight: "400px",
     margin: "10px auto",
     transition: "opacity 0.3s ease-in-out, height 0.3s ease-in-out",
+    overflow: "hidden",
   };
 
   const hiddenGraphStyle = {
@@ -80,7 +84,9 @@ const InteractionCard = ({ title, icon, graph, onSwitchChange, isActive }) => {
             </Tooltip>
           </Box>
         </Flex>
-        <Box style={isActive ? graphStyle : hiddenGraphStyle}>{graph}</Box>
+        <Box style={isActive ? graphStyle : hiddenGraphStyle}>
+          {graph}
+        </Box>
       </VStack>
     </Box>
   );

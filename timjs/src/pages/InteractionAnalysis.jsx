@@ -4,20 +4,20 @@ import { retrieveInteractionData } from "../utils/DataProcessor";
 import { useGlobalContext } from "../utils/GlobalContext";
 import YouTubeInteractionCard from "../components/InteractionCard";
 import { SocialIcon } from "react-social-icons";
-import {
-  Box,
-  Flex,
-  VStack,
-  HStack,
-  Text
-} from "@chakra-ui/react";
+import { Box, Flex, VStack, HStack, Text } from "@chakra-ui/react";
 
 /**
  * A small helper component to show a modern "No data" placeholder.
  */
 const NoData = () => {
   return (
-    <Box display="flex" alignItems="center" justifyContent="center" height="100%">
+    <Box
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      height="100%"
+      overflow="hidden"
+    >
       <Text fontSize="xl" fontWeight="bold" color="gray.500">
         No data available
       </Text>
@@ -27,7 +27,6 @@ const NoData = () => {
 
 /**
  * A simple color palette for categories, based on a stable hash approach.
- * You can adjust these colors to your liking (they are "light-ish" and unique).
  */
 const colorPalette = [
   "#FF6B6B", // Light-ish red
@@ -49,12 +48,10 @@ const colorPalette = [
 
 /**
  * Stable function to pick a color for a given category name.
- * For consistency, we hash the category name's string so it picks the same
- * color each time. If you'd like more advanced hashing, feel free to adjust.
  */
 const getColorForCategory = (categoryName) => {
-  // For "SELECT_ALL", we can return a neutral color
-  if (categoryName === "SELECT_ALL") return "#888888";
+  // For "SELECT_ALL", return a neutral color.
+  if (categoryName === "SELECT_ALL") return "transparent";
 
   let hash = 0;
   for (let i = 0; i < categoryName.length; i++) {
@@ -65,16 +62,14 @@ const getColorForCategory = (categoryName) => {
 };
 
 /**
- * A custom Legend component that:
- * 1. Displays categories (including "Select All") in multiple columns if needed.
- * 2. Shows active categories in bold, inactive in normal font.
- * 3. Calls toggleCategory on click.
- * 4. Renders a colored circle to the left of each label.
+ * A custom Legend component that displays categories (including "Select All")
+ * in multiple columns if needed, shows active categories in bold, and
+ * calls toggleCategory on click.
  */
 const Legend = ({ categories, activeCategories, toggleCategory }) => {
   if (!categories || !categories.length) return null;
 
-  // Decide how many items per column before splitting
+  // Decide how many items per column before splitting.
   const maxItemsPerColumn = 10;
   const columns = [];
   for (let i = 0; i < categories.length; i += maxItemsPerColumn) {
@@ -87,13 +82,12 @@ const Legend = ({ categories, activeCategories, toggleCategory }) => {
         <VStack key={colIndex} spacing="8px" align="start">
           {colData.map((item) => {
             const isActive = activeCategories[item.id];
-            const color = getColorForCategory(item.id);
+            const color = isActive ? getColorForCategory(item.id):'transparent';
             return (
               <HStack
                 key={item.id}
                 spacing="6px"
                 cursor="pointer"
-                fontWeight={isActive ? "600" : "400"}
                 whiteSpace="nowrap"
                 overflow="hidden"
                 textOverflow="ellipsis"
@@ -101,12 +95,7 @@ const Legend = ({ categories, activeCategories, toggleCategory }) => {
                 title={item.label}
               >
                 {/* Colored circle indicator */}
-                <Box
-                  w="12px"
-                  h="12px"
-                  borderRadius="full"
-                  bg={color}
-                />
+                <Box w="12px" h="12px" borderRadius="full" bg={color} />
                 <Text>{item.label}</Text>
               </HStack>
             );
@@ -120,8 +109,7 @@ const Legend = ({ categories, activeCategories, toggleCategory }) => {
 const InteractionAnalysis = () => {
   const { aggregationType } = useGlobalContext();
 
-  // State for chart data, scraping flag, aggregation interval,
-  // and active categories (all active by default after data load)
+  // State for chart data, scraping flag, aggregation interval, and active categories.
   const [chartData, setChartData] = useState([]);
   const [scrapingAllowed, setScrapingAllowed] = useState(false);
   const [aggregationInterval, setAggregationInterval] = useState("");
@@ -137,7 +125,7 @@ const InteractionAnalysis = () => {
   // Initialize activeCategories when chartData is loaded (including "SELECT_ALL").
   useEffect(() => {
     if (chartData.length && Object.keys(activeCategories).length === 0) {
-      // By default, set everything to active, including "SELECT_ALL"
+      // By default, set everything to active, including "SELECT_ALL".
       const newActive = { SELECT_ALL: true };
       chartData.forEach((entry) => {
         newActive[entry.name] = true;
@@ -169,14 +157,11 @@ const InteractionAnalysis = () => {
   // Fetch data on mount and whenever aggregationType or scrapingAllowed changes.
   useEffect(() => {
     fetchData();
-
-    // Refetch data when the page becomes visible again.
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
         fetchData();
       }
     };
-
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
@@ -200,29 +185,16 @@ const InteractionAnalysis = () => {
   const toggleCategory = (categoryName) => {
     setActiveCategories((prev) => {
       const newState = { ...prev };
-      // Special handling for "SELECT_ALL"
       if (categoryName === "SELECT_ALL") {
         const wasActive = newState["SELECT_ALL"];
-        if (wasActive) {
-          // Deactivate all
-          Object.keys(newState).forEach((k) => {
-            newState[k] = false;
-          });
-        } else {
-          // Activate all
-          Object.keys(newState).forEach((k) => {
-            newState[k] = true;
-          });
-        }
+        Object.keys(newState).forEach((k) => {
+          newState[k] = !wasActive;
+        });
       } else {
-        // Toggle an individual category
         newState[categoryName] = !newState[categoryName];
-
-        // If we turn a category OFF, then "SELECT_ALL" must be OFF
         if (!newState[categoryName]) {
           newState["SELECT_ALL"] = false;
         } else {
-          // If all categories except "SELECT_ALL" are active, set "SELECT_ALL" = true
           const allActiveExceptSelectAll = Object.keys(newState)
             .filter((k) => k !== "SELECT_ALL")
             .every((cat) => newState[cat]);
@@ -235,7 +207,7 @@ const InteractionAnalysis = () => {
     });
   };
 
-  // Create fixed series for "Video" and "Shorts", then filter out data points that are inactive.
+  // Create fixed series for "Video" and "Shorts", then filter out inactive data points.
   const formattedData = useMemo(() => {
     if (!chartData.length) return [];
     const series = [
@@ -260,7 +232,7 @@ const InteractionAnalysis = () => {
     }));
   }, [chartData, activeCategories]);
 
-  // Prepare an array for the legend, including our "Select All" item
+  // Prepare an array for the legend, including our "Select All" item.
   const legendData = useMemo(() => {
     if (!chartData.length) return [];
     const categories = chartData.map((entry) => ({
@@ -270,7 +242,7 @@ const InteractionAnalysis = () => {
     return [{ id: "SELECT_ALL", label: "Select All" }, ...categories];
   }, [chartData]);
 
-  // Check if there's any visible data in the final dataset
+  // Check if there's any visible data.
   const hasData = useMemo(() => {
     if (!chartData.length) return false;
     return formattedData.some((series) => series.data.length > 0);
@@ -285,6 +257,7 @@ const InteractionAnalysis = () => {
       position="relative"
       bg="#f7f9fc"
       borderRadius="8px"
+      overflow="hidden"
       opacity={1}
       transition="opacity 0.5s ease-out"
     >
@@ -292,7 +265,7 @@ const InteractionAnalysis = () => {
         Interaction Analysis {aggregationInterval && `(${aggregationInterval})`}
       </Text>
 
-      <VStack p="12px" gap={4}>
+      <VStack p="12px" gap={4} width="100%" overflow="hidden">
         <YouTubeInteractionCard
           title="Youtube"
           icon={
@@ -303,18 +276,16 @@ const InteractionAnalysis = () => {
             />
           }
           graph={
-            <Flex minH="400px">
+            <Flex minH="400px" width="100%" overflow="hidden">
               {/* Chart Area */}
-              <Box flex="1">
+              <Box flex="1" overflow="hidden">
                 {hasData ? (
                   <ResponsiveRadialBar
                     data={formattedData}
                     valueFormat={(value) => formatTimeValue(value)}
                     padding={0.4}
                     cornerRadius={2}
-                    // Use the same color function as the legend
                     colors={(bar) => getColorForCategory(bar.data.x)}
-                    // Some margin for the chart
                     margin={{ left: 40, right: 40, top: 40, bottom: 40 }}
                     radialAxisStart={{
                       tickSize: 12,
@@ -332,18 +303,19 @@ const InteractionAnalysis = () => {
                   <NoData />
                 )}
               </Box>
-
               {/* Custom Legend on the right */}
-              <Box minH="400px" p="10px">
-                <Text mb="8px" fontWeight="bold">
-                  Categories:
-                </Text>
-                <Legend
-                  categories={legendData}
-                  activeCategories={activeCategories}
-                  toggleCategory={toggleCategory}
-                />
-              </Box>
+              {chartData && (
+                <Box minH="400px" p="10px" overflow="hidden">
+                  <Text mb="8px" fontWeight="bold">
+                    Categories:
+                  </Text>
+                  <Legend
+                    categories={legendData}
+                    activeCategories={activeCategories}
+                    toggleCategory={toggleCategory}
+                  />
+                </Box>
+              )}
             </Flex>
           }
           onSwitchChange={toggleScrapingAllowed}

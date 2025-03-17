@@ -1,3 +1,4 @@
+// TimJS/src/pages/Dashboard.jsx
 import React, { useState, useEffect } from "react";
 import { Box, HStack, VStack, Text, Spacer } from "@chakra-ui/react";
 import { BiWorld } from "react-icons/bi";
@@ -29,38 +30,84 @@ const TimeTracker = () => {
   const [activeCategory, setActiveCategory] = useState(null);
   const [hoveredCategory, setHoveredCategory] = useState(null);
 
-  // Inline style objects for all components
+  // Main container: 2 columns (65%/35%), 2 rows of equal height
   const containerStyle = {
     position: "relative",
     display: "grid",
     gridTemplateColumns: "65% 35%",
-    gridTemplateRows: "34vh 6vh 6vh 34vh",
+    gridTemplateRows: "1fr 1fr", // Equal height rows
     gridGap: "15px",
     width: "100%",
-    height: "100%",
+    height: "88vh",
     padding: "10px 25px",
     backgroundColor: "#f7f9fc",
     borderRadius: "8px",
   };
 
-  const currentDashboardStyle = {
-    gridArea: "1 / 1 / 3 / 2",
+  // Dashboard (top-left): occupies row 1 / col 1
+  const dashboardStyle = {
+    gridColumn: "1",
+    gridRow: "1",
     width: "100%",
     height: "100%",
+    backgroundColor: "#ffffff",
+    borderRadius: "6px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    padding: "15px",
+    display: "flex",
+    flexDirection: "column",
   };
 
-  const currentDashboardContentStyle = {
+  // Usage Summary (bottom-left): occupies row 2 / col 1
+  const usageListStyle = {
+    gridColumn: "1",
+    gridRow: "2",
+    width: "100%",
+    height: "100%",
+    backgroundColor: "#ffffff",
+    borderRadius: "6px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
     padding: "15px",
+    boxSizing: "border-box",
+    display: "flex",
+    flexDirection: "column",
+    overflow: "hidden", // prevent content overflow
+  };
+
+  // Browsing Summary (top-right): occupies row 1 / col 2
+  const browsingSummaryStyle = {
+    gridColumn: "2",
+    gridRow: "1",
+    height: "100%",
+    backgroundColor: "#ffffff",
+    borderRadius: "6px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    padding: "5%",
+    boxSizing: "border-box",
+  };
+
+  // Sync Info (bottom-right): occupies row 2 / col 2
+  // Removed height: "100%" and added alignSelf: "start" so that it fits its content.
+  const syncInfoStyle = {
+    gridColumn: "2",
+    gridRow: "2",
+    backgroundColor: "#000",
+    padding: "20px",
+    position: "relative",
+    borderRadius: "6px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    alignSelf: "start",
     height: "100%",
   };
 
+  // Sub-grid for the top section of Dashboard (Wasted/Working time + Bar Chart)
   const numberCellGridStyle = {
-    position: "relative",
     display: "grid",
     gridTemplateColumns: "50% 50%",
     gridTemplateRows: "30% 70%",
     gridGap: "15px",
-    height: "100%",
+    marginTop: "15px",
+    flex: "1", // Fill available space
   };
 
   const numberCellStyle = {
@@ -75,39 +122,51 @@ const TimeTracker = () => {
   };
 
   const workingTimeStyle = {
-    gridArea: "1 / 2 / 2 / -1",
+    gridArea: "1 / 2 / 2 / 3",
   };
 
   const barChartStyle = {
-    gridArea: "2 / 1 / -1 / -1",
+    gridArea: "2 / 1 / 3 / 3",
     padding: "15px",
     backgroundColor: "#ffffff",
     borderRadius: "6px",
     boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-  };
-
-  const usageListStyle = {
-    gridArea: "3 / 1 / -1 / 2",
-    width: "100%",
     height: "100%",
-    padding: "15px",
-    boxSizing: "border-box",
+  };
+
+  // Usage list content: allow scrolling for overflow content
+  const usageListContentStyle = {
+    flex: "1",
+    overflowY: "auto",
+  };
+
+  const syncButtonStyle = {
+    backgroundColor: "#F0F0F0",
+    border: "1px solid #D0D0D0",
+    padding: "10px 20px",
+    borderRadius: "4px",
+    fontSize: "16px",
+    fontWeight: "bold",
+    color: "#333",
+    cursor: "not-allowed",
+    transition: "background-color 0.3s",
+    position: "absolute",
+    bottom: "30px",
+    right: "25px",
+  };
+
+  const roundedBoxStyle = {
     backgroundColor: "#ffffff",
     borderRadius: "6px",
     boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-  };
-
-  const usageListContentStyle = {
-    overflowY: "auto",
-    height: "95%",
+    padding: "15px",
+    marginBottom: "10px",
   };
 
   const usageListItemStyle = {
     padding: "15px",
     borderBottom: "1px solid #eee",
     width: "100%",
-    display: "flex",
-    alignItems: "center",
     boxSizing: "border-box",
     transition: "background-color 0.3s",
   };
@@ -137,47 +196,7 @@ const TimeTracker = () => {
     transition: "width 0.3s",
   };
 
-  const browsingSummaryStyle = {
-    gridArea: "1 / 2 / 4 / -1",
-    padding: "5%",
-    backgroundColor: "#ffffff",
-    borderRadius: "6px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-  };
-
-  const syncInfoStyle = {
-    gridArea: "4 / 2 / -1 / -1",
-    backgroundColor: "#000",
-    padding: "20px",
-    position: "relative",
-    borderRadius: "6px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-  };
-
-  const syncButtonStyle = {
-    backgroundColor: "#F0F0F0",
-    border: "1px solid #D0D0D0",
-    padding: "10px 20px",
-    borderRadius: "4px",
-    fontSize: "16px",
-    fontWeight: "bold",
-    color: "#333",
-    cursor: "not-allowed",
-    transition: "background-color 0.3s",
-    position: "absolute",
-    bottom: "30px",
-    right: "25px",
-  };
-
-  const roundedBoxStyle = {
-    backgroundColor: "#ffffff",
-    borderRadius: "6px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-    padding: "15px",
-    marginBottom: "10px",
-  };
-
-  // Function to fetch data
+  // Fetch data from the API
   const fetchData = async () => {
     const results = await retrieveDashboardData(aggregationType);
     if (results) {
@@ -205,6 +224,7 @@ const TimeTracker = () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, [aggregationType]);
 
+  // Format total minutes into days, hours, and minutes
   const formatTime = (totalMinutes) => {
     const days = Math.floor(totalMinutes / (24 * 60));
     const hours = Math.floor((totalMinutes % (24 * 60)) / 60);
@@ -216,12 +236,14 @@ const TimeTracker = () => {
     return formattedTime;
   };
 
+  // Format large numbers to K/M values
   const formatNumber = (number) => {
     if (number >= 1000000) return (number / 1000000).toFixed(1) + "M";
     else if (number >= 1000) return (number / 1000).toFixed(1) + "K";
     else return number.toString();
   };
 
+  // Toggle active category on bar click
   const handleBarClick = (data) => {
     if (data && data.name) {
       setActiveCategory((prevCategory) =>
@@ -230,15 +252,20 @@ const TimeTracker = () => {
     }
   };
 
+  // Fallback for site icons
   const handleImageError = (e) => {
     e.target.style.display = "none";
-    e.target.nextSibling.style.display = "block";
+    if (e.target.nextSibling) {
+      e.target.nextSibling.style.display = "block";
+    }
   };
 
+  // Filter websites based on active category
   const filteredWebsites = activeCategory
     ? websiteDetails.filter((site) => site.category === activeCategory)
     : websiteDetails;
 
+  // Determine bar color based on active or hovered category
   const getBarColor = (category) => {
     if (category === activeCategory || category === hoveredCategory) {
       return "#555555";
@@ -246,6 +273,7 @@ const TimeTracker = () => {
     return "#C4C4C4";
   };
 
+  // Capitalize the first word (for aggregationType)
   const capitalizeFirstWord = (str) => {
     if (!str) return str;
     return str.charAt(0).toUpperCase() + str.slice(1);
@@ -253,11 +281,11 @@ const TimeTracker = () => {
 
   return (
     <Box style={containerStyle}>
-      <Box style={currentDashboardStyle}>
-        <VStack align="left" style={currentDashboardContentStyle}>
+      {/* Dashboard (top-left) */}
+      <Box style={dashboardStyle}>
+        <VStack align="left">
           <h1>
-            Dashboard{" "}
-            {aggregationInterval && `(${aggregationInterval})`}
+            Dashboard {aggregationInterval && `(${aggregationInterval})`}
           </h1>
           <Box style={numberCellGridStyle}>
             {/* Wasted Time */}
@@ -284,7 +312,7 @@ const TimeTracker = () => {
             </Box>
             {/* Bar Chart */}
             <Box style={barChartStyle}>
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer initialDimension={{ width: 200, height: 200 }}>
                 <BarChart
                   data={chartData}
                   margin={{ top: 5, right: 5, left: 10, bottom: 5 }}
@@ -298,9 +326,7 @@ const TimeTracker = () => {
                     tickLine={false}
                   />
                   <YAxis
-                    tickFormatter={(value) =>
-                      Math.round(value * 10) / 10
-                    }
+                    tickFormatter={(value) => Math.round(value * 10) / 10}
                     tick={{ fontSize: 10, fill: "#999" }}
                     axisLine={false}
                     tickLine={false}
@@ -317,9 +343,7 @@ const TimeTracker = () => {
                   <Tooltip cursor={{ fill: "rgba(0, 0, 0, 0.05)" }} />
                   <Bar
                     dataKey="hours"
-                    onMouseEnter={(data) =>
-                      setHoveredCategory(data.name)
-                    }
+                    onMouseEnter={(data) => setHoveredCategory(data.name)}
                     onMouseLeave={() => setHoveredCategory(null)}
                     onClick={(data) => handleBarClick(data)}
                     cursor="pointer"
@@ -327,10 +351,7 @@ const TimeTracker = () => {
                     radius={[30, 30, 0, 0]}
                   >
                     {chartData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={getBarColor(entry.name)}
-                      />
+                      <Cell key={`cell-${index}`} fill={getBarColor(entry.name)} />
                     ))}
                   </Bar>
                 </BarChart>
@@ -340,66 +361,7 @@ const TimeTracker = () => {
         </VStack>
       </Box>
 
-      <Box style={usageListStyle}>
-        <h1>Usage Summary</h1>
-        <Box style={usageListContentStyle}>
-          <VStack align="left" spacing={2}>
-            {filteredWebsites.length > 0 ? (
-              filteredWebsites
-                .sort((a, b) => b.time - a.time)
-                .map((site) => (
-                  <HStack key={site.name} style={usageListItemStyle}>
-                    <img
-                      src={site.icon}
-                      alt={site.name}
-                      style={siteIconStyle}
-                      onError={handleImageError}
-                    />
-                    <BiWorld
-                      size={24}
-                      style={{ display: "none" }}
-                    />
-                    <VStack align="left" flex="1">
-                      <Text fontSize="md">{site.name}</Text>
-                      <Text fontSize="sm" style={siteCategoryStyle}>
-                        Active: {formatTime(site.time)} | Category:{" "}
-                        {site.category}
-                      </Text>
-                    </VStack>
-                    <Text fontSize="sm" style={sitePercentageStyle}>
-                      {site.time > 0
-                        ? (
-                            (site.time /
-                              websiteDetails.reduce(
-                                (acc, site) => acc + site.time,
-                                0
-                              )) *
-                            100
-                          ).toFixed(1) + "%"
-                        : "0%"}
-                    </Text>
-                    <Box
-                      style={{
-                        ...siteBarStyle,
-                        width: `${
-                          (site.time /
-                            websiteDetails.reduce(
-                              (acc, site) => acc + site.time,
-                              0
-                            )) *
-                          100
-                        }%`,
-                      }}
-                    />
-                  </HStack>
-                ))
-            ) : (
-              <Text>No websites to display.</Text>
-            )}
-          </VStack>
-        </Box>
-      </Box>
-
+      {/* Browsing Summary (top-right) */}
       <Box style={browsingSummaryStyle}>
         <h2>Browsing Time</h2>
         <VStack align="left">
@@ -408,7 +370,9 @@ const TimeTracker = () => {
             <h3>{formatTime(totalTime)}</h3>
           </Box>
           <Box style={roundedBoxStyle}>
-            <h3>Total Browsing in This {capitalizeFirstWord(aggregationType)}:</h3>
+            <h3>
+              Total Browsing in This {capitalizeFirstWord(aggregationType)}:
+            </h3>
             <h3>{formatTime(aggBrowsing)}</h3>
           </Box>
           <Box style={roundedBoxStyle}>
@@ -416,12 +380,75 @@ const TimeTracker = () => {
             <h3>{formatNumber(totalURLs)}</h3>
           </Box>
           <Box style={roundedBoxStyle}>
-            <h3>Total URLs in This {capitalizeFirstWord(aggregationType)}:</h3>
+            <h3>
+              Total URLs in This {capitalizeFirstWord(aggregationType)}:
+            </h3>
             <h3>{formatNumber(aggURLs)}</h3>
           </Box>
         </VStack>
       </Box>
 
+      {/* Usage Summary (bottom-left) */}
+      <Box style={usageListStyle}>
+        <h1>Usage Summary</h1>
+        <Box style={usageListContentStyle}>
+          <VStack align="left" spacing={2}>
+            {filteredWebsites.length > 0 ? (
+              filteredWebsites
+                .sort((a, b) => b.time - a.time)
+                .map((site) => {
+                  const totalAllSites = websiteDetails.reduce(
+                    (acc, s) => acc + s.time,
+                    0
+                  );
+                  const sitePercentage =
+                    totalAllSites > 0
+                      ? ((site.time / totalAllSites) * 100).toFixed(1) + "%"
+                      : "0%";
+
+                  return (
+                    <HStack
+                      key={site.name}
+                      style={usageListItemStyle}
+                      alignItems="flex-start"
+                    >
+                      {/* Icon (or fallback) */}
+                      <img
+                        src={site.icon}
+                        alt={site.name}
+                        style={siteIconStyle}
+                        onError={handleImageError}
+                      />
+                      <BiWorld size={24} style={{ display: "none" }} />
+                      {/* Text + progress bar */}
+                      <VStack align="left" flex="1" spacing={1}>
+                        <Text fontSize="md">{site.name}</Text>
+                        <Text fontSize="sm" style={siteCategoryStyle}>
+                          Active: {formatTime(site.time)} | Category: {site.category}
+                        </Text>
+                        <HStack w="100%" justifyContent="space-between">
+                          <Text fontSize="sm" style={sitePercentageStyle}>
+                            {sitePercentage}
+                          </Text>
+                          <Box
+                            style={{
+                              ...siteBarStyle,
+                              width: `${(site.time / totalAllSites) * 100}%`,
+                            }}
+                          />
+                        </HStack>
+                      </VStack>
+                    </HStack>
+                  );
+                })
+            ) : (
+              <Text>No websites to display.</Text>
+            )}
+          </VStack>
+        </Box>
+      </Box>
+
+      {/* Sync Info (bottom-right) */}
       <Box style={syncInfoStyle}>
         <h1 style={{ color: "floralwhite", fontWeight: 200 }}>
           Account Sync Information

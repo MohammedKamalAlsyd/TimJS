@@ -22,7 +22,6 @@
   "dependencies": {
     "@chakra-ui/react": "^2.10.5",
     "@nivo/radial-bar": "^0.88.0",
-    "cytoscape": "^3.31.0",
     "react": "^18.2.0",
     "react-cytoscapejs": "^2.0.0",
     "react-dom": "^18.2.0",
