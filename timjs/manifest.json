@@ -39,8 +39,7 @@
     "storage",
     "scripting",
     "windows",
-    "favicon",
-    "webNavigation"
+    "favicon"
   ],
   "host_permissions": [
     "https://www.youtube.com/*",
