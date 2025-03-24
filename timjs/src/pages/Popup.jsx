@@ -45,7 +45,6 @@ const Popup = () => {
   // Inline style for the popup container (modern and centered)
   const popupContainerStyle = {
     padding: "24px",
-    backgroundColor: "#FFFFFF",
     borderRadius: "8px",
     boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
     width: "100%",
@@ -91,7 +90,7 @@ const Popup = () => {
 
         {/* Additional Info */}
         <Text fontSize="sm" color="#999999" mt={2}>
-          Version 1.0 | © 2023 TimJS
+          Version 1.1 | © 2025 TimJS
         </Text>
       </VStack>
     </Box>

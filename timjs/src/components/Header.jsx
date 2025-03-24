@@ -250,7 +250,7 @@ const Header = () => {
       {/* User Dropdown Menu */}
       <HStack style={userSectionStyle} spacing="1vw" ref={dropdownRef}>
         <h3 style={{ color: "gray", fontSize: "12px", fontWeight: 500 }}>
-          Version: 1.0.0
+          Version: 1.1
         </h3>
         <FaAngleDown
           style={

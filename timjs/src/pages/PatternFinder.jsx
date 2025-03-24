@@ -49,7 +49,6 @@ const PatternFinder = () => {
     width: "100%",
     padding: "10px 25px",
     gap: "20px",
-    backgroundColor: "#f5f5f5",
     borderRadius: "8px",
     animation: "fadeIn 0.5s ease-out",
   };
