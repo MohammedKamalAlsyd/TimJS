@@ -158,8 +158,7 @@ function saveData() {
 // Update YouTube scrapping data.
 function updateYouTubeScrappingData(scrapedData, timeSpent) {
   chrome.storage.local.get(["interactionData"], (result) => {
-    const now = new Date();
-    const todayDate = now.toISOString().split("T")[0];
+    const todayDate = getCurrentDate();
     let youtubeScrapping = result.interactionData?.youtube || {};
     let todayData = youtubeScrapping[todayDate] || { genres: {} };
     const genreData = todayData.genres[scrapedData.genre] || { video: 0, shorts: 0 };
@@ -224,9 +223,9 @@ function periodicUpdateAndSave() {
     }
   }
   saveData();
-  setTimeout(periodicUpdateAndSave, 5000);
+  setTimeout(periodicUpdateAndSave, 60000);
 }
-setTimeout(periodicUpdateAndSave, 5000);
+setTimeout(periodicUpdateAndSave, 60000);
 
 // ------------------------------
 // Track website usage for a tab.
