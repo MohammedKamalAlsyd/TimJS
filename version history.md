@@ -21,6 +21,13 @@
 - Added Playwright tests to improve test coverage.
 - Enhanced background script functionality for better performance.
 
-## v0.4
+## v0.4 (V1.0 in Chrome Store)
 - Integrated source code for web scraping functionality.
 - Improved overall page design and user interface consistency.
+
+
+## v0.5 (V1.1 in Chrome Store)
+- Fix Bug Related to Active Script Not Working
+- Improve Color Consistency
+- Improve Tests to Include Icon Fetching & Active Script Status
+- Add Logging to Background Script
