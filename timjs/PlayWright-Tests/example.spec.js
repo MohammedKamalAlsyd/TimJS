@@ -53,7 +53,7 @@ test.describe('Comprehensive Background Script Tests', () => {
   test('Test 1: Records time spent on a website (idle accumulation)', async ({ page, context }) => {
     const trackingStart = Date.now();
     await page.goto('https://example.com');
-    await page.waitForTimeout(61000);
+    await page.waitForTimeout(60000);
     const backgroundPage = await getBackgroundPage(context);
     const trackingData = await backgroundPage.evaluate(() => trackingData);
     const today = getCurrentDate();
@@ -78,19 +78,21 @@ test.describe('Comprehensive Background Script Tests', () => {
   test('Test 3: Records YouTube video time for a 60-second session', async ({ page, context }) => {
     test.setTimeout(80000);
     const videoUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
-    await page.goto(videoUrl);
-    await page.waitForTimeout(60000);
+    await page.goto(videoUrl); // Waits for page load ("complete" status)
+    const startTime = Date.now(); // Record time after page is loaded
+    await page.waitForTimeout(60000); // Wait 60 seconds
+    const endTime = Date.now(); // Record end time
+    const actualElapsed = (endTime - startTime) / 60000; // Actual time in minutes
     const bgPage = await getBackgroundPage(context);
     const today = getCurrentDate();
     const youtubeData = await waitForYouTubeData(bgPage, today);
     expect(youtubeData).toBeDefined();
     const genres = youtubeData.genres;
     expect(Object.keys(genres).length).toBeGreaterThan(0);
-    const expectedTime = 1;
     const recordedVideoTime = Object.values(genres).reduce((sum, g) => sum + (g.video || 0), 0);
     expect(recordedVideoTime).toBeGreaterThan(0);
-    expect(Math.abs(recordedVideoTime - expectedTime)).toBeLessThanOrEqual(0.1);
-    // Verify that no shorts time is recorded.
+    expect(Math.abs(recordedVideoTime - actualElapsed)).toBeLessThanOrEqual(0.1);
+    // Verify that no shorts time is recorded
     const recordedShortsTime = Object.values(genres).reduce((sum, g) => sum + (g.shorts || 0), 0);
     expect(recordedShortsTime).toBe(0);
   });
@@ -107,19 +109,21 @@ test.describe('Comprehensive Background Script Tests', () => {
       };
     });
     const shortsUrl = 'https://www.youtube.com/shorts/ggcWTdwWYgo';
-    await page.goto(shortsUrl);
-    await page.waitForTimeout(60000);
+    await page.goto(shortsUrl); // Waits for page load
+    const startTime = Date.now(); // Record time after page is loaded
+    await page.waitForTimeout(60000); // Wait 60 seconds
+    const endTime = Date.now(); // Record end time
+    const actualElapsed = (endTime - startTime) / 60000; // Actual time in minutes
     const bgPage = await getBackgroundPage(context);
     const today = getCurrentDate();
     const youtubeData = await waitForYouTubeData(bgPage, today);
     expect(youtubeData).toBeDefined();
     const genres = youtubeData.genres;
     expect(Object.keys(genres).length).toBeGreaterThan(0);
-    const expectedTime = 1;
     const recordedShortsTime = Object.values(genres).reduce((sum, g) => sum + (g.shorts || 0), 0);
     expect(recordedShortsTime).toBeGreaterThan(0);
-    expect(Math.abs(recordedShortsTime - expectedTime)).toBeLessThanOrEqual(0.1);
-    // Verify that no video time is recorded.
+    expect(Math.abs(recordedShortsTime - actualElapsed)).toBeLessThanOrEqual(0.1);
+    // Verify that no video time is recorded
     const recordedVideoTime = Object.values(genres).reduce((sum, g) => sum + (g.video || 0), 0);
     expect(recordedVideoTime).toBe(0);
   });
@@ -127,7 +131,7 @@ test.describe('Comprehensive Background Script Tests', () => {
   test('Test 5: Accumulates time on a single website without navigation', async ({ page, context }) => {
     const startTime = Date.now();
     await page.goto('https://example.com');
-    await page.waitForTimeout(61000);
+    await page.waitForTimeout(60000);
     const backgroundPage = await getBackgroundPage(context);
     const trackingData = await backgroundPage.evaluate(() => trackingData);
     const today = getCurrentDate();
@@ -148,18 +152,20 @@ test.describe('Comprehensive Background Script Tests', () => {
       };
     });
     const videoUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
-    await page.goto(videoUrl);
-    await page.waitForTimeout(61000);
+    await page.goto(videoUrl); // Waits for page load
+    const startTime = Date.now(); // Record time after page is loaded
+    await page.waitForTimeout(60000); // Wait 60 seconds for accumulation
+    const endTime = Date.now(); // Record end time
+    const actualElapsed = (endTime - startTime) / 60000; // Actual time in minutes
     const bgPage = await getBackgroundPage(context);
     const today = getCurrentDate();
     const youtubeData = await waitForYouTubeData(bgPage, today);
     expect(youtubeData).toBeDefined();
     const genres = youtubeData.genres;
-    const expectedTime = 1;
-    const totalVideoTime = Object.values(genres).reduce((sum, g) => sum + (g.video || 0), 0);
-    expect(totalVideoTime).toBeGreaterThan(0);
-    expect(Math.abs(totalVideoTime - expectedTime)).toBeLessThanOrEqual(0.1);
-    // Ensure no shorts time is recorded.
+    const recordedVideoTime = Object.values(genres).reduce((sum, g) => sum + (g.video || 0), 0);
+    expect(recordedVideoTime).toBeGreaterThan(0);
+    expect(Math.abs(recordedVideoTime - actualElapsed)).toBeLessThanOrEqual(0.1);
+    // Ensure no shorts time is recorded
     const recordedShortsTime = Object.values(genres).reduce((sum, g) => sum + (g.shorts || 0), 0);
     expect(recordedShortsTime).toBe(0);
   });
@@ -297,7 +303,7 @@ test.describe('Comprehensive Background Script Tests', () => {
     });
     const musicVideoUrl = 'https://www.youtube.com/watch?v=musicVideoTest';
     await page.goto(musicVideoUrl);
-    await page.waitForTimeout(61000); // Wait ~61 seconds for accumulation
+    await page.waitForTimeout(60000); // Wait 60 seconds for accumulation
     const bgAfterMusic = await getBackgroundPage(context);
     const today = getCurrentDate();
     const youtubeDataMusic = await waitForYouTubeData(bgAfterMusic, today);
@@ -317,7 +323,7 @@ test.describe('Comprehensive Background Script Tests', () => {
     });
     const gamingVideoUrl = 'https://www.youtube.com/watch?v=gamingVideoTest';
     await page.goto(gamingVideoUrl);
-    await page.waitForTimeout(61000); // Wait ~61 seconds for accumulation
+    await page.waitForTimeout(60000); // Wait 60 seconds for accumulation
     const bgAfterGaming = await getBackgroundPage(context);
     const youtubeDataGaming = await waitForYouTubeData(bgAfterGaming, today);
     expect(youtubeDataGaming).toBeDefined();
